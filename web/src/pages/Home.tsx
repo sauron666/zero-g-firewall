@@ -30,6 +30,8 @@ const STOPS: { to: string; verb: string; text: string }[] = [
 ];
 const STARTERS = ["Will a fire go out if the fans are stopped?", "Has anything been burned in lunar gravity?", "What is the most oxygen any solid material was burned at?"];
 
+const FAN_FLOW = 0.1;                                              // m/s: the forced flow drawn in both windows while the fans run
+
 export function Home({ manifest }: { manifest: Manifest | null }) {
   const [fans, setFansState] = useState(true);
   const [offAt, setOffAt] = useState<number | null>(null);          // the flame in ISKRA's lantern follows the same switch
@@ -114,21 +116,21 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
               <div className="windows">
                 <figure>
                   <Porthole tag="schematic">
-                    <FlameCanvas g={0} flow={fans ? 0.1 : 0} strength={fans ? 1 : 0} seed={3} label="Schematic flame on the space station" />
+                    <FlameCanvas g={0} flow={fans ? FAN_FLOW : 0} strength={fans ? 1 : 0} seed={3} label="Schematic flame on the space station" />
                   </Porthole>
                   <figcaption className="window-cap">
                     <div className="window-cap__name">Space station</div>
                     <div className="window-cap__g">free fall, air at 21% oxygen</div>
-                    <p className="window-cap__state">{fans ? "Air passes the fuel at about 10 cm/s. The flame burns blue and steady." : "The flame shrinks and goes out, as it did in one BASS-II test."}</p>
+                    <p className="window-cap__state">{fans ? `Air passes the fuel at about ${FAN_FLOW * 100} cm/s. The flame burns blue and steady.` : "The flame shrinks and goes out, as it did in one BASS-II test."}</p>
                   </figcaption>
                 </figure>
                 <figure>
                   <Porthole tag="schematic">
-                    <FlameCanvas g={BODIES.moon.g} flow={fans ? 0.1 : 0} strength={fans ? 1 : 0.8} uncertain={!fans} seed={11} label="Schematic flame in lunar gravity" />
+                    <FlameCanvas g={BODIES.moon.g} flow={fans ? FAN_FLOW : 0} strength={fans ? 1 : 0.8} uncertain={!fans} seed={11} label="Schematic flame in lunar gravity" />
                   </Porthole>
                   <figcaption className="window-cap">
                     <div className="window-cap__name">Lunar habitat</div>
-                    <div className="window-cap__g">0.165 g, richer in oxygen</div>
+                    <div className="window-cap__g">{BODIES.moon.g} g, richer in oxygen</div>
                     <p className="window-cap__state">
                       {fans ? "Fan flow and buoyant flow add up." : `Buoyancy still draws air through the flame, about ${(mLo * 100).toFixed(0)} to ${(mHi * 100).toFixed(0)} cm/s by scaling. Unmeasured: it may keep burning.`}
                     </p>

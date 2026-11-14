@@ -43,7 +43,7 @@ export function About({ manifest }: { manifest: Manifest | null }) {
           <ul className="prose" style={{ fontSize: "1.02rem", marginTop: 12, paddingLeft: 18, listStyle: "disc" }}>
             <li>Lunar and Martian gravity are bounded, not predicted: PSI holds no partial-gravity data yet.</li>
             <li>Results are observations and model bounds. No safety rating or probability is derived from them.</li>
-            <li>The cause of the Artemis II smoke alarm is not public, so the site leaves it open.</li>
+            <li>No stored NASA document states what set off the smoke alarm on Artemis II, so the site leaves it open.</li>
             <li>A missing value stays missing.</li>
             <li>Alarm and cyber scenarios are synthetic and control nothing.</li>
           </ul>

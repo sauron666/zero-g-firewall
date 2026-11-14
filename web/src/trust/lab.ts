@@ -34,7 +34,7 @@ export const SCENARIOS: Scenario[] = [
   { id: "spoof", name: "Fake smoke readings injected", truth: "tampering", fire: false, tampering: true, about: "Someone on the data bus injects high smoke readings without the sensor's key. The cabin is quiet.",
     sparta: { id: "EX-0014.03", name: "Spoofing: Sensor Data" } },
   { id: "replay", name: "A real fire hidden by replayed 'all clear' frames", truth: "fire", fire: true, tampering: true,
-    about: "A fire burns while old, validly signed quiet readings of the duct detector are replayed in place of the new ones.", sparta: { id: "EX-0001.02", name: "Replay: Bus Traffic" } },
+    about: "A fire burns while old, validly signed quiet readings of the duct detector are replayed in place of the new ones.", sparta: { id: "EX-0001.02", name: "Replay: Bus Traffic Replay" } },
   { id: "timeshift", name: "A real fire with a manipulated sensor clock", truth: "fire", fire: true, tampering: true,
     about: "A fire burns while the duct detector's clock is pushed back by 90 s to defeat freshness checks.", sparta: { id: "EX-0014.01", name: "Spoofing: Time Spoof" } },
 ];
@@ -247,9 +247,11 @@ export function timeline(checked: Checked[], fansOffAt: number | null): Verdict[
 
 export interface Score { scenario: Scenario; runs: number; fireAlarms: number; alerts: number; clear: number; leading: Record<string, number>; medianAlarmAt: number | null; correct: number }
 /** The same scenarios over many seeds: how often the lab reaches the declared truth, and whether tampering ever lowered an alarm. */
-export async function scorecard(keys: Keys, seeds: number[], onProgress?: (done: number, total: number) => void): Promise<{ rows: Score[]; suppressed: number; fireRuns: number }> {
+/** The seeds of the scorecard on the page. */
+export const SCORE_SEEDS = [11, 12, 13, 14, 15, 16, 17, 18];
+export async function scorecard(keys: Keys, seeds: number[], onProgress?: (done: number, total: number) => void): Promise<{ rows: Score[]; suppressed: number; fireRuns: number; frames: number }> {
   const rows: Score[] = [];
-  let suppressed = 0, fireRuns = 0, done = 0;
+  let suppressed = 0, fireRuns = 0, done = 0, frames = 0;
   for (const sc of SCENARIOS) {
     const r: Score = { scenario: sc, runs: 0, fireAlarms: 0, alerts: 0, clear: 0, leading: {}, medianAlarmAt: null, correct: 0 };
     const times: number[] = [];
@@ -258,6 +260,7 @@ export async function scorecard(keys: Keys, seeds: number[], onProgress?: (done:
       const tl = timeline(await checkFrames(run, keys), run.fansOffAt);
       const end = tl[tl.length - 1];
       r.runs++;
+      frames += run.frames.length;
       if (end.state === "FIRE ALARM") { r.fireAlarms++; times.push(end.latchedAt ?? DURATION); } else if (end.state === "CHECK") r.alerts++; else r.clear++;
       r.leading[end.leading] = (r.leading[end.leading] ?? 0) + 1;
       const right = sc.fire ? end.state === "FIRE ALARM" : sc.truth === "nothing" ? end.state === "CLEAR" : end.state === "CHECK" && (end.leading === sc.truth || (sc.truth === "tampering" && end.integrity.anomaly));
@@ -269,7 +272,7 @@ export async function scorecard(keys: Keys, seeds: number[], onProgress?: (done:
     r.medianAlarmAt = times.length ? times[Math.floor(times.length / 2)] : null;
     rows.push(r);
   }
-  return { rows, suppressed, fireRuns };
+  return { rows, suppressed, fireRuns, frames };
 }
 
 /** A hash-chained audit log of what the receiver decided, so that the record of an alarm cannot be quietly rewritten. */

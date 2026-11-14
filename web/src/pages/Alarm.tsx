@@ -11,7 +11,7 @@ import { SaffireProducts } from "../viz/Reported";
 import { Item } from "./Myths";
 import { IconCheck, IconInfo, IconPause, IconPlay, IconReset, IconWarn } from "../components/icons";
 import { emit } from "../mascot/bus";
-import { auditLog, Checked, checkFrames, DURATION, generate, Keys, LogEntry, makeKeys, Run, SCENARIOS, ScenarioId, scorecard, Score, SENSOR_IDS, SENSORS, SensorId, STEP, timeline, Verdict } from "../trust/lab";
+import { auditLog, Checked, checkFrames, DURATION, generate, Keys, LogEntry, makeKeys, Run, SCENARIOS, ScenarioId, SCORE_SEEDS, scorecard, Score, SENSOR_IDS, SENSORS, SensorId, STEP, timeline, Verdict } from "../trust/lab";
 import { PageProps } from "./stubs";
 
 const STATE_ICON = { "FIRE ALARM": <IconWarn size={22} />, CHECK: <IconInfo size={22} />, CLEAR: <IconCheck size={22} /> };
@@ -136,7 +136,7 @@ export function Alarm({ route, manifest }: PageProps) {
   const [log, setLog] = useState<LogEntry[]>([]);
   const [at, setAt] = useState(DURATION);
   const [playing, setPlaying] = useState(false);
-  const [score, setScore] = useState<{ rows: Score[]; suppressed: number; fireRuns: number } | null>(null);
+  const [score, setScore] = useState<{ rows: Score[]; suppressed: number; fireRuns: number; frames: number } | null>(null);
   const [prog, setProg] = useState<number | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const inv = useData<InvestigationsDoc>("investigations.json");
@@ -271,12 +271,12 @@ export function Alarm({ route, manifest }: PageProps) {
 
       <section>
         <div className="section__head"><h2 className="h2">Scorecard: the same nine situations over many seeds</h2>
-          <button type="button" className="btn btn--quiet btn--sm" disabled={!keys || prog != null} onClick={async () => { if (!keys) return; setProg(0); setScore(await scorecard(keys, [11, 12, 13, 14, 15, 16, 17, 18], (d, t) => setProg(d / t))); setProg(null); }}>
-            {prog != null ? `Running… ${Math.round(prog * 100)}%` : score ? "Run again" : "Run 72 seeded runs"}</button></div>
+          <button type="button" className="btn btn--quiet btn--sm" disabled={!keys || prog != null} onClick={async () => { if (!keys) return; setProg(0); setScore(await scorecard(keys, SCORE_SEEDS, (d, t) => setProg(d / t))); setProg(null); }}>
+            {prog != null ? `Running… ${Math.round(prog * 100)}%` : score ? "Run again" : `Run ${SCENARIOS.length * SCORE_SEEDS.length} seeded runs`}</button></div>
         {score ? (
           <>
             <p className={`verdict-line`} role="status">{score.suppressed === 0 ? <IconCheck size={20} /> : <IconWarn size={20} />}
-              <span><b>Fire alarms lowered by tampering: {score.suppressed} of {score.fireRuns / 2} tampered fire runs.</b> Across all {score.fireRuns} runs with a real fire, the alarm was raised in {score.rows.filter((r) => r.scenario.fire).reduce((a, r) => a + r.fireAlarms, 0)}.</span></p>
+              <span><b>Fire alarms lowered by tampering: {score.suppressed} of {score.fireRuns / 2} tampered fire runs.</b> Across all {score.fireRuns} runs with a real fire, the alarm was raised in {score.rows.filter((r) => r.scenario.fire).reduce((a, r) => a + r.fireAlarms, 0)}. {score.frames.toLocaleString("en-US")} signed frames were checked.</span></p>
             <div className="table-wrap" style={{ marginTop: 8 }}>
               <table className="table">
                 <thead><tr><th>Situation</th><th>Declared truth</th><th className="r">Runs</th><th className="r">Fire alarm</th><th className="r">Alert</th><th className="r">Clear</th><th className="r">Judged right</th><th className="r">Median time to alarm</th></tr></thead>
@@ -287,13 +287,13 @@ export function Alarm({ route, manifest }: PageProps) {
               </table>
             </div>
           </>
-        ) : <p className="note">Runs every situation with eight different seeds in your browser, about 35,000 signed frames, and counts how often the lab reaches the declared truth.</p>}
+        ) : <p className="note">Runs every situation with {SCORE_SEEDS.length} different seeds in your browser and counts how often the lab reaches the declared truth.</p>}
       </section>
 
       <section className="grid cols-2" style={{ ["--gap" as string]: "20px", alignItems: "start" }}>
         <div className="panel panel--tight" data-klass="derived">
           <h2 className="panel__title">What acting on the alarm costs</h2>
-          <p className="doc" style={{ fontSize: "1rem", marginTop: 8 }}>NASA tested stopping the airflow as a way to put a flame out, and its guide lists the belief that a fire then extinguishes itself among the critical misconceptions. When an alarm leads to stopping the fans, a false alarm costs ventilation. A real one, answered that way, can blind the detector that raised it: in this site's model the duct detector may never see the smoke once the fans are off.</p>
+          <p className="doc" style={{ fontSize: "1rem", marginTop: 8 }}>In a NASA test a flame went out when its airflow was cut, and NASA's guide lists the belief that a fire then extinguishes itself among the critical misconceptions. When an alarm leads to stopping the fans, a false alarm costs ventilation. A real one, answered that way, can blind the detector that raised it: in this site's model the duct detector may never see the smoke once the fans are off.</p>
           <p className="note" style={{ marginTop: 8 }}><a href={href("/paradox")}>Fans on, fans off</a> shows it side by side. <a href={href("/playbooks/step-ventilation")}>The response playbook</a> has the step and its evidence. <a href={href("/falsify/detector")}>Try to refute it</a> has what NASA's documents say about detectors.</p>
         </div>
         <div className="panel panel--tight" data-klass="observed">
