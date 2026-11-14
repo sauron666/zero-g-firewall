@@ -1,3 +1,4 @@
+import { BROWSER_DEFAULT, BrowserModelConfig, callBrowserModel, Deps, Progress } from "./browserModel";
 import type { Hit } from "./search";
 
 /**
@@ -7,15 +8,16 @@ import type { Hit } from "./search";
  * cannot give. Passages are data: instructions inside them are ignored by construction of the prompt
  * and cannot survive the verifier.
  */
-export type Mode = "offline" | "local" | "cloud" | "hybrid";
+export type Mode = "offline" | "browser" | "local" | "cloud" | "hybrid";
 export type Vendor = "anthropic" | "openai" | "gemini" | "compatible";
 export interface ModelConfig { vendor: Vendor; endpoint: string; model: string; key: string }
-export interface Settings { mode: Mode; local: ModelConfig; cloud: ModelConfig }
+export interface Settings { mode: Mode; local: ModelConfig; cloud: ModelConfig; browser: BrowserModelConfig }
 
 export const DEFAULTS: Settings = {
   mode: "offline",
   local: { vendor: "compatible", endpoint: "http://localhost:11434/v1", model: "llama3.2", key: "" },
   cloud: { vendor: "anthropic", endpoint: "https://api.anthropic.com", model: "claude-sonnet-5-5", key: "" },
+  browser: { ...BROWSER_DEFAULT },
 };
 export const VENDOR_DEFAULT: Record<Vendor, { endpoint: string; model: string }> = {
   anthropic: { endpoint: "https://api.anthropic.com", model: "claude-sonnet-5-5" },
@@ -28,16 +30,16 @@ const listeners = new Set<() => void>();
 export function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) { const s = JSON.parse(raw); return { mode: s.mode ?? "offline", local: { ...DEFAULTS.local, ...s.local }, cloud: { ...DEFAULTS.cloud, ...s.cloud } }; }
+    if (raw) { const s = JSON.parse(raw); return { mode: s.mode ?? "offline", local: { ...DEFAULTS.local, ...s.local }, cloud: { ...DEFAULTS.cloud, ...s.cloud }, browser: { ...DEFAULTS.browser, ...s.browser } }; }
   } catch { /* storage may be blocked; the offline engine needs none */ }
-  return { ...DEFAULTS, local: { ...DEFAULTS.local }, cloud: { ...DEFAULTS.cloud } };
+  return { ...DEFAULTS, local: { ...DEFAULTS.local }, cloud: { ...DEFAULTS.cloud }, browser: { ...DEFAULTS.browser } };
 }
 export function saveSettings(s: Settings): void {
   try { localStorage.setItem(KEY, JSON.stringify(s)); } catch { /* ignore */ }
   listeners.forEach((f) => f());
 }
 export const onSettings = (f: () => void) => { listeners.add(f); return () => { listeners.delete(f); }; };
-export const MODE_LABEL: Record<Mode, string> = { offline: "offline", local: "local model", cloud: "cloud model", hybrid: "hybrid" };
+export const MODE_LABEL: Record<Mode, string> = { offline: "offline", browser: "model in this browser", local: "local model", cloud: "cloud model", hybrid: "hybrid" };
 
 export const SYSTEM = [
   "You answer questions about fire in spacecraft using ONLY the numbered evidence passages in the user message.",
@@ -117,7 +119,11 @@ export async function callModel(cfg: ModelConfig, system: string, user: string, 
 
 export interface ModelRun { verified: Verified; raw: string; draft?: string; by: string }
 /** local or cloud: one model writes; hybrid: the local model drafts, the cloud model checks; the verifier judges every time. */
-export async function askModel(s: Settings, question: string, hits: Hit[], f: Fetch = fetch): Promise<ModelRun> {
+export async function askModel(s: Settings, question: string, hits: Hit[], f: Fetch = fetch, onProgress?: Progress, deps?: Deps): Promise<ModelRun> {
+  if (s.mode === "browser") {
+    const { text, by } = await callBrowserModel(s.browser, SYSTEM, userPrompt(question, hits), onProgress, deps);
+    return { verified: verify(text, hits), raw: text, by };
+  }
   if (s.mode === "hybrid") {
     const draft = await callModel(s.local, SYSTEM, userPrompt(question, hits), f);
     const raw = await callModel(s.cloud, SYSTEM, checkerPrompt(question, hits, draft), f);

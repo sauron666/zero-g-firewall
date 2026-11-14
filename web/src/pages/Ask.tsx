@@ -5,6 +5,7 @@ import { askModel, callModel, loadSettings, Mode, ModelConfig, ModelRun, saveSet
 import { AgentRun, runAgent } from "../lib/agent";
 import { EvalKind, EvalReport, runEval } from "../lib/evalset";
 import { PLANTED, poisonDemo } from "../lib/poison";
+import { BrowserModelConfig, callBrowserModel, choose, Probe, probe } from "../lib/browserModel";
 import { useKit } from "../ai/kit";
 import { Trace } from "../ai/Trace";
 import { useReceipt } from "../components/Receipt";
@@ -29,7 +30,8 @@ const KIND: Record<EvalKind, [string, string]> = {
 const Mark = ({ ok }: { ok: boolean }) => <span className={`mark ${ok ? "" : "mark--no"}`} role="img" aria-label={ok ? "passed" : "failed"}>{ok ? <IconCheck size={12} /> : <IconClose size={11} />}</span>;
 const MODES: [Mode, string, string][] = [
   ["offline", "Offline engine", "No model. The answer is made of sentences taken from the evidence. Works with no connection at all."],
-  ["local", "Local model", "A model on this computer writes the answer from the passages. Nothing leaves the machine: the setting for a habitat with no link to Earth."],
+  ["browser", "In this browser", "A model that runs inside this browser tab writes the answer from the passages. No key, no server, and no connection once it is on the machine: the setting for a habitat with no link to Earth."],
+  ["local", "Local model", "A model served on this computer or on the habitat's own network writes the answer from the passages. Nothing leaves the machine."],
   ["cloud", "Cloud model", "A hosted model writes the answer from the passages, with a key you type here."],
   ["hybrid", "Hybrid", "The local model drafts, the cloud model checks the draft against the passages."],
 ];
@@ -53,6 +55,33 @@ function ModelFields({ title, cfg, onChange, vendors }: { title: string; cfg: Mo
   );
 }
 
+const CHROME: Record<Probe["chrome"], string> = {
+  available: "ready on this machine", downloadable: "offered; the browser downloads it on first use", downloading: "being downloaded by the browser",
+  unavailable: "offered by this browser but not usable on this machine", absent: "not offered by this browser (Chrome 148 or later on a desktop has it)",
+};
+function BrowserFields({ cfg, onChange }: { cfg: BrowserModelConfig; onChange: (c: BrowserModelConfig) => void }) {
+  const [p, setP] = useState<Probe | null>(null);
+  useEffect(() => { probe().then(setP).catch(() => setP({ chrome: "absent", webgpu: false })); }, []);
+  const pick = p ? choose(cfg, p) : null;
+  return (
+    <fieldset className="aiset">
+      <legend>Model in this browser</legend>
+      <label><span>Which model</span>
+        <select className="select" value={cfg.backend} onChange={(e) => onChange({ ...cfg, backend: e.target.value as BrowserModelConfig["backend"] })}>
+          <option value="auto">Automatic: the browser's own model, else WebGPU</option>
+          <option value="chrome">The browser's own model</option>
+          <option value="webllm">An open model on WebGPU (WebLLM)</option>
+        </select></label>
+      <label><span>WebGPU model</span><input value={cfg.webllmModel} onChange={(e) => onChange({ ...cfg, webllmModel: e.target.value })} spellCheck={false} /></label>
+      <ul className="note" style={{ display: "grid", gap: 4, marginTop: 4 }}>
+        <li>The browser's own model: {p ? CHROME[p.chrome] : "checking…"}.</li>
+        <li>WebGPU: {p ? (p.webgpu ? "available" : "not available in this browser") : "checking…"}.</li>
+        <li><b>{p ? (pick === "chrome" ? "The browser's own model will be used." : pick === "webllm" ? `${cfg.webllmModel} will be used; its weights are downloaded once, then kept by the browser.` : "Neither is available here. The offline engine still answers.") : ""}</b></li>
+      </ul>
+    </fieldset>
+  );
+}
+
 export function Ask({ manifest, route }: PageProps) {
   const ready = !!manifest?.nasa;
   const { kit, count, error } = useKit(ready);
@@ -66,6 +95,7 @@ export function Ask({ manifest, route }: PageProps) {
   const [report, setReport] = useState<EvalReport | null>(null);
   const [live, setLive] = useState<{ raw: string; verified: Verified; by: string } | { error: string } | null>(null);
   const [liveBusy, setLiveBusy] = useState(false);
+  const [progress, setProgress] = useState<{ f: number; text: string } | null>(null);
   const srcRef = useRef<HTMLOListElement | null>(null);
   const first = useRef(false);
   const open = useReceipt();
@@ -81,8 +111,8 @@ export function Ask({ manifest, route }: PageProps) {
     if (settings.mode === "offline" || a.refused || a.hits.length === 0) return;
     setBusy(true);
     const t0 = performance.now();
-    try { setRun({ ...(await askModel(settings, text, a.hits)), ms: performance.now() - t0 }); } catch (e) { setErr(String((e as Error).message ?? e)); }
-    setBusy(false);
+    try { setRun({ ...(await askModel(settings, text, a.hits, undefined, (f, tx) => setProgress({ f, text: tx }))), ms: performance.now() - t0 }); } catch (e) { setErr(String((e as Error).message ?? e)); }
+    setBusy(false); setProgress(null);
   };
   useEffect(() => {                       // a link such as #ask?q=... asks its question once the passages are loaded
     const asked = route.query.get("q");
@@ -97,8 +127,9 @@ export function Ask({ manifest, route }: PageProps) {
     setLiveBusy(true); setLive(null);
     try {
       const poisoned = [...demoHits, { passage: PLANTED, score: 0, matched: [] }];        // the gates are bypassed on purpose, for this one request
-      const raw = await callModel(cfg, SYSTEM, userPrompt("Will a fire go out if the fans are stopped?", poisoned));
-      setLive({ raw, verified: verify(raw, demoHits), by: cfg.model });
+      const prompt = userPrompt("Will a fire go out if the fans are stopped?", poisoned);
+      const out = settings.mode === "browser" ? await callBrowserModel(settings.browser, SYSTEM, prompt) : { text: await callModel(cfg, SYSTEM, prompt), by: cfg.model };
+      setLive({ raw: out.text, verified: verify(out.text, demoHits), by: out.by });
     } catch (e) { setLive({ error: String((e as Error).message ?? e) }); }
     setLiveBusy(false);
   };
@@ -139,7 +170,8 @@ export function Ask({ manifest, route }: PageProps) {
               <p className="callout"><IconInfo size={16} /><span>This is the question the site is built around. <a href={href("/myths/fans")}>Both halves of the answer, side by side</a>.</span></p>
             )}
             {agent.notes.map((n) => <p key={n} className="asknote"><IconInfo size={16} /><span>{n}</span></p>)}
-            {busy && <p className="note">Waiting for the model. The offline answer is below meanwhile.</p>}
+            {busy && <p className="note">Waiting for the model. The offline answer is below meanwhile.{progress ? ` ${progress.text}: ${Math.round(progress.f * 100)}%.` : ""}</p>}
+            {busy && progress && <div className="score__bar" aria-hidden="true"><i style={{ width: `${Math.round(progress.f * 100)}%` }} /></div>}
             {err && <p className="callout"><IconWarn size={16} /><span>The model could not be used: {err} The offline answer is shown instead.</span></p>}
             {run && run.verified.abstained && <p className="callout"><IconInfo size={16} /><span>The model said the evidence does not answer this. The nearest passages are shown.</span></p>}
             {run && !run.verified.abstained && run.verified.kept.length === 0 && <p className="callout"><IconWarn size={16} /><span>The checker removed every sentence the model wrote. The offline answer is shown instead.</span></p>}
@@ -206,15 +238,17 @@ export function Ask({ manifest, route }: PageProps) {
           <span className="note" style={{ flex: "1 1 320px" }}>{modeInfo[2]}</span>
         </div>
         {settings.mode !== "offline" && (
-          <details className="panel panel--tight" open={settings.mode === "local" ? !settings.local.model : !settings.cloud.key}>
+          <details className="panel panel--tight" open={settings.mode === "browser" || (settings.mode === "local" ? !settings.local.model : !settings.cloud.key)}>
             <summary style={{ cursor: "pointer", fontWeight: 700 }}>Model settings</summary>
             <div className="grid cols-2" style={{ marginTop: 12, ["--gap" as string]: "18px 28px", alignItems: "start" }}>
-              {settings.mode !== "cloud" && <ModelFields title="Local model" cfg={settings.local} vendors={false} onChange={(c) => update({ ...settings, local: c })} />}
-              {settings.mode !== "local" && <ModelFields title="Cloud model" cfg={settings.cloud} vendors onChange={(c) => update({ ...settings, cloud: c })} />}
+              {settings.mode === "browser" && <BrowserFields cfg={settings.browser} onChange={(c) => update({ ...settings, browser: c })} />}
+              {(settings.mode === "local" || settings.mode === "hybrid") && <ModelFields title="Local model" cfg={settings.local} vendors={false} onChange={(c) => update({ ...settings, local: c })} />}
+              {(settings.mode === "cloud" || settings.mode === "hybrid") && <ModelFields title="Cloud model" cfg={settings.cloud} vendors onChange={(c) => update({ ...settings, cloud: c })} />}
             </div>
             <p className="note" style={{ marginTop: 10, maxWidth: "92ch" }}>
-              Keys and addresses stay in this browser and are sent only to the address you set. A local server such as Ollama, LM Studio or llama.cpp must allow requests from this page
-              (for Ollama, start it with OLLAMA_ORIGINS set to this site's address). The connectors are tested against each service's request and reply format, not against the live services.
+              {settings.mode === "browser"
+                ? "The model runs in this tab and the passages never leave the machine. The first use needs a connection to fetch the model: the browser's own model is fetched by the browser, and a WebGPU model is some hundreds of megabytes, fetched once from its public host. This mode is written against the published interfaces and tested with stand-ins; it was not run in the build environment, which has no GPU."
+                : "Keys and addresses stay in this browser and are sent only to the address you set. A local server such as Ollama, LM Studio or llama.cpp must allow requests from this page (for Ollama, start it with OLLAMA_ORIGINS set to this site's address). The connectors are tested against each service's request and reply format, not against the live services."}
             </p>
           </details>
         )}

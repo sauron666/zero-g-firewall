@@ -12,13 +12,20 @@ Before the event the team prepared research notes, a written plan, the team embl
 
 ## AI inside the application
 
-"Ask the evidence" works in four ways, chosen by the reader and always shown in the top bar.
+"Ask the evidence" is an agent with typed tools. A question is first screened (an instruction to the engine, a request for a probability, or a name the evidence never mentions ends there). Then a plan of tools runs, each reading only files built by the pipeline: count test rows near a stated atmosphere, rank the investigations for a mission, look up what is measured in a habitat, fetch curator notes, fetch a named record, search the passages, compose, check. Counts and rankings are computed by code. Every other sentence of an answer is taken word for word from a stored passage. The trace under each answer lists the calls as they ran.
 
-- **Offline engine (default).** No language model. Passages are found with BM25 in the browser and the answer is made of sentences taken from those passages. Nothing is generated.
-- **Local model.** A model on the reader's own computer, reached at an address the reader sets (any OpenAI-compatible server, for example Ollama, LM Studio or llama.cpp). Nothing leaves the machine.
+Who writes the answer is chosen by the reader and always shown in the top bar.
+
+- **Offline engine (default).** No language model. The planner is a set of rules. Nothing is generated.
+- **In this browser.** A model that runs inside the browser tab: the browser's own model through the Prompt API where the browser offers it (Chrome 148 or later on a desktop), otherwise a small open model on WebGPU through WebLLM, fetched once and kept by the browser. No key and no server; no connection after the first download.
+- **Local model.** A model on the reader's own computer or network, reached at an address the reader sets (any OpenAI-compatible server, for example Ollama, LM Studio or llama.cpp). Nothing leaves the machine.
 - **Cloud model.** Anthropic, OpenAI, Google Gemini or any OpenAI-compatible endpoint, with a key the reader types. The key is kept in that browser's storage and sent only to the address shown. No key is in this repository.
 - **Hybrid.** The local model drafts, the cloud model checks the draft against the passages.
 
-In every model mode the same rules hold. The model receives only the retrieved passages, marked as data. A deterministic checker (`web/src/lib/ai.ts`, `verify`) then keeps a sentence only if it cites a passage that was given, every number in it is in that passage, and it gives no verdict, probability or safety rating. Removed sentences are shown as removed, with the reason. Numbers on the rest of the site are never produced by a model.
+In every model mode the same rules hold. The model receives only the passages the tools returned, marked as data, and may only rephrase them. A deterministic checker (`web/src/lib/ai.ts`, `verify`) then keeps a sentence only if it cites a passage that was given, every number in it is in that passage, and it gives no verdict, probability or safety rating. Removed sentences are shown as removed, with the reason. Numbers on the rest of the site are never produced by a model.
 
-State: the offline engine and the checker are tested and run on the site. The model connectors are tested against each service's request and reply format; they were not run against live services in the build environment.
+Two defences stand in front of the checker and are demonstrated on the page with a planted note: only passages from the hashed index may enter a prompt, and a passage that addresses the model is quarantined. The demonstration also shows what the checker alone would let through, which is why the gates exist.
+
+A scorecard of 36 questions with written pass rules runs in the browser and in the test suite (`web/src/lib/evalset.ts`). It reports held-out questions separately from the ones the engine was improved against.
+
+State: the offline agent, the checker, the scorecard and the demonstration are tested and run on the site. The cloud and local connectors are tested against each service's request and reply format. The in-browser model is tested with stand-ins shaped like the published interfaces. None of the model modes was run against a live model in the build environment.

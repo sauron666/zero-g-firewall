@@ -42,6 +42,7 @@ Updated: 14 November 2026, 14:38 Sofia time. Kept truthful: nothing is listed as
 
 | Part | State |
 |---|---|
+| Model in the browser (fifth way to write answers) | The browser's own model through the Prompt API, else WebLLM on WebGPU; the same checker judges every sentence. Detection of what the browser offers runs on the page. 6 tests with stand-ins shaped like the published interfaces. Not run against a real model in the build environment (no GPU, no model download). |
 | Local, cloud and hybrid model modes of Ask the evidence | Connectors for Anthropic, OpenAI, Google Gemini and any OpenAI-compatible endpoint (which covers local servers such as Ollama, LM Studio and llama.cpp). Request and reply formats are unit-tested with a stand-in for the network; the hybrid path (local drafts, cloud checks, verifier judges) is tested the same way. **No live model was called from the build environment**: it has no keys and no route to those services. An in-browser model (WebGPU) is not built. |
 
 ## Data is in, pages not built yet (nothing is shown in their place)
