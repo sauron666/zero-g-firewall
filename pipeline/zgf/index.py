@@ -126,6 +126,19 @@ def build(raw_dir: str, out_dir: str) -> dict:
         "%d test rows in NASA's tables state oxygen, %d of them also pressure. %s. No solid-material row states pressure, and %s (near means %s)."
         % (len(env["points"]), both, "; ".join("%d rows lie near %s" % (n["n_near"], n["label"]) for n in env["near_presets"]), env["gravity_counts"]["note"].rstrip(".").lower() if False else "no row was taken in lunar or Martian gravity", env["near_rule"]),
         "/envelope")
+    if os.path.exists(os.path.join(out_dir, "gaps.json")):
+        gdoc = load("gaps.json")
+        pc = lambda x: ("%.1f" % (100.0 * x)).rstrip("0").rstrip(".")
+        cv = gdoc.get("coverage")
+        if cv:
+            add("cov:oxygen", "derived", "Gaps: where the tests sit, by oxygen",
+                "Counted from NASA's tables: %s. No row of any kind states more than %s%% oxygen, and no row was taken in lunar or Martian gravity. "
+                "%d of %d rows are placed; the others cannot be, because %s."
+                % ("; ".join("%s, %d rows, state %s%% to %s%% oxygen" % (k["label"].lower(), k["rows"], pc(k["min"]), pc(k["max"])) for k in cv["kinds"] if k["rows"]),
+                   pc(cv["top"]), cv["placed"], cv["total"], "; ".join("%s (%d rows)" % (x["why"], x["rows"]) for x in cv["not_placed"])), "/gaps")
+        for g in gdoc["items"]:
+            add("gap:%s" % g["id"], "derived", "Gap measured from NASA's tables: %s" % g["title"].lower(),
+                "%s: %s %s. %s Planned or flown to fill it: %s." % (g["title"], g["measure"], g["unit"], g["why"], "; ".join(p["name"] for p in g["plans"])), "/gaps")
     if val:
         o = val["overall"]["closer_convention_per_table"]
         add("val:summary", "model", "Model check against NASA's Tad column",

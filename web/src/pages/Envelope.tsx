@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { scaleLinear } from "d3-scale";
 import { href } from "../app/router";
 import { fmtInt, useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
-import type { EnvelopeDoc, EnvelopePoint, EnvelopeSeries, TableSummary } from "../lib/types";
+import type { EnvelopeDoc, EnvelopePoint, EnvelopeSeries, RankDoc, TableSummary } from "../lib/types";
+import { emit } from "../mascot/bus";
 import { useReceipt } from "../components/Receipt";
 import { Scatter, ScatterGroup, ScatterLegend, ScatterMark, ScatterPoint, Shape, shapePath } from "../viz/Scatter";
 import { PageProps, stub } from "./stubs";
@@ -52,7 +53,13 @@ export function Envelope({ route, manifest }: PageProps) {
   const env = useData<EnvelopeDoc>(ready ? "envelope.json" : null);
   const atm = useData<AtmDoc>("model/atmospheres.json");
   const idx = useData<{ items: TableSummary[] }>(ready ? "tables/index.json" : null);
+  const rank = useData<RankDoc>(ready ? "rank_features.json" : null);
+  const [mission, setMission] = useState(route.query.get("mission") ?? "");
+  const lens = rank.data?.lenses.find((l) => l.id === mission);
+  const pure = !!lens?.atmospheres.some((a) => a[1] > 0.45);
   const [zoom, setZoom] = useState<"all" | "tests">("all");
+  useEffect(() => { if (lens) setZoom(pure ? "all" : "tests"); }, [lens?.id, pure]);
+  useEffect(() => { if (lens) emit({ type: "CONTEXT", g: lens.gravity === "partial" ? (lens.id === "mars" ? 0.3794 : 0.1654) : 0, source: "mission" }); }, [lens?.id, lens?.gravity]);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const open = useReceipt();
 
@@ -126,6 +133,9 @@ export function Envelope({ route, manifest }: PageProps) {
   ] : [];
   const curve = atm.data ? [{ pts: Array.from({ length: 150 }, (_, i) => 20 + i * 2).map((p) => [p, 21.23 / p] as [number, number]), label: "same oxygen partial pressure as sea-level air",
     labelAt: (zoom === "all" ? [50, 0.5] : [150, 0.158]) as [number, number] }] : [];
+  const win = d.near ?? { dx: 0.03, dp: 0.15 };
+  const regions = (lens?.atmospheres ?? []).map((a) => ({ x0: a[2] * (1 - win.dp), x1: a[2] * (1 + win.dp), y0: a[1] - win.dx, y1: a[1] + win.dx }));
+  const lensNear = (lens?.atmospheres ?? []).map((a) => ({ a, n: d.near_presets.find((n) => Math.abs(n.x_o2 - a[1]) < 1e-6 && Math.abs(n.p_kpa - a[2]) < 0.05) }));
   const counts = Object.fromEntries(d.series.map((s) => [s.id, s.n]));
   const near = (id: string) => d.near_presets.find((n) => n.id === id);
   const solidsBoth = d.series.filter((s) => s.kind === "solid").reduce((a, s) => a + s.n_with_pressure, 0);
@@ -139,11 +149,34 @@ export function Envelope({ route, manifest }: PageProps) {
         and {near("exploration")?.n_near ?? 0} near 34% at 8.2 psia. {solidsBoth === 0 ? "None of them is a solid material." : ""} {d.gravity_counts.partial === 0 ? "None was taken in lunar or Martian gravity." : ""}
       </p>
 
+      {rank.data && (
+        <div className="stack" style={{ ["--gap" as string]: "10px" }}>
+          <div className="toolbar">
+            <span className="note">Look for a mission</span>
+            <div className="seg" role="group" aria-label="Mission whose atmosphere is marked on the map">
+              <button type="button" aria-pressed={!lens} onClick={() => setMission("")}>None</button>
+              {rank.data.lenses.map((l) => <button key={l.id} type="button" aria-pressed={l.id === lens?.id} onClick={() => setMission(l.id)}>{l.name}</button>)}
+            </div>
+          </div>
+          {lens && (
+            <p className="claim claim--m" style={{ maxWidth: "60ch" }} role="status">
+              {lens.name}: {lensNear.map(({ a, n }, i) => (
+                <span key={a[0]}>{i ? "; " : ""}{!n ? "an unknown number of rows lie" : n.n_near === 0 ? "no row lies" : `${fmtInt(n.n_near)} ${n.n_near === 1 ? "row lies" : "rows lie"}`} near {a[0]}
+                  {n && n.n_near > 0 ? ` (${Object.entries(n.by_kind).map(([k, v]) => `${v} ${KIND[k] ?? k}`).join(", ")})` : ""}</span>
+              ))}.
+              {lensNear.some(({ n }) => (n?.n_near ?? 0) > 0) && lensNear.every(({ n }) => !n?.by_kind.solid) && " None is a solid material."}
+              {lens.gravity === "partial" && d.gravity_counts.partial === 0 && " None was taken in the gravity of that mission."}
+              {" "}<a className="note" href={href(`/rank/${lens.id}`)}>Rank the records for this mission</a>
+            </p>
+          )}
+        </div>
+      )}
+
       <section className="panel" data-klass="observed">
         <div className="panel__head">
           <div>
             <h2 className="panel__title">Oxygen and pressure of every test row that states them</h2>
-            <p className="panel__sub">Marks are rows of NASA's experimental tables; a larger mark means more rows at that condition. Shape tells the experiment. All are blue because all were taken in free fall. Click a mark for its receipt.</p>
+            <p className="panel__sub">Marks are rows of NASA's experimental tables; a larger mark means more rows at that condition. Shape tells the experiment. All are blue because all were taken in free fall. Click a mark for its receipt.{lens ? ` The dashed window is "near" the mission's atmosphere: ${d.near_rule}.` : ""}</p>
           </div>
           <div className="seg" role="group" aria-label="Range of the oxygen axis">
             <button type="button" aria-pressed={zoom === "all"} onClick={() => setZoom("all")}>All atmospheres</button>
@@ -159,7 +192,7 @@ export function Envelope({ route, manifest }: PageProps) {
         } />
         <div className="mapwrap" style={{ marginTop: 10 }}>
           <Scatter points={points} groups={groups} xLabel="total pressure, kPa" yLabel="oxygen, mole fraction" xDomain={[0, 320]} yDomain={yDomain} height={H}
-                   marks={marks} curves={curve} onPick={(p) => pickBin(p.ref as EnvelopePoint[])} fmtY={(v) => v.toFixed(2).replace(/0$/, "")}
+                   marks={marks} curves={curve} regions={regions} onPick={(p) => pickBin(p.ref as EnvelopePoint[])} fmtY={(v) => v.toFixed(2).replace(/0$/, "")}
                    ariaLabel="Scatter plot of oxygen mole fraction against total pressure for NASA microgravity combustion test rows, with crew atmospheres and historical points" />
           <Strip points={only} groups={groups} yDomain={yDomain} onPick={pick} />
         </div>
@@ -176,7 +209,7 @@ export function Envelope({ route, manifest }: PageProps) {
             <thead><tr><th>Atmosphere</th><th className="r">Oxygen</th><th className="r">Pressure, kPa</th><th className="r">Rows near it</th><th style={{ paddingLeft: 18 }}>Of which</th><th className="r">Solid materials</th><th className="r">Partial gravity</th></tr></thead>
             <tbody>
               {d.near_presets.map((n) => (
-                <tr key={n.id}>
+                <tr key={n.id} style={lensNear.some((x) => x.n?.id === n.id) ? { background: "var(--raised)", boxShadow: "inset 3px 0 0 var(--ink)" } : undefined}>
                   <td className="strong">{n.label}</td><td className="r num">{(n.x_o2 * 100).toFixed(1)}%</td><td className="r num">{n.p_kpa.toFixed(1)}</td>
                   <td className="r num strong">{fmtInt(n.n_near)}</td>
                   <td style={{ paddingLeft: 18 }}>{Object.entries(n.by_kind).map(([k, v]) => `${v} ${KIND[k] ?? k}`).join(", ") || "none"}</td>

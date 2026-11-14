@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { atmosphereIn, recordsIn, runAgent, unknownNames } from "./agent";
+import { atmosphereIn, oxygenRange, recordsIn, runAgent, unknownNames } from "./agent";
 import { EVAL, runEval } from "./evalset";
 import { poisonDemo } from "./poison";
 import { buildIndex } from "./search";
@@ -25,6 +25,25 @@ describe("evidence agent", () => {
       expect(run.steps.map((s) => s.tool)).toContain("count_tests_near");
       expect(run.answer.lines[0].text.startsWith(`${n.n_near} of the `)).toBe(true);
     }
+  });
+
+  it("computes the oxygen range from the same rows as the coverage chart", () => {
+    const cover = load("gaps.json").coverage;
+    const solid = cover.kinds.find((k: { id: string }) => k.id === "solid");
+    const run = runAgent("What is the most oxygen any solid material was burned at?", kit);
+    expect(run.steps.map((s) => s.tool)).toContain("oxygen_range");
+    expect(run.answer.lines[0].text).toContain(`run from ${Number((solid.min * 100).toFixed(1))}% to ${Number((solid.max * 100).toFixed(1))}% oxygen`);
+    expect(run.answer.lines[0].text.startsWith(`The ${solid.rows} solid-material test rows`)).toBe(true);
+  });
+
+  it("counts rows past a level instead of near it when the question says above or below", () => {
+    const run = runAgent("Was anything burned above 40% oxygen?", kit);
+    expect(run.steps.map((s) => s.tool)).toContain("oxygen_range");
+    expect(run.steps.map((s) => s.tool)).not.toContain("count_tests_near");
+    expect(run.answer.lines[0].text).toMatch(/^None of the \d+ test rows in NASA's tables that state oxygen states more than 40% oxygen\.$/);
+    const below = oxygenRange(kit.envelope, "how many droplet tests below 15% oxygen", 0.15);
+    const n = kit.envelope.points.filter((p: { s: string; x: number }) => p.x < 0.15 && kit.envelope.series.find((s: { id: string }) => s.id === p.s).kind === "droplet").length;
+    expect(below.x.startsWith(`${n} of the `)).toBe(true);
   });
 
   it("finds the records a question names and no others", () => {

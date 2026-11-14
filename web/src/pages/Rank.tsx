@@ -54,6 +54,7 @@ export function Rank({ route, manifest }: PageProps) {
       <p className="note" style={{ fontSize: 14 }}>
         {lens.about} Atmosphere{lens.atmospheres.length > 1 ? "s" : ""} looked for: {lens.atmospheres.map((a) => `${a[0]} (${a[2].toFixed(1)} kPa)`).join(" or ")}.
         {noneFull && " No record can score 1 on gravity here: PSI holds no test in lunar or Martian gravity."}
+        {" "}<a href={`${href("/envelope")}?mission=${lens.id}`}>See {lens.atmospheres.length > 1 ? "these atmospheres" : "this atmosphere"} among the tests</a>
       </p>
 
       <div className="rankgrid">

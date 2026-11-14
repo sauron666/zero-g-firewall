@@ -19,10 +19,10 @@
   "validation_rows": 587,
   "validation_mean_abs_K": 2.12,
   "export_files": 28,
-  "quotes": 111,
-  "quotes_verified": 111,
+  "quotes": 115,
+  "quotes_verified": 115,
   "files_read": 83,
-  "passages": 524
+  "passages": 531
  },
  "artifacts": {
   "model/atmospheres.json": {
@@ -196,8 +196,8 @@
    "klass": "derived"
   },
   "envelope.json": {
-   "sha256": "c447d911462cadb38d1b71426f9e29d211d19308d32ed4689e43e9dec5d52eaf",
-   "bytes": 141272,
+   "sha256": "294b7c38dff1c9050a61356dba6a3084ba6317bb8b3fed536e52853db585748e",
+   "bytes": 141301,
    "klass": "observed"
   },
   "validation.json": {
@@ -226,8 +226,8 @@
    "klass": "derived"
   },
   "index.json": {
-   "sha256": "dbbeaee4abb76b38988f784e1980c73ce832b7cc0308a30a94ebb188f090eae5",
-   "bytes": 443734,
+   "sha256": "c043516396a4e58b7cbfce2bbce3b440f369c6a192d483b176504157ae4b04b4",
+   "bytes": 447260,
    "klass": "derived"
   },
   "falsify.json": {
@@ -236,8 +236,8 @@
    "klass": "derived"
   },
   "gaps.json": {
-   "sha256": "5b8969b703f178462d7223edb31b30c4a2ba66085c85749160bfa3146446141e",
-   "bytes": 10269,
+   "sha256": "8ccb1a11ba0604799baa20f6d766c3dfde3e686fb1150cd94db4a927a9c8416c",
+   "bytes": 16798,
    "klass": "derived"
   },
   "lessons.json": {
@@ -404,5 +404,5 @@
  "brand": "Zero-G Firewall",
  "team": "The Rule of Flame",
  "mascot": "ISKRA",
- "built_at_utc": "2026-11-14T13:55:04Z"
+ "built_at_utc": "2026-11-14T14:06:18Z"
 }

@@ -40,6 +40,8 @@ export interface ScatterProps {
   height?: number;
   curves?: { pts: [number, number][]; label: string; dash?: string; labelAt?: [number, number] }[];
   marks?: ScatterMark[];
+  /** windows in data units, drawn behind the points with a dashed edge: "near" a chosen atmosphere */
+  regions?: { x0: number; x1: number; y0: number; y1: number; label?: string }[];
   diagonal?: boolean;                 // the line y = x, for parity plots
   onPick?: (p: ScatterPoint) => void;
   fmtX?: (x: number) => string;
@@ -99,6 +101,17 @@ export function Scatter(p: ScatterProps) {
         <text x={m.l - 44} y={14} className="t-2">{p.yLabel}</text>
         <text x={width - m.r} y={H - 4} textAnchor="end" className="t-2">{p.xLabel}</text>
 
+        {(p.regions ?? []).map((r, i) => {
+          const x0 = sx(Math.max(r.x0, p.xDomain[0])), x1 = sx(Math.min(r.x1, p.xDomain[1]));
+          const y0 = sy(Math.min(r.y1, p.yDomain[1])), y1 = sy(Math.max(r.y0, p.yDomain[0]));
+          if (x1 <= x0 || y1 <= y0) return null;
+          return (
+            <g key={"r" + i}>
+              <rect x={x0} y={y0} width={x1 - x0} height={y1 - y0} rx={3} fill="var(--ink)" fillOpacity={0.07} stroke="var(--ink)" strokeWidth={1.5} strokeDasharray="6 4" />
+              {r.label && <text x={x0 + 6} y={y0 - 6} className="t-ink" style={{ paintOrder: "stroke", stroke: "var(--surface)", strokeWidth: 4, strokeLinejoin: "round" }}>{r.label}</text>}
+            </g>
+          );
+        })}
         {p.diagonal && (
           <line x1={sx(Math.max(p.xDomain[0], p.yDomain[0]))} y1={sy(Math.max(p.xDomain[0], p.yDomain[0]))}
                 x2={sx(Math.min(p.xDomain[1], p.yDomain[1]))} y2={sy(Math.min(p.xDomain[1], p.yDomain[1]))}

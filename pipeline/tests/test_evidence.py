@@ -228,5 +228,43 @@ class Facets(unittest.TestCase):
         self.assertEqual(self.of("Flame Design", "Study soot inception in spherical flames."), [])
 
 
+class OxygenCoverage(unittest.TestCase):
+    """The coverage chart counts every placed row once and accounts for every row it cannot place."""
+
+    def setUp(self):
+        from zgf import lessons as Ls
+        self.Ls = Ls
+        pt = lambda s, a, t, r, x, p=None: {"s": s, "a": a, "t": t, "r": r, "x": x, "p": p, "f": ""}
+        self.env = {"series": [{"id": "S", "kind": "solid"}, {"id": "D", "kind": "droplet"}],
+                    "points": [pt("S", "PSI-1", "t1", 0, 0.175), pt("S", "PSI-1", "t1", 1, 0.2095), pt("D", "PSI-2", "t2", 0, 0.30, 70.0)],
+                    "near_presets": [{"id": "iss", "label": "ISS cabin", "x_o2": 0.2095, "p_kpa": 101.325}],
+                    "gravity_counts": {"micro": 3, "partial": 0}}
+        tb = lambda acc, art, file, cols, n: {"accession": acc, "artifact": art, "file": file, "columns": cols, "rows": [[""] * len(cols)] * n}
+        self.tables = [tb("PSI-1", "t1", "solids.csv", ["Percent O2"], 3), tb("PSI-2", "t2", "drops.csv", ["Oxygen"], 1),
+                       tb("PSI-3", "t3", "x_Inverse Flame.csv", ["XO2"], 5), tb("PSI-4", "t4", "matrix.csv", ["Oxygen Conc (percent)"], 2),
+                       tb("PSI-5", "t5", "jets.csv", ["Fuel", "CO2 ppm"], 4)]
+
+    def test_halves_go_upward_and_every_row_is_accounted_for(self):
+        c = self.Ls.coverage(self.env, self.tables)
+        self.assertEqual({k: {p: x["n"] for p, x in v.items()} for k, v in c["cells"].items()}, {"solid": {"18": 1, "21": 1}, "droplet": {"30": 1}, "gas": {}})
+        self.assertEqual((c["placed"], c["total"]), (3, 15))
+        self.assertEqual({x["id"]: x["rows"] for x in c["not_placed"]}, {"none": 4, "inverse": 5, "listed": 2, "empty": 1})
+        self.assertEqual([r["rows"] for r in c["regimes"]], [3, 0])
+        self.assertEqual(c["kinds"][0]["with_pressure"], 0)
+
+    def test_a_row_that_is_neither_placed_nor_explained_stops_the_build(self):
+        self.env["points"].append({"s": "S", "a": "PSI-9", "t": "t9", "r": 0, "x": 0.21, "p": None, "f": ""})
+        with self.assertRaises(ValueError):
+            self.Ls.coverage(self.env, self.tables)
+
+    def test_the_integrity_check_catches_a_square_that_gains_a_row(self):
+        from zgf import validate as V
+        c = self.Ls.coverage(self.env, self.tables)
+        self.assertEqual(V.cover(c, self.env, 15), 4)
+        c["cells"]["solid"]["18"]["n"] += 1
+        with self.assertRaises(V.IntegrityError):
+            V.cover(c, self.env, 15)
+
+
 if __name__ == "__main__":
     unittest.main()

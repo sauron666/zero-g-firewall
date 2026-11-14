@@ -66,7 +66,27 @@ def check(out_dir: str) -> dict:
             walk(load(name))
     if os.path.exists(os.path.join(out_dir, "matrix.json")):
         n += matrix(load("matrix.json"))
+    if os.path.exists(os.path.join(out_dir, "gaps.json")) and load("gaps.json").get("coverage"):
+        n += cover(load("gaps.json")["coverage"], load("envelope.json"), sum(tables.values()))
     return {"checks": n, "ok": True}
+
+
+def cover(c: dict, env: dict, rows_in_all_tables: int) -> int:
+    """The coverage chart may not lose or invent a row: its squares add up to the points of the atmosphere map,
+    placed and not placed add up to the tables, and the partial-gravity block shows what the map counted."""
+    in_cells = sum(x["n"] for k in c["cells"].values() for x in k.values())
+    if in_cells != len(env["points"]) or c["placed"] != in_cells:
+        raise IntegrityError("the coverage chart holds %d rows, the atmosphere map %d" % (in_cells, len(env["points"])))
+    if c["placed"] + sum(x["rows"] for x in c["not_placed"]) != c["total"] or c["total"] > rows_in_all_tables:
+        raise IntegrityError("coverage: placed and not placed do not add up to the rows of the tables")
+    for k in c["cells"].values():
+        for x in k.values():
+            if sum(x["records"].values()) != x["n"]:
+                raise IntegrityError("coverage: a square counts more rows than its records hold")
+    partial = [r for r in c["regimes"] if r["id"] == "partial"]
+    if not partial or partial[0]["rows"] != env["gravity_counts"]["partial"]:
+        raise IntegrityError("coverage: the partial-gravity block does not match the count on the atmosphere map")
+    return 4
 
 
 def matrix(mx: dict) -> int:

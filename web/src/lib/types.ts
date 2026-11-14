@@ -251,6 +251,8 @@ export interface EnvelopeDoc {
   klass: Klass;
   note: string;
   near_rule: string;
+  /** the same rule in numbers: oxygen fraction either way, and pressure as a share either way */
+  near?: { dx: number; dp: number };
   series: EnvelopeSeries[];
   points: EnvelopePoint[];
   near_presets: { id: string; label: string; x_o2: number; p_kpa: number; n_near: number; by_kind: Record<string, number> }[];
@@ -388,7 +390,22 @@ export interface Gap {
   evidence: MythItem[];
   plans: { name: string; state: string; items: MythItem[] }[];
 }
-export interface GapsDoc { klass: Klass; note: string; searches: Record<string, number>; outside_the_combustion_search: string[]; outside_note: string; items: Gap[] }
+/** Where the placed test rows sit: fuel form by whole percent of oxygen, in each gravity regime. */
+export interface CoverCell { n: number; records: Record<string, number> }
+export interface CoverageBlock {
+  klass: Klass;
+  rule: string;
+  axis: { lo: number; hi: number; unit: string };
+  kinds: { id: string; label: string; rows: number; with_pressure: number; min: number | null; max: number | null; records: string[] }[];
+  cells: Record<string, Record<string, CoverCell>>;
+  regimes: { id: "micro" | "partial"; label: string; rows: number }[];
+  atmospheres: { id: string; label: string; x_o2: number; p_kpa: number; pct: number }[];
+  placed: number;
+  total: number;
+  top: number;
+  not_placed: { id: string; why: string; rows: number; records: string[] }[];
+}
+export interface GapsDoc { klass: Klass; coverage?: CoverageBlock; note: string; searches: Record<string, number>; outside_the_combustion_search: string[]; outside_note: string; items: Gap[] }
 export interface LessonCard { id: string; title: string; when?: string; resource: string; what: MythItem[]; ties: MythItem[] }
 export interface LessonsDoc {
   klass: Klass;

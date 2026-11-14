@@ -1,6 +1,7 @@
 import { useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
 import type { GapsDoc } from "../lib/types";
+import { OxygenCover, pc } from "../viz/OxygenCover";
 import { Item } from "./Myths";
 import { PageProps, stub } from "./stubs";
 
@@ -19,6 +20,20 @@ export function Gaps({ route, manifest }: PageProps) {
         What NASA's combustion tables do not hold matters as much as what they do. Each gap below is counted from the tables themselves and set beside the experiment that is planned, or has flown, to fill it.
       </p>
       <p className="note"><KlassBadge k="derived" note="counted from NASA's tables" /> {d.data.note}</p>
+      {d.data.coverage && (() => {
+        const c = d.data.coverage;
+        const solid = c.kinds.find((k) => k.id === "solid");
+        const partial = c.regimes.find((r) => r.id === "partial");
+        return (
+          <>
+            <p className="claim claim--m" style={{ maxWidth: "46ch" }}>
+              {solid && solid.rows > 0 && <>Where NASA's open tables state the oxygen, solid materials burn between {pc(solid.min)} and {pc(solid.max)}. </>}
+              No row of any kind states more than {pc(c.top)}.{partial && partial.rows === 0 && <> None was taken in lunar or Martian gravity.</>}
+            </p>
+            <OxygenCover c={c} />
+          </>
+        );
+      })()}
       {d.data.items.map((g) => (
         <article key={g.id} className="gap" id={g.id}>
           <header className="gap__head">

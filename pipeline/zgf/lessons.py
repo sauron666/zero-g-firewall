@@ -12,7 +12,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
+import re
 
 from . import ledger as L
 from .claims import FM2, GLENN, GUIDE, LUCI, MIR, NAMES, OLSON, SAFFIRE6, Resolver, data_items, model_items, q, reading
@@ -30,6 +32,76 @@ NAMES.update({A1: "NASA Safety and Mission Assurance: Apollo 1 case study", A13:
               S_DET: "NASA Spinoff: Fire Detector (1978)", S_ATTIRE: "NASA Spinoff: New Technology for the Fire Attire (1982)"})
 
 
+KINDS = [("solid", "Solid materials"), ("droplet", "Liquid droplets"), ("gas", "Gas flames")]
+COVER_AXIS = (10, 42)       # whole percents drawn one by one; everything above is one stretch up to pure oxygen
+OXYGEN_COL = re.compile(r"oxygen|(?<![a-z])x?o2(?![a-z0-9])", re.I)
+
+
+def whole_percent(x: float) -> int:
+    """The whole percent nearest to a mole fraction, halves upward: 0.2095 counts at 21."""
+    return int(math.floor(round(100.0 * x, 3) + 0.5))      # rounded first, so 17.5 stored as 17.499999 still goes up
+
+
+def coverage(env: dict, tables: list[dict]) -> dict:
+    """Where the placed test rows sit: fuel form by oxygen percent by gravity regime, with the rows that cannot be placed and why.
+
+    env is envelope.json; tables are the experimental tables of the records in scope (accession, file, artifact, columns, rows).
+    The counts must add up to every row of every table, or the build stops.
+    """
+    kind = {s["id"]: s["kind"] for s in env["series"]}
+    cells: dict[str, dict[str, dict]] = {k: {} for k, _ in KINDS}
+    stats = {k: {"id": k, "label": label, "rows": 0, "with_pressure": 0, "min": None, "max": None, "records": []} for k, label in KINDS}
+    for p in env["points"]:
+        k = kind[p["s"]]
+        c = cells[k].setdefault(str(whole_percent(p["x"])), {"n": 0, "records": {}})
+        c["n"] += 1
+        c["records"][p["a"]] = c["records"].get(p["a"], 0) + 1
+        s = stats[k]
+        s["rows"] += 1
+        s["with_pressure"] += 1 if p["p"] is not None else 0
+        s["min"] = p["x"] if s["min"] is None else min(s["min"], p["x"])
+        s["max"] = p["x"] if s["max"] is None else max(s["max"], p["x"])
+        if p["a"] not in s["records"]:
+            s["records"].append(p["a"])
+    placed_tables = {p["t"] for p in env["points"]}
+    left = {"empty": [0, set()], "inverse": [0, set()], "listed": [0, set()], "none": [0, set()]}
+    placed_by_table: dict[str, int] = {}
+    for p in env["points"]:
+        placed_by_table[p["t"]] = placed_by_table.get(p["t"], 0) + 1
+    total = 0
+    for t in tables:
+        n = len(t["rows"])
+        total += n
+        if t["artifact"] in placed_tables:
+            why, n = "empty", n - placed_by_table[t["artifact"]]
+        elif "inverse" in t["file"].lower():
+            why = "inverse"
+        elif any(OXYGEN_COL.search(c) and not re.search(r"co2|flow|mg/s", c, re.I) for c in t["columns"]):
+            why = "listed"
+        else:
+            why = "none"
+        if n:
+            left[why][0] += n
+            left[why][1].add(t["accession"])
+    words = {"none": "the table has no oxygen column",
+             "inverse": "inverse flames: the oxygen stated is that of the injected gas, not of the atmosphere",
+             "listed": "one cell lists several oxygen values (a test matrix, not one test in each row)",
+             "empty": "the oxygen cell of the row is empty"}
+    not_placed = [{"id": k, "why": words[k], "rows": left[k][0], "records": sorted(left[k][1], key=lambda a: int(a.split("-")[1]))} for k in ("none", "inverse", "listed", "empty") if left[k][0]]
+    placed = len(env["points"])
+    if placed + sum(x["rows"] for x in not_placed) != total:
+        raise ValueError("coverage: %d placed and %d not placed do not add up to %d rows" % (placed, sum(x["rows"] for x in not_placed), total))
+    top = max((p["x"] for p in env["points"]), default=0.0)
+    return {"klass": "derived",
+            "rule": "A test row is counted at the whole percent nearest to the oxygen it states (20.95% counts at 21%). Only a row that states one oxygen value for its atmosphere can be placed.",
+            "axis": {"lo": COVER_AXIS[0], "hi": COVER_AXIS[1], "unit": "oxygen, percent by volume"},
+            "kinds": [stats[k] for k, _ in KINDS], "cells": cells,
+            "regimes": [{"id": "micro", "label": "Free fall", "rows": env["gravity_counts"]["micro"]},
+                        {"id": "partial", "label": "Lunar or Martian gravity", "rows": env["gravity_counts"]["partial"]}],
+            "atmospheres": [{"id": n["id"], "label": n["label"], "x_o2": n["x_o2"], "p_kpa": n["p_kpa"], "pct": whole_percent(n["x_o2"])} for n in env["near_presets"]],
+            "placed": placed, "total": total, "top": top, "not_placed": not_placed}
+
+
 def gaps(out_dir: str, searches: dict[str, int]) -> list[dict]:
     load = lambda name: json.load(open(os.path.join(out_dir, name), encoding="utf-8"))
     env, rank = load("envelope.json"), load("rank_features.json")
@@ -37,6 +109,10 @@ def gaps(out_dir: str, searches: dict[str, int]) -> list[dict]:
     both = sum(1 for p in env["points"] if p["p"] is not None)
     solid = [s for s in env["series"] if s["kind"] == "solid"]
     n_solid, n_solid_p = sum(s["n"] for s in solid), sum(s["n_with_pressure"] for s in solid)
+    kind_of = {s["id"]: s["kind"] for s in env["series"]}
+    top = {k: max((p["x"] for p in env["points"] if kind_of[p["s"]] == k), default=0.0) for k, _ in KINDS}
+    solid_top, solid_low = top["solid"], min((p["x"] for p in env["points"] if kind_of[p["s"]] == "solid"), default=0.0)
+    pc = lambda x: ("%.1f" % (100.0 * x)).rstrip("0").rstrip(".")
     with_table = [i for i in rank["items"] if i["rows"]]
     with_outcome = [i for i in with_table if i["shared"]["outcome"]["score"] == 1]
     def in_psi(term: str) -> str:
@@ -62,6 +138,17 @@ def gaps(out_dir: str, searches: dict[str, int]) -> list[dict]:
          "plans": [{"name": "SoFIE, Solid Fuel Ignition and Extinction", "state": "on the station", "items": [
                        q(SOFIE, "The atmosphere will be a mix of oxygen and nitrogen, with the oxygen percentage ranging from atmospheric up to 85%", ""),
                        q(SOFIE, "The pressure will be varied accordingly to stay on or near the normoxic curve", ""),
+                       fact(in_psi("SoFIE"))]}]},
+        {"id": "solids-oxygen", "title": "No solid-material row states more than %s%% oxygen" % pc(solid_top),
+         "measure": "%s%%" % pc(solid_top), "unit": "is the most oxygen any of the %d solid-material rows states" % n_solid,
+         "why": "The two exploration atmospheres on this site's map hold 30%% and 34%% oxygen, and a suit holds pure oxygen. The solid-fuel rows in PSI run from %s%% to %s%%." % (pc(solid_low), pc(solid_top)),
+         "evidence": [fact("Of %d rows that state oxygen, %d are solid materials; their oxygen runs from %s%% to %s%%. Droplet rows reach %s%% and gas-flame rows %s%%. No row of any kind states more than %s%%."
+                           % (len(env["points"]), n_solid, pc(solid_low), pc(solid_top), pc(top["droplet"]), pc(top["gas"]), pc(max(top.values()))), link="/gaps"),
+                      q(GUIDE, "The glovebox is normally limited to ISS “air,” nominally 21 percent oxygen by volume and one atmospheric pressure", "Why the station's solid-fuel tests stayed near air"),
+                      q(GUIDE, "spacecraft frequently operate at an ambient oxygen mole fraction higher than that of air", "")],
+         "plans": [{"name": "SoFIE, Solid Fuel Ignition and Extinction", "state": "on the station", "items": [
+                       q(GUIDE, "SoFIE can accommodate testing in exploration atmospheres with reduced pressure and elevated oxygen", ""),
+                       q(SOFIE, "The atmosphere will be a mix of oxygen and nitrogen, with the oxygen percentage ranging from atmospheric up to 85%", ""),
                        fact(in_psi("SoFIE"))]}]},
         {"id": "exploration-atmosphere", "title": "Few tests sit near the atmospheres planned for exploration", "measure": "%d and %d" % (near["challenge_limit"]["n_near"], near["exploration"]["n_near"]),
          "unit": "of %d rows lie near 30%% oxygen at 10.2 psia and 34%% at 8.2 psia" % both,
@@ -149,7 +236,10 @@ def build(raw_dir: str, out_dir: str) -> dict:
     lessons = {"klass": "literature", "note": "Quotations are checked against the stored NASA pages. Sentences marked as readings are ours.",
                "incidents": [card(c) for c in incidents()], "earth": [card(c) for c in earth()], "video": video,
                "resources": [{k: x[k] for k in ("id", "title", "url", "type", "in_ledger", "used_in", "receipts")} for x in res]}
-    gdoc = {"klass": "derived", "note": "Each gap is measured from NASA's tables as fetched for this site. Plans are quoted from NASA pages and reports in the ledger.", "searches": {k: len(v) for k, v in searches.items()}, "outside_the_combustion_search": outside,
+    scoped = [json.load(open(os.path.join(out_dir, tb["artifact"]), encoding="utf-8")) | {"artifact": tb["artifact"]}
+              for i in json.load(open(os.path.join(out_dir, "investigations.json"), encoding="utf-8"))["items"] if i.get("scope", {}).get("in_scope") for tb in i["tables"]]
+    cover = coverage(json.load(open(os.path.join(out_dir, "envelope.json"), encoding="utf-8")), scoped)
+    gdoc = {"klass": "derived", "coverage": cover, "note": "Each gap is measured from NASA's tables as fetched for this site. Plans are quoted from NASA pages and reports in the ledger.", "searches": {k: len(v) for k, v in searches.items()}, "outside_the_combustion_search": outside,
             "outside_note": "Returned by another fire-related search of PSI but not by the combustion search, so not among the records on this site.", "items": g_out}
     mpath = os.path.join(out_dir, "manifest.json")
     manifest = json.load(open(mpath, encoding="utf-8"))
@@ -163,4 +253,4 @@ def build(raw_dir: str, out_dir: str) -> dict:
     manifest["nasa"]["quotes_verified"] = manifest["nasa"].get("quotes_verified", 0) + ok
     with open(mpath, "w", encoding="utf-8") as fh:
         json.dump(manifest, fh, indent=1)
-    return {"gaps": len(g_out), "quotes": resolve.n_quotes, "verified": ok, "problems": resolve.missing, "outside": outside}
+    return {"gaps": len(g_out), "coverage": {"placed": cover["placed"], "total": cover["total"], "not_placed": {x["id"]: x["rows"] for x in cover["not_placed"]}}, "quotes": resolve.n_quotes, "verified": ok, "problems": resolve.missing, "outside": outside}

@@ -10,7 +10,7 @@ import type { EnvelopeDoc, MatrixDoc, Passage, RankDoc } from "./types";
  * With no model connected the planner is a set of rules. A connected model may rephrase the passages the
  * tools return; it never calls a tool by itself and never produces a number.
  */
-export type ToolName = "screen_question" | "count_tests_near" | "rank_for_mission" | "matrix_coverage" | "curator_notes" | "get_investigation" | "search_passages" | "compose_answer" | "check_answer";
+export type ToolName = "screen_question" | "count_tests_near" | "oxygen_range" | "rank_for_mission" | "matrix_coverage" | "curator_notes" | "get_investigation" | "search_passages" | "compose_answer" | "check_answer";
 export interface Step { tool: ToolName; why: string; args: Record<string, string | number>; out: string; found: number; ms: number }
 export interface Kit { index: Index; envelope?: EnvelopeDoc | null; rank?: RankDoc | null; matrix?: MatrixDoc | null }
 export interface AgentRun { question: string; steps: Step[]; hits: Hit[]; answer: Answer; computed: number; ms: number; planner: "rules"; notes: string[]; refused: boolean }
@@ -19,6 +19,7 @@ export const TOOLS: Record<ToolName, { title: string; reads: string }> = {
   screen_question: { title: "Screen the question", reads: "the question" },
   curator_notes: { title: "Fetch the curator's notes on NASA's tables", reads: "index.json" },
   count_tests_near: { title: "Count test rows near an atmosphere", reads: "envelope.json" },
+  oxygen_range: { title: "Find the oxygen range of the test rows", reads: "envelope.json" },
   rank_for_mission: { title: "Rank the investigations for a mission", reads: "rank_features.json" },
   matrix_coverage: { title: "Look up what is measured in a habitat", reads: "matrix.json" },
   get_investigation: { title: "Fetch an investigation record", reads: "index.json" },
@@ -34,6 +35,11 @@ const RANK = /\b(rank|ranking|ranked|most relevant|most useful|priorit|top (thre
 const GAP = /\b(gap|gaps|unknown|not (yet |been |ever )*(measured|tested|studied|burned)|never been|nobody|no one|missing|what is not known|has (anything|anyone|nasa)|have (they|we|nasa) (ever )?(measured|tested|burned)|ever been (burned|tested|measured))\b/i;
 const QUALITY = /\b(data quality|problems?|errors?|mistakes?|wrong|artefacts?|artifacts?|inconsisten\w*|anomal\w*|typos?|curat\w*)\b/i;
 const TABLES = /\b(tables?|columns?|data|datasets?|records?|files?|spreadsheets?|cells?)\b/i;
+/** A question about how much oxygen the tests reached, or whether any went past a stated level. */
+export const EXTREME = /\b(most|highest|maximum|max|richest|least|lowest|minimum|range|span|how (much|high|low|rich))\b[^.?!]{0,60}\b(oxygen|o2)\b|\b(oxygen|o2)\b[^.?!]{0,60}\b(most|highest|maximum|least|lowest|minimum|range|span|how high|how low)\b/i;
+const BEYOND = /\b(above|over|more than|higher than|greater than|beyond|exceed\w*)\b/i;
+const UNDER = /\b(below|under|less than|lower than)\b/i;
+const FORM: [RegExp, string, string][] = [[/\b(solids?|materials?|fabrics?|plastics?|pmma|acrylic)\b/i, "solid", "solid-material"], [/\b(droplets?|liquids?)\b/i, "droplet", "liquid-droplet"], [/\b(gas(eous)?|jets?|burners?)\b/i, "gas", "gas-flame"]];
 /** A question that is really an instruction to the engine. It is refused, never searched. */
 export const INSTRUCTION = /\b(ignore|disregard|forget|override)\b[^.?!]{0,30}\b(instructions?|rules|prompts?|guidelines)\b|\bdeveloper mode\b|\b(system|hidden|secret|initial) prompt\b|\bjailbreak\b|\bpretend (you are|to be)\b|\byou are now\b|^\s*(system|assistant)\s*:/i;
 /** A request for a number the evidence cannot give. */
@@ -72,6 +78,40 @@ function countNear(env: EnvelopeDoc, x: number, p: number | null): Passage {
     x: `${near.length} of the ${pool.length} test rows in NASA's tables that state oxygen${p == null ? "" : " and pressure"} lie near ${at} (${rule}).` +
       (near.length ? ` By experiment: ${where}.` : "") +
       ` ${solids === 0 ? "None of them is a solid material." : `${solids} of them are solid materials.`} No row in any table was taken in lunar or Martian gravity.`,
+  };
+}
+
+/** The span of oxygen the placed test rows state, for one fuel form or all, or how many rows lie past a stated level. */
+export function oxygenRange(env: EnvelopeDoc, q: string, level: number | null): Passage {
+  const kind = new Map(env.series.map((s) => [s.id, s.kind]));
+  const form = FORM.find(([re]) => re.test(q));
+  const all = env.points;
+  const pool = form ? all.filter((pt) => kind.get(pt.s) === form[1]) : all;
+  const lo = (ps: typeof all) => Math.min(...ps.map((pt) => pt.x));
+  const hi = (ps: typeof all) => Math.max(...ps.map((pt) => pt.x));
+  const word = form ? `${form[2]} ` : "";
+  const rows = (n: number) => `${n} ${word}test row${n === 1 ? "" : "s"} in NASA's tables that state${n === 1 ? "s" : ""} oxygen`;
+  const tail = " No row in any table was taken in lunar or Martian gravity.";
+  const records = Array.from(new Set(pool.map((pt) => pt.a))).join(", ");
+  if (!pool.length) return { id: `tool:oxygen:${form?.[1] ?? "all"}`, k: "derived", l: "/gaps", t: "Computed here: the oxygen range of the test rows", x: `No ${word}test row in NASA's tables states oxygen.${tail}` };
+  if (level != null && (BEYOND.test(q) || UNDER.test(q))) {
+    const up = BEYOND.test(q);
+    const n = pool.filter((pt) => (up ? pt.x > level + 1e-9 : pt.x < level - 1e-9)).length;
+    const than = `${up ? "more" : "less"} than ${pct(level)} oxygen`;
+    return {
+      id: `tool:oxygen:${form?.[1] ?? "all"}:${up ? "gt" : "lt"}:${fix(level, 3)}`, k: "derived", l: "/gaps", t: `Computed here: test rows with ${than}`,
+      x: (n === 0 ? `None of the ${rows(pool.length)} states ${than}.` : `${n} of the ${rows(pool.length)} state${n === 1 ? "s" : ""} ${than}.`) +
+        ` The ${up ? "most" : "least"} any of them states is ${pct(up ? hi(pool) : lo(pool))}.${tail}`,
+    };
+  }
+  const each = ([["solid", "solid materials"], ["droplet", "liquid droplets"], ["gas", "gas flames"]] as const)
+    .map(([k, label]) => [label, all.filter((pt) => kind.get(pt.s) === k)] as const).filter(([, ps]) => ps.length)
+    .map(([label, ps]) => `${label} ${pct(lo(ps))} to ${pct(hi(ps))} (${ps.length} rows)`).join(", ");
+  return {
+    id: `tool:oxygen:${form?.[1] ?? "all"}`, k: "derived", l: "/gaps", t: "Computed here: the oxygen range of the test rows",
+    x: form
+      ? `The ${rows(pool.length)} run from ${pct(lo(pool))} to ${pct(hi(pool))} oxygen (${records}). Across all ${all.length} rows that state oxygen the range is ${pct(lo(all))} to ${pct(hi(all))}.${tail}`
+      : `The ${rows(pool.length)} run from ${pct(lo(pool))} to ${pct(hi(pool))} oxygen: ${each}.${tail}`,
   };
 }
 
@@ -167,7 +207,12 @@ export function runAgent(question: string, kit: Kit): AgentRun {
   if (VERDICT_ASK.test(question)) notes.push("This site gives no verdict of safe or unsafe. What follows is what was observed, and where nothing was.");
 
   const atm = atmosphereIn(question);
-  if (atm && kit.envelope) {
+  const past = !!atm && atm.p == null && (BEYOND.test(question) || UNDER.test(question));     // "above 40% oxygen" asks for a count past a level, not near it
+  if ((past || EXTREME.test(question)) && kit.envelope) {
+    computed.push(timed("oxygen_range", past ? `the question asks what lies past a level of oxygen (${atm!.said})` : "the question asks how much oxygen the tests reached", { form: FORM.find(([re]) => re.test(question))?.[1] ?? "all", level: past ? Number(fix(atm!.x, 3)) : "none" },
+      () => oxygenRange(kit.envelope!, question, past ? atm!.x : null), (p) => [first(p.x), Number(p.x.match(/\d+/)?.[0] ?? 0)]));
+  }
+  if (atm && !past && kit.envelope) {
     computed.push(timed("count_tests_near", `the question states an atmosphere (${atm.said})`, { oxygen_fraction: Number(fix(atm.x, 3)), pressure_kpa: atm.p == null ? "any" : Number(fix(atm.p)) },
       () => countNear(kit.envelope!, atm.x, atm.p), (p) => [first(p.x), Number(p.x.match(/^\d+/)?.[0] ?? 0)]));
   }

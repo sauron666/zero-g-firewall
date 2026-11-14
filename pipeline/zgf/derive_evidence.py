@@ -349,7 +349,7 @@ def envelope(tables: dict[str, dict]) -> dict:
         near.append({"id": pid, "label": label, "x_o2": x0, "p_kpa": p0, "n_near": len(hit), "by_kind": kinds})
     return {"klass": "observed", "units": {"x": "oxygen mole fraction", "p": "kPa"},
             "note": "Each point is one row of a NASA experimental table. Rows that state oxygen but no pressure have p null and are drawn on a separate strip, never at an assumed pressure.",
-            "near_rule": "within %.2f in oxygen fraction and %d%% in pressure" % (NEAR[0], NEAR[1] * 100),
+            "near_rule": "within %.2f in oxygen fraction and %d%% in pressure" % (NEAR[0], NEAR[1] * 100), "near": {"dx": NEAR[0], "dp": NEAR[1]},
             "series": list(series.values()), "points": points, "near_presets": near, "left_out": left_out,
             "gravity_counts": {"micro": len(points), "partial": 0, "note": "No row in any PSI combustion table was taken in lunar or Martian gravity."}}
 

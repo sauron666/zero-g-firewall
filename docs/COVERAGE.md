@@ -1,14 +1,14 @@
 # Coverage of the plan, feature by feature
 
-Checked on 14 November 2026 at 15:55 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
+Checked on 14 November 2026 at 16:09 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
 
 | Priority | Features | Done | Partial | Not built |
 |---|---|---|---|---|
-| P0 | 28 | 24 | 4 | 0 |
+| P0 | 28 | 26 | 2 | 0 |
 | P1 | 59 | 35 | 8 | 16 |
 | P2 | 38 | 2 | 9 | 27 |
 | P3 | 5 | 0 | 0 | 5 |
-| All | 130 | 61 | 21 | 48 |
+| All | 130 | 63 | 19 | 48 |
 
 ## Definition of done (specification, section 0)
 
@@ -61,8 +61,8 @@ Checked on 14 November 2026 at 15:55 Sofia time against the 130 features of the 
 | B04 | P0 | done | Ranking engine, deterministic and transparent | ten factors, five missions, weights, stability |
 | B05 | P0 | **partial** | Compare two to four investigations | up to three records compared factor by factor; no shared-hardware or comparability warnings |
 | B06 | P0 | done | Atmosphere Envelope Map (oxygen fraction against pressure) |  |
-| B07 | P0 | **partial** | Gap Explorer | five measured gaps with plans; no coverage matrix of gravity by fuel by atmosphere |
-| B08 | P0 | **partial** | Mission lens | five missions re-rank; no 'spacecraft' lens; the mission is not drawn on the map |
+| B07 | P0 | done | Gap Explorer | six measured gaps with plans, and a coverage chart of fuel form by oxygen for free fall and for lunar and Martian gravity (empty), with a table view, receipts and a count of the rows that cannot be placed |
+| B08 | P0 | done | Mission lens | five missions re-rank; choosing one (or arriving from the ranking page) marks its atmosphere on the map with the window that counts as near; a spacecraft in transit is read under the station or the rover and lander lens |
 | B09 | P0 | done | Evidence Q&A with claim-level citations, abstention and deterministic fallback | offline engine, checker, local, cloud and hybrid modes |
 | B10 | P1 | **not built** | Audience lens (student, researcher, engineer) |  |
 | B11 | P1 | **not built** | Sensor and measurement inventory across investigations |  |
