@@ -5,7 +5,7 @@ import { fmtBytes, fmtInt, useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
 import type { BriefsDoc, CuratorDoc, CuratorFinding, InventoryDoc, Investigation, InvestigationsDoc, ProfilesDoc, RankDoc, RankFacets, TableDoc, TableProfile, TableSummary } from "../lib/types";
 import { FlowWords, MeasuredMatrix, RawHoldings } from "../viz/Inventory";
-import { worded } from "../lib/inventory";
+import { stating, worded } from "../lib/inventory";
 import { SourceBtn } from "../components/Source";
 import { useReceipt } from "../components/Receipt";
 import { IconArrow, IconWarn } from "../components/icons";
@@ -233,7 +233,7 @@ function Measured({ doc }: { doc: InventoryDoc }) {
     <div className="stack" style={{ ["--gap" as string]: "22px" }}>
       <Views at="measured" />
       <Readings>
-        <Tile label="Tables state oxygen" value={t.oxygen.records} of={of} sub={`${t.pressure.records} of them state pressure too`} />
+        <Tile label="Tables state oxygen" value={t.oxygen.records} of={of} sub={`${stating(doc, ["oxygen", "pressure"]).length} of them state pressure too`} />
         <Tile label="State the air flow" value={t.flow.records} of={of} sub="speed, direction or a fan setting" />
         <Tile label="Say how the flame ended" value={t.ending.records} of={of} sub="by itself, by the test, or at what size" tone="flame" />
         <Tile label="Raw files behind them" value={doc.counts.raw_files} sub={`${fmtBytes(doc.counts.raw_bytes)} listed in PSI, not fetched`} />
