@@ -1,5 +1,23 @@
 # What to build next, in order
 
+## Hand-off (14 November, evening): start here
+
+The site is live from `main` at https://sauron666.github.io/zero-g-firewall/. All 28 must-have features of `docs/COVERAGE.md` are done. Tests: 53 Python, 98 TypeScript, all passing; the integrity check runs 1,683 checks at each derivation.
+
+**Direction set by the team on 14 November, 16:25. Keep to it.** Show the engineering, demonstrate the science, let the results speak. The look is a flight deck (`docs/DESIGN.md`, `web/src/styles/deck.css`): mission control as the opening page, readings at the head of a page, ISKRA as a conversation on every page. The interface does not talk about how it was built: one sentence on the Method page, details in `docs/AI_USE.md`. Lead with results; state a real limit once, beside the result; fold explanations of the machinery into "How it works". Reference pages for engineers stay last in the navigation.
+
+Do next, in this order:
+
+1. **On the machine that holds `nasa_raw/` (it has NASA access):** run `python pipeline/sync_nasa.py` once (version 1.2.0 adds NASA's fire protection brief and one NTRS record), then `python pipeline/derive.py --raw nasa_raw`. Look at `matrix.waiting_for_sync` in the output: it must be empty. Open the stored text of `doc:std3001_fire_protection_brief` and compare it with the three quotations declared for `BRIEF` in `pipeline/zgf/matrix.py`; they were typed from a web summary and may not match word for word. Correct them until `quotes_verified` equals `quotes`. The opening page then states the station's own procedure with a receipt (the logic is already in `web/src/pages/Home.tsx`). Commit the new data files and the ledger.
+2. **Controls view (B13):** on the Fire matrix page, a section that lists, for prevention, detection and suppression, the PSI records that inform each (the pillar marks are already in `rank_features.json`, `facets.pillars`, with their written rules) beside the count of behaviours measured on the station and in lunar gravity. This is the challenge's own sentence: "research that informs next-generation fire-safety controls".
+3. **Nearest tests to a design point (B23):** on the Atmosphere map, a visitor enters oxygen and pressure (or clicks the map) and gets the nearest test rows with their distance, fuel and outcome, and a CSV of them. All data is in `envelope.json`.
+4. **Report for a mission (B15):** on the ranking page, a button that writes a cited brief (Markdown) for the chosen mission: the five records to read first with the reason for each, the gaps, the limits, the ledger head.
+5. Smaller: export of the alarm lab's audit log (E08); a signed release (K03); a sensor and measurement inventory (B11). ISS live telemetry (M01) only if it can be tested against the real feed.
+
+Deliverables that must follow the site: the 30-second video (`node tools/video/record.mjs web/dist out_dir`, about four minutes; captions read their numbers from the build), the pitch slides and the jury questions (links are with the team). Re-record after any change a viewer would see. Sunday: freeze around 11:00, video due 14:00, submit before 22:00.
+
+Checks before every push: `python -m unittest discover -s pipeline/tests`, `cd web && npx tsc --noEmit -p . && npx vitest run && npx vite build`, then look at the changed page at 1440 px and 390 px in both themes.
+
 **Read `docs/COVERAGE.md` first.** It lists all 130 planned features with their true state and the order of work agreed with the team on 14 November at 14:25. The pitch: a 30-second video on Sunday at 14:00; the best five teams then present for 3 minutes and answer the jury for 5. The recorder for the video is `tools/video/record.mjs`.
 
 Clock: the event ends Sunday 15 November 2026 at 23:59 Sofia time. Freeze features on Sunday around 11:00, submit at least two hours before the deadline. Ask the human when the local pitch is.
@@ -10,7 +28,7 @@ Acceptance rows (Q01 to Q35) are in `docs/pack/04_TESTS_SUBMISSION_PLAYBOOK.md`;
 
 1. Overview with real counts and the "fetched from NASA" time. *(done)*
 2. Myth card 2: "a fire will self-extinguish if ventilation is shut off": where it held, where NASA's sources say it may not, what is open. *(done: Myths and evidence)*
-3. The same question in the evidence Q&A, every sentence cited to a row or a page. *(done: Ask the evidence)*
+3. The same question in the evidence Q&A, every sentence cited to a row or a page. *(done: Ask ISKRA, and the conversation on every page)*
 4. Atmosphere map: real test points, the lunar-habitat region, the empty partial-gravity cell, the Apollo 1 historical point, the ISS point live when the feed is up. *(done, except the live point)*
 5. Ranking for a lunar habitat with the breakdown and the stability figure. *(done)*
 6. What varied in one investigation, and the sensor inventory. *(what varied: done on every record card)*
@@ -23,7 +41,7 @@ Acceptance rows (Q01 to Q35) are in `docs/pack/04_TESTS_SUBMISSION_PLAYBOOK.md`;
 
 Already built and to keep working: the opening scene with the fan switch, **Two realities (the Fan Paradox)**, Flame physics.
 
-## Where the build stands (14 November, early afternoon)
+## Where the build stood (14 November, early afternoon; kept for the data notes below)
 
 Done and deployed from `main`: sync and ledger, derivation stages 1 and 2, the literature layer with the quotation check, and these pages on real data: Investigations with record cards, Atmosphere map, Myths and evidence, Evidence ledger (chain re-computed in the browser), Data and models (curator report, model check), Flame physics with the parity plot. `docs/IMPLEMENTATION_STATUS.md` has the exact list.
 
