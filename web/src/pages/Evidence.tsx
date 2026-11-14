@@ -149,7 +149,7 @@ function Explorer({ doc, findings, briefs, rank, pillar }: { doc: Investigations
         </label>
       </div>
       {rank && (
-        <div className="facets" aria-label="Narrow the list">
+        <div className="facets" role="group" aria-label="Narrow the list">
           <div className="facets__group"><span className="facets__name" title={Object.values(rank.facet_rules.pillars).join(" · ")}>Pillar</span>
             {PILLAR.map((p) => <button key={p} type="button" className="facet" aria-pressed={pillars.has(p)} onClick={() => setPillars(flip(pillars, p))}>{p[0].toUpperCase() + p.slice(1)}</button>)}</div>
           <div className="facets__group"><span className="facets__name">What burns</span>
@@ -403,7 +403,7 @@ function Cite({ inv, readOn }: { inv: Investigation; readOn: string | null }) {
     <details className="howto refcite" style={{ marginTop: 12 }}>
       <summary>Cite this record</summary>
       <p className="refcite__text">{c.text}</p>
-      <pre className="refcite__bib" tabIndex={0} aria-label="BibTeX entry">{c.bibtex}</pre>
+      <pre className="refcite__bib">{c.bibtex}</pre>
       <div className="row" style={{ marginTop: 8 }}>
         <button type="button" className="btn btn--quiet btn--sm" onClick={() => copy("text")}>{copied === "text" ? "Copied" : "Copy citation"}</button>
         <button type="button" className="btn btn--quiet btn--sm" onClick={() => copy("bibtex")}>{copied === "bibtex" ? "Copied" : "Copy BibTeX"}</button>

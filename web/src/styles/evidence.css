@@ -198,9 +198,9 @@ a.rec:hover { background: var(--raised); }
 
 /* Oxygen coverage: one square per whole percent. Blue is free fall, in four steps by count; a hatched square holds no row.
    The partial-gravity block is the same grid, empty. */
-.cov { position: relative; display: grid; gap: 5px; --cov-label: 196px; }
+.cov { position: relative; display: grid; gap: 5px; --cov-label: 180px; }
 .cov__legend { margin-bottom: 12px; }
-.cov__row { display: grid; grid-template-columns: var(--cov-label) repeat(var(--cov-n), minmax(0, 1fr)) 8px minmax(0, 4.5fr); gap: 2px; align-items: stretch; }
+.cov__row { display: grid; grid-template-columns: var(--cov-label) repeat(var(--cov-n), minmax(0, 1fr)) 8px minmax(0, 3fr); gap: 2px; align-items: stretch; }
 .cov__label { display: grid; align-content: center; gap: 1px; padding-right: 12px; font-size: var(--t-13); line-height: 1.25; min-width: 0; }
 .cov__label span { font-size: var(--t-12); color: var(--ink-3); }
 .cov__cell { display: block; min-width: 0; height: 30px; padding: 0; border: 0; border-radius: 2px; font: inherit; color: var(--ink); }
@@ -209,7 +209,7 @@ a.rec:hover { background: var(--raised); }
 .cov__cell--2 { background: color-mix(in srgb, var(--g-micro) 56%, var(--surface)); }
 .cov__cell--3 { background: color-mix(in srgb, var(--g-micro) 78%, var(--surface)); }
 .cov__cell--4 { background: var(--g-micro); }
-button.cov__cell { cursor: pointer; }
+button.cov__cell, .cov__cell--tap { cursor: pointer; }
 button.cov__cell:hover, button.cov__cell:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
 .cov__cell--atm { box-shadow: 0 0 0 1.5px var(--ink); position: relative; z-index: 1; }
 .cov__cell--wide { display: grid; place-items: center; font-size: var(--t-12); }
@@ -229,7 +229,7 @@ button.cov__cell:hover, button.cov__cell:focus-visible { outline: 2px solid var(
 .cov__row--axis .cov__label span { color: var(--ink-2); }
 @media (max-width: 860px) {
   .cov { --cov-label: 0px; }
-  .cov__row { grid-template-columns: repeat(var(--cov-n), minmax(0, 1fr)) 5px minmax(0, 4.5fr); gap: 1px; margin-bottom: 4px; }
+  .cov__row { grid-template-columns: repeat(var(--cov-n), minmax(0, 1fr)) 5px minmax(0, 3fr); gap: 1px; margin-bottom: 4px; }
   .cov__label { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; padding: 0 0 2px; }
   .cov__row--marks .cov__label { display: none; }
   .cov__cell { height: 26px; border-radius: 1px; }

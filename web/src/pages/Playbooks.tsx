@@ -126,7 +126,8 @@ function Controls({ doc, rank, onPillar }: { doc: MatrixDoc; rank: RankDoc; onPi
               {(["iss", "lunar"] as Habitat[]).map((h) => (
                 <div key={h} className={`ctl__row mx__hab--${h}`}>
                   <span className="ctl__name">{HABITAT[h].short}</span>
-                  <span className="ctl__marks">{cells.map((c) => <a key={c.id} className={`cmark cmark--${c[h]}`} href={href(`/playbooks/${c.id}`)} title={`${c.name}: ${COVER[c[h]].toLowerCase()}`} aria-label={`${c.name}: ${COVER[c[h]].toLowerCase()}`} />)}</span>
+                  <span className="ctl__marks" role="img" aria-label={`${HABITAT[h].short}: ${(["evidence", "bounded", "gap", "na"] as Coverage[]).map((k) => `${cells.filter((c) => c[h] === k).length} ${COVER[k].toLowerCase()}`).join(", ")}`}>
+                    {cells.map((c) => <span key={c.id} className={`cmark cmark--${c[h]}`} title={`${c.name}: ${COVER[c[h]].toLowerCase()}`} />)}</span>
                   <span className="ctl__num"><b>{n(h)}</b> of {cells.length} measured</span>
                 </div>
               ))}

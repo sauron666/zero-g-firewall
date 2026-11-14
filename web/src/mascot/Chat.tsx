@@ -185,7 +185,7 @@ export function IskraChat({ state, name, top, ready, onTour, touring = false }: 
                 </div>
               );
             })}
-            {busy && <div className="msg msg--iskra"><span className="dots" aria-label="Searching"><i /><i /><i /></span></div>}
+            {busy && <div className="msg msg--iskra"><span className="dots" role="status" aria-label="Searching"><i /><i /><i /></span></div>}
             {!busy && (
               <div className="msg__chips">
                 {chips.map((s) => <button key={s} type="button" className="chipbtn" onClick={() => say(s)}>{s}</button>)}

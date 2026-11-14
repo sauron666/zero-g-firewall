@@ -26,7 +26,7 @@
   /* ink */
   --ink: #0c1220;
   --ink-2: #414b60;
-  --ink-3: #68738c;
+  --ink-3: #5c6780;                 /* 4.9:1 on the palest sunken ground, 5.2:1 on the page: small notes stay readable */
   --ink-inverse: #ffffff;
   --focus: #1f6fd6;
 

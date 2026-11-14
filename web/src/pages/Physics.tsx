@@ -46,7 +46,7 @@ function AtmosphereChart({ m }: { m: AtmModel }) {
   const brief = (a: Atm) => (narrow ? a.name.split(",")[0] : a.name);                // on a phone "Lunar habitat, lander and rover" is "Lunar habitat"; the tooltip and the table keep the whole name
   return (
     <div className="plot" ref={ref}>
-      <svg width={width} height={H} role="img" aria-label="Equilibrium flame temperature of methane against oxygen fraction, with cabin atmospheres marked">
+      <svg width={width} height={H} role="group" aria-label="Equilibrium flame temperature of methane against oxygen fraction, with cabin atmospheres marked">
         <g className="grid">{sy.ticks(5).map((t) => <line key={t} x1={mg.l} x2={width - mg.r} y1={sy(t)} y2={sy(t)} />)}</g>
         <g className="axis">
           <line x1={mg.l} x2={width - mg.r} y1={H - mg.b} y2={H - mg.b} />
@@ -67,7 +67,7 @@ function AtmosphereChart({ m }: { m: AtmModel }) {
                 ? <rect x={x - 5} y={y - 5} width={10} height={10} fill="var(--surface)" stroke="var(--ink)" strokeWidth={2} transform={`rotate(45 ${x} ${y})`} />
                 : <circle cx={x} cy={y} r={6} fill="var(--ink)" stroke="var(--surface)" strokeWidth={2} />}
               {lab && <text x={x + lab[0]} y={y + lab[1]} textAnchor={lab[2]} className="t-ink">{brief(a)}</text>}
-              <circle cx={x} cy={y} r={14} fill="transparent" tabIndex={0} aria-label={`${a.name}: ${a.Tad_K.CH4} K`}
+              <circle cx={x} cy={y} r={14} fill="transparent" tabIndex={0} role="img" aria-label={`${a.name}: ${Math.round(a.Tad_K.CH4)} K for methane`}
                 onPointerEnter={() => setTip({ a, x, y })} onPointerLeave={() => setTip(null)} onFocus={() => setTip({ a, x, y })} onBlur={() => setTip(null)} />
             </g>
           );

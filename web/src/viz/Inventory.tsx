@@ -287,7 +287,7 @@ export function FlowWords({ w, rule }: { w: FlowWordsTable; rule: string }) {
       </div>
       {view === "chart" ? (
         <div className="plot" ref={ref} style={{ marginTop: 8 }} onMouseLeave={() => setHover(null)}>
-          <svg width={width} height={H} role="img" style={{ display: "block" }}
+          <svg width={width} height={H} role="group" style={{ display: "block" }}
                aria-label={`${w.acronym} rows by oxygen at the start: ${lanes.map((l) => `${l.dots.length} where ${l.label}`).join("; ")}`}>
             <g className="grid">{sx.ticks(width < 520 ? 5 : 10).map((t) => <line key={t} x1={sx(t)} x2={sx(t)} y1={m.t} y2={H - m.b} />)}</g>
             {lanes.map((l, i) => {

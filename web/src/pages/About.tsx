@@ -118,6 +118,9 @@ export function About({ manifest }: { manifest: Manifest | null }) {
         <p className="note" style={{ marginTop: 10 }}>
           Full methodology and development notes are in the <a href={`${REPO}/tree/main/docs`} target="_blank" rel="noreferrer">repository</a>: design, data contracts, decisions, test status and <a href={`${REPO}/blob/main/docs/AI_USE.md`} target="_blank" rel="noreferrer">AI use</a>.
         </p>
+        <p className="note" style={{ marginTop: 8 }}>
+          Accessibility, audit of 14 November 2026: every page in both themes and at two widths, checked by axe-core against the WCAG 2.2 rules of levels A and AA a machine can test; no rule violated. What a machine cannot judge is in the <a href={`${REPO}/blob/main/docs/ACCESSIBILITY.md`} target="_blank" rel="noreferrer">audit notes</a>.
+        </p>
       </section>
 
       <section className="panel">

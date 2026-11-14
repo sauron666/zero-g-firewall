@@ -111,13 +111,13 @@
 .ctl__name { font-weight: 700; }
 .ctl__marks { display: flex; flex-wrap: wrap; gap: 4px; }
 .ctl__marks .cmark { width: 14px; height: 14px; }
-.ctl__marks a.cmark:hover { outline: 2px solid var(--ink); outline-offset: 1px; }
+/* the marks are a picture of the tiles above, where each behaviour opens; they are not controls themselves */
 .ctl__num { color: var(--ink-2); white-space: nowrap; }
 .ctl__num b { font-size: var(--t-16); color: var(--ink); }
 .ctl__lab { font-family: var(--font-data); font-size: 11px; letter-spacing: 0.03em; color: var(--ink-3); margin-bottom: 6px; }
 .ctl__recs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px 14px; list-style: none; padding: 0; }
-.ctl__recs li { display: flex; justify-content: space-between; gap: 8px; font-size: var(--t-13); min-width: 0; }
-.ctl__recs a { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-decoration: none; }
+.ctl__recs li { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: var(--t-13); min-width: 0; min-height: 24px; }
+.ctl__recs a { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-decoration: none; min-width: 24px; line-height: 24px; }      /* a link as tall and wide as a fingertip needs */
 .ctl__recs a:hover { text-decoration: underline; }
 .ctl__recs .num { color: var(--ink-3); font-size: var(--t-12); white-space: nowrap; }
 @media (max-width: 1100px) { .ctl { grid-template-columns: minmax(0, 1fr); } }

@@ -28,6 +28,7 @@ import { Playbooks } from "../pages/Playbooks";
 import { Alarm } from "../pages/Alarm";
 import { Ask } from "../pages/Ask";
 import { Falsify } from "../pages/Falsify";
+import { keepScrollersReachable } from "../lib/reach";
 
 /** Every route is registered here once. To build a page, edit its file in ../pages; this table does not change. */
 const PAGES: Record<string, (p: PageProps) => React.ReactNode> = {
@@ -41,6 +42,7 @@ const ENGINE: Record<string, string> = { offline: "built in, works offline", bro
 function Clock() {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => { const id = window.setInterval(() => setNow(new Date()), 1000); return () => clearInterval(id); }, []);
+  useEffect(() => keepScrollersReachable(), []);                                    // a box that scrolls can be reached from the keyboard
   return <span className="clock" title="Coordinated Universal Time">UTC <b>{now.toISOString().slice(11, 19)}</b></span>;
 }
 

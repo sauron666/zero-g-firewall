@@ -72,7 +72,7 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
 
   return (
     <div className="deck">
-      <div className="deck__strip" aria-label="State of the evidence">
+      <div className="deck__strip" role="group" aria-label="State of the evidence">
         <Tile label="Investigations" value={nasa?.investigations_in_scope ?? null} of={nasa ? `of ${nasa.search_hits}` : undefined} sub="combustion records in PSI" to={href("/evidence")} />
         <Tile label="Test rows" value={nasa?.table_rows ?? null} sub={nasa ? `in ${nasa.tables} NASA tables` : "after the NASA sync"} to={href("/envelope")} />
         <Tile label="Measured on station" value={mx.data?.coverage.iss.evidence ?? null} of={mx.data ? `of ${mx.data.cells.length}` : undefined} sub="fire behaviours" to={href("/playbooks")} />
@@ -108,7 +108,7 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
                 <span>Sources:</span>
                 {brief && brief.kind === "quote" && <SourceBtn title={brief.source} sref={{ ...brief.ref, page: brief.ref.loc }} klass="literature" label="the station's response" extra={[["quotation", brief.quote]]} />}
                 {bass && bass.kind === "quote" && <SourceBtn title={bass.source} sref={{ ...bass.ref, page: bass.ref.loc }} klass="literature" label="BASS-II report" extra={[["quotation", bass.quote]]} />}
-                {myth && <SourceBtn title="A Researcher's Guide to: Combustion Science" sref={{ ...myth.myth_ref, page: myth.myth_ref.loc }} klass="literature" label="NASA's guide, p. 35" extra={[["quotation", myth.myth]]} />}
+                {myth && <SourceBtn title="A Researcher's Guide to: Combustion Science" sref={{ ...myth.myth_ref, page: myth.myth_ref.loc }} klass="literature" label={`NASA's guide${myth.myth_ref.loc ? ", " + myth.myth_ref.loc : ""}`} extra={[["quotation", myth.myth]]} />}
                 {!nasa && <span>appear after the NASA sync</span>}
               </p>
             </div>

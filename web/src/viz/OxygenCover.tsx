@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { href } from "../app/router";
 import { fmtInt } from "../lib/data";
 import type { CoverageBlock, DocRef, ReportedDoc } from "../lib/types";
@@ -57,6 +57,21 @@ export function OxygenCover({ c, reported }: { c: CoverageBlock; reported?: Repo
   const atm = new Map(c.atmospheres.filter((a) => a.pct <= hi).map((a) => [a.pct, a]));
   const beyond = c.atmospheres.filter((a) => a.pct > hi);
   const style = { ["--cov-n" as string]: cols.length } as React.CSSProperties;
+  // A square is a button only while it is large enough to press: 24 px from one square to the next (WCAG 2.2, target size).
+  // Below that the squares still answer a pointer, and the table view carries the same counts and records for everyone else.
+  const [boxW, setBoxW] = useState(0);
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const read = () => setBoxW(el.getBoundingClientRect().width);
+    read();
+    const ro = new ResizeObserver(read);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [view]);
+  const wide = boxW > 0 && boxW + 60 > 860;                        // the label column and the wider gaps of the desktop layout
+  const pitch = boxW > 0 ? (boxW - (wide ? 180 + 8 : 5) - (wide ? 2 : 1) * (cols.length + 2)) / (cols.length + 3) + (wide ? 2 : 1) : 0;      // the grid of .cov__row, in numbers
+  const pressable = pitch >= 24;
   const micro = c.regimes.find((r) => r.id === "micro");
   const partial = c.regimes.find((r) => r.id === "partial");
 
@@ -110,11 +125,12 @@ export function OxygenCover({ c, reported }: { c: CoverageBlock; reported?: Repo
             ...ms.map((x) => [x.who, x.state === "planned" ? "planned" : "in a NASA paper"] as [string, string]),
             ...(atm.has(p) ? [["crew atmosphere", atm.get(p)!.label] as [string, string]] : [])], hint: n || ms.length ? "Click for the receipt" : undefined };
           const glyph = ms.length > 0 && <i className={`cov__lit cov__lit--${ms.some((x) => x.state === "reported") ? "reported" : "planned"}`} aria-hidden="true" />;
-          return n > 0 || ms.length > 0
+          const act = () => (n > 0 && cell ? receipt(kind, p, n, cell.records) : outside(kind, p, where, ms));
+          if (n === 0 && ms.length === 0) return <span key={p} className={cls} onMouseEnter={(e) => show(e, t)} onMouseLeave={() => setTip(null)} />;
+          return pressable
             ? <button key={p} type="button" className={cls} aria-label={`${kind.label}, ${p}% oxygen, ${where}: ${n} rows in PSI${ms.length ? `; ${ms.map((x) => `${x.who}, ${x.state === "planned" ? "planned" : "reported outside PSI"}`).join("; ")}` : ""}`}
-                      onMouseEnter={(e) => show(e, t)} onFocus={(e) => show(e, t)} onMouseLeave={() => setTip(null)} onBlur={() => setTip(null)}
-                      onClick={() => (n > 0 && cell ? receipt(kind, p, n, cell.records) : outside(kind, p, where, ms))}>{glyph}</button>
-            : <span key={p} className={cls} onMouseEnter={(e) => show(e, t)} onMouseLeave={() => setTip(null)} />;
+                      onMouseEnter={(e) => show(e, t)} onFocus={(e) => show(e, t)} onMouseLeave={() => setTip(null)} onBlur={() => setTip(null)} onClick={act}>{glyph}</button>
+            : <span key={p} className={`${cls} cov__cell--tap`} onMouseEnter={(e) => show(e, t)} onMouseLeave={() => setTip(null)} onClick={act}>{glyph}</span>;
         })}
         <span className="cov__break" aria-hidden="true" />
         <span className={`cov__cell cov__cell--wide cov__cell--${coverStep(up)}`}
@@ -128,6 +144,12 @@ export function OxygenCover({ c, reported }: { c: CoverageBlock; reported?: Repo
 
   const pcts = Array.from(new Set([...Object.values(c.cells).flatMap((k) => Object.keys(k).map(Number)), ...c.atmospheres.map((a) => a.pct), ...marks.map((x) => x.pct)])).sort((a, b) => a - b);
   const atmAt = new Map(c.atmospheres.map((a) => [a.pct, a]));
+  /** The records whose rows sit at one whole percent, over all fuel forms: what a square's receipt lists, for the table view. */
+  const recordsAt = (p: number): [string, number][] => {
+    const sum = new Map<string, number>();
+    for (const k of c.kinds) for (const [acc, n] of Object.entries(c.cells[k.id]?.[String(p)]?.records ?? {})) sum.set(acc, (sum.get(acc) ?? 0) + n);
+    return [...sum.entries()].sort((x, y) => y[1] - x[1]);
+  };
 
   return (
     <section className="panel" data-klass="derived">
@@ -187,23 +209,26 @@ export function OxygenCover({ c, reported }: { c: CoverageBlock; reported?: Repo
       ) : (
         <div className="table-wrap">
           <table className="table">
-            <thead><tr><th className="r">Oxygen</th>{c.kinds.map((k) => <th key={k.id} className="r">{k.label}</th>)}<th className="r">{partial?.label ?? "Partial gravity"}</th><th style={{ paddingLeft: 18 }}>Crew atmosphere</th>
+            <thead><tr><th className="r">Oxygen</th>{c.kinds.map((k) => <th key={k.id} className="r">{k.label}</th>)}<th className="r">{partial?.label ?? "Partial gravity"}</th><th style={{ paddingLeft: 18 }}>Records, with their rows</th><th style={{ paddingLeft: 18 }}>Crew atmosphere</th>
               {marks.length > 0 && <th>Outside PSI: reported or planned by NASA</th>}</tr></thead>
             <tbody>
               {pcts.map((p) => (
                 <tr key={p}>
                   <td className="r num strong">{p}%</td>
                   {c.kinds.map((k) => <td key={k.id} className="r num">{c.cells[k.id]?.[String(p)]?.n ?? 0}</td>)}
-                  <td className="r num">0</td><td style={{ paddingLeft: 18 }}>{atmAt.get(p)?.label ?? ""}</td>
+                  <td className="r num">0</td>
+                  <td style={{ paddingLeft: 18 }}>{recordsAt(p).map(([acc, k], i) => <span key={acc}>{i ? ", " : ""}<a href={href(`/evidence/${acc}`)}>{acc}</a> <span className="num">({k})</span></span>)}</td>
+                  <td style={{ paddingLeft: 18 }}>{atmAt.get(p)?.label ?? ""}</td>
                   {marks.length > 0 && <td className="note">{marks.filter((x) => x.pct === p).map((x) => `${x.who}${x.state === "planned" ? " (planned)" : ""}`).join(", ")}</td>}
                 </tr>
               ))}
-              <tr><td className="r strong">All</td>{c.kinds.map((k) => <td key={k.id} className="r num strong">{fmtInt(k.rows)}</td>)}<td className="r num strong">{fmtInt(partial?.rows ?? 0)}</td><td />{marks.length > 0 && <td className="note">not counted</td>}</tr>
+              <tr><td className="r strong">All</td>{c.kinds.map((k) => <td key={k.id} className="r num strong">{fmtInt(k.rows)}</td>)}<td className="r num strong">{fmtInt(partial?.rows ?? 0)}</td><td /><td />{marks.length > 0 && <td className="note">not counted</td>}</tr>
             </tbody>
           </table>
         </div>
       )}
 
+      {view === "chart" && boxW > 0 && !pressable && <p className="note" style={{ marginTop: 10 }}>On this screen the squares are small: the table view lists the same counts, with the records behind each.</p>}
       <p className="note" style={{ marginTop: 12, maxWidth: "96ch" }}>
         {c.rule} {fmtInt(c.placed)} of {fmtInt(c.total)} rows are placed. Not placed:{" "}
         {c.not_placed.map((x, i) => <span key={x.id}>{i ? "; " : ""}{fmtInt(x.rows)} because {x.why} ({x.records.join(", ")})</span>)}.
