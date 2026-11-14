@@ -17,7 +17,7 @@ Do next, in this order:
    Still open, by value: a signed release (K03); detector evidence cards for SAME, SAME-R and DAFT (E01). ISS live telemetry (M01) only if it can be tested against the real feed.
 4. Polish worth doing if time remains: readings at the head of the remaining pages (`Readings` and `Tile` in `web/src/dash/widgets.tsx`), and a pass over long paragraphs on the Alarm, Ledger and Data pages: lead with the result, fold the rest.
 
-Deliverables that must follow the site: the 30-second video (`node tools/video/record.mjs web/dist out_dir`, about four minutes for all ten scenes; `--only=3,6` renders single scenes again; captions read their numbers from the build), the pitch slides and the jury questions (links are with the team). Re-record after any change a viewer would see. Sunday: freeze around 11:00, video due 14:00, submit before 22:00.
+State of the deliverables on 14 November, 19:15: video v7, slides version 9 and the jury document follow the site as it is at commit `eb6e31d` and later. Deliverables that must follow the site: the 30-second video (`node tools/video/record.mjs web/dist out_dir`, about four minutes for all ten scenes; `--only=3,6` renders single scenes again; captions read their numbers from the build), the pitch slides and the jury questions (links are with the team). Re-record after any change a viewer would see. Sunday: freeze around 11:00, video due 14:00, submit before 22:00.
 
 Checks before every push: `python -m unittest discover -s pipeline/tests`, `cd web && npx tsc --noEmit -p . && npx vitest run && npx vite build`, then look at the changed page at 1440 px and 390 px in both themes.
 
