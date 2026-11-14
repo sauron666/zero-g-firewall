@@ -61,7 +61,36 @@ def check(out_dir: str) -> dict:
             for v in o:
                 walk(v)
 
-    for name in ("myths.json", "falsify.json", "lessons.json", "gaps.json"):
+    for name in ("myths.json", "falsify.json", "lessons.json", "gaps.json", "matrix.json"):
         if os.path.exists(os.path.join(out_dir, name)):
             walk(load(name))
+    if os.path.exists(os.path.join(out_dir, "matrix.json")):
+        n += matrix(load("matrix.json"))
     return {"checks": n, "ok": True}
+
+
+def matrix(mx: dict) -> int:
+    """The matrix may not claim more than its evidence: a behaviour marked as measured needs a measurement or a checked
+    quotation behind it, and a playbook step needs a checked quotation, because steps are documented, never invented."""
+    n = 0
+    phases, states = {p["id"] for p in mx["phases"]}, set(mx["words"])
+    solid = lambda it: (it["kind"] == "quote" and it.get("quote_verified")) or (it["kind"] == "data" and it.get("klass") in ("observed", "derived"))
+    ids = set()
+    for c in mx["cells"]:
+        if c["phase"] not in phases or c["pillar"] not in mx["pillars"] or c["iss"] not in states or c["lunar"] not in states:
+            raise IntegrityError("matrix behaviour %s has an unknown phase, pillar or coverage state" % c["id"])
+        if not c["items"]:
+            raise IntegrityError("matrix behaviour %s has nothing behind it" % c["id"])
+        if "evidence" in (c["iss"], c["lunar"]) and not any(solid(it) for it in c["items"]):
+            raise IntegrityError("matrix behaviour %s is marked as measured but shows no measurement and no checked quotation" % c["id"])
+        ids.add(c["id"])
+        n += 1
+    for s in mx["playbook"]:
+        if not any(it["kind"] == "quote" and it.get("quote_verified") for it in s["documented"]):
+            raise IntegrityError("playbook step %s has no checked quotation behind it" % s["id"])
+        if any(c not in ids for c in s["cells"]):
+            raise IntegrityError("playbook step %s names a behaviour that is not in the matrix" % s["id"])
+        if s["lunar"] == "supported":
+            raise IntegrityError("playbook step %s is marked as supported in lunar gravity, where no measurement exists" % s["id"])
+        n += 1
+    return n

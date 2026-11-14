@@ -19,10 +19,10 @@
   "validation_rows": 587,
   "validation_mean_abs_K": 2.12,
   "export_files": 28,
-  "quotes": 79,
-  "quotes_verified": 79,
+  "quotes": 111,
+  "quotes_verified": 111,
   "files_read": 83,
-  "passages": 496
+  "passages": 524
  },
  "artifacts": {
   "model/atmospheres.json": {
@@ -181,8 +181,8 @@
    "klass": "observed"
   },
   "official_resources.json": {
-   "sha256": "de0c28ecd70ced9066ba42bbf17727847e2d9e6b9991b922f1605ce0ffc9907b",
-   "bytes": 10028,
+   "sha256": "624d8dc99682c1ba8d8231c6c34a593fba456d32facd87e4270b3b4be3c8df9c",
+   "bytes": 10102,
    "klass": "literature"
   },
   "profiles.json": {
@@ -226,8 +226,8 @@
    "klass": "derived"
   },
   "index.json": {
-   "sha256": "636992a6fd7ef2f12a811c0710cf9339f1cc4bf953c0349eafd5fdd0b065a34f",
-   "bytes": 430806,
+   "sha256": "dbbeaee4abb76b38988f784e1980c73ce832b7cc0308a30a94ebb188f090eae5",
+   "bytes": 443734,
    "klass": "derived"
   },
   "falsify.json": {
@@ -241,8 +241,8 @@
    "klass": "derived"
   },
   "lessons.json": {
-   "sha256": "7bf98baf1d227fa946aa1ea2b880f98973eef015f46c3b00dbe4a26f90cab83c",
-   "bytes": 16299,
+   "sha256": "1830b08e9d6fa863249d25aa64f14ce39cae7bdb31701df5dc2bba54c08dfdc9",
+   "bytes": 16373,
    "klass": "literature"
   },
   "exports/PSI-22__PSI_22_Experimental_table_ACME_E_FIELD_Flames.csv": {
@@ -389,10 +389,15 @@
    "sha256": "aea84565c31a552ead025ab7e6c23c800e25a82d903f1a4daeab3aac45601f6c",
    "bytes": 3804,
    "klass": "literature"
+  },
+  "matrix.json": {
+   "sha256": "6b73d28892cf5958d383a62b27a2a0227e9b526cec399db1719162275aeb0b26",
+   "bytes": 29607,
+   "klass": "derived"
   }
  },
  "brand": "Zero-G Firewall",
  "team": "The Rule of Flame",
  "mascot": "ISKRA",
- "built_at_utc": "2026-11-14T12:30:47Z"
+ "built_at_utc": "2026-11-14T12:52:55Z"
 }

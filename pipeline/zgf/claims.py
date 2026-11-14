@@ -135,7 +135,7 @@ USES = {      # official resource -> where the site uses it (only pages that exi
     "R6": [("/lessons", "Apollo 13: insulation burned inside an oxygen tank")],
     "R7": [("/myths", "the Mir fire: a flame fed by its own oxygen"), ("/lessons", "the incident, in NASA's words"), ("/falsify", "a case where stopping the flow could not have starved the flame")],
     "R8": [("/lessons", "lighter air tanks for firefighters")],
-    "R9": [("/lessons", "a detector that tells smoke from dust"), ("/falsify", "why a detector from Earth may not behave the same in orbit")],
+    "R9": [("/lessons", "a detector that tells smoke from dust"), ("/playbooks", "the behaviour 'dust that looks like smoke'"), ("/falsify", "why a detector from Earth may not behave the same in orbit")],
     "R10": [("/lessons", "firefighters' gear from spacesuit materials")],
 }
 

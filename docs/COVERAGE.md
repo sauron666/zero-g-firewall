@@ -1,14 +1,14 @@
 # Coverage of the plan, feature by feature
 
-Checked on 14 November 2026 at 14:38 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
+Checked on 14 November 2026 at 14:53 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
 
 | Priority | Features | Done | Partial | Not built |
 |---|---|---|---|---|
 | P0 | 28 | 22 | 6 | 0 |
-| P1 | 59 | 21 | 12 | 26 |
-| P2 | 38 | 1 | 8 | 29 |
+| P1 | 59 | 24 | 12 | 23 |
+| P2 | 38 | 1 | 9 | 28 |
 | P3 | 5 | 0 | 0 | 5 |
-| All | 130 | 44 | 26 | 60 |
+| All | 130 | 47 | 27 | 56 |
 
 ## Definition of done (specification, section 0)
 
@@ -147,11 +147,11 @@ Checked on 14 November 2026 at 14:38 Sofia time against the 130 features of the 
 | I06 | P1 | **not built** | Demo mode with separately labelled real-data and synthetic flows |  |
 | I07 | P2 | **not built** | Glossary |  |
 | I08 | P2 | **not built** | Print-friendly briefs |  |
-| J01 | P1 | **not built** | Matrix data model |  |
-| J02 | P1 | **not built** | Matrix view with a coverage overlay per habitat |  |
-| J03 | P1 | **not built** | Response playbooks for the ISS and for a lunar habitat |  |
+| J01 | P1 | done | Matrix data model | 22 behaviours in 7 phases with pillar, evidence items, coverage per habitat and the response steps that meet each (pipeline/zgf/matrix.py) |
+| J02 | P1 | done | Matrix view with a coverage overlay per habitat | matrix with a habitat switch (station, lunar) and a pillar filter; a tile opens its evidence |
+| J03 | P1 | done | Response playbooks for the ISS and for a lunar habitat | six steps, each resting on a checked quotation from a NASA page; a badge per habitat; every lunar badge states where its evidence was taken. Quotations from NASA's fire protection brief appear after the next sync |
 | J04 | P2 | **not built** | Layer export and import as JSON |  |
-| J05 | P2 | **not built** | Scenario drill through playbook and Alarm Trust together |  |
+| J05 | P2 | **partial** | Scenario drill through playbook and Alarm Trust together | behaviours link to the matching alarm-lab situation; no guided drill |
 | K01 | P0 | done | Content-addressed raw store and manifest with SHA-256 |  |
 | K02 | P1 | **partial** | Hash-chained append-only log of ingest and transform events | the chain covers every fetch; transform steps are not logged |
 | K03 | P1 | **not built** | Signed release bundle (Ed25519), public key published, verification in the browser |  |

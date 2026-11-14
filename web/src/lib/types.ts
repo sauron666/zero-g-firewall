@@ -394,3 +394,25 @@ export interface LessonsDoc {
   video: null | { title: string; by: string; url: string; resource: string; ref: SourceRef };
   resources: { id: string; title: string; url: string; type: string; in_ledger: boolean; used_in: { page: string; what: string }[]; receipts: SourceRef[] }[];
 }
+
+/** matrix.json: fire behaviours by phase with coverage per habitat, and the documented response steps. */
+export type Coverage = "evidence" | "bounded" | "gap" | "na";
+export type StepBadge = "supported" | "uncertain" | "gap";
+export type Habitat = "iss" | "lunar";
+export interface MatrixCell { id: string; phase: string; name: string; pillar: string; iss: Coverage; lunar: Coverage; links: string[]; items: MythItem[]; steps: string[] }
+export interface PlaybookStep {
+  id: string; n: number; step: string; documented: MythItem[]; iss: StepBadge; lunar: StepBadge;
+  /** where the evidence behind the lunar badge was taken: no step has a measurement in lunar gravity */
+  lunar_basis: string; why: string; adds: string | null; cells: string[];
+}
+export interface MatrixDoc {
+  klass: Klass; note: string;
+  phases: { id: string; name: string; about: string }[];
+  pillars: string[];
+  cells: MatrixCell[];
+  playbook: PlaybookStep[];
+  coverage: Record<Habitat, Record<Coverage, number>>;
+  playbook_coverage: Record<Habitat, Record<StepBadge, number>>;
+  words: Record<Coverage, string>;
+  waiting_for_sync: { key: string; name: string }[];
+}

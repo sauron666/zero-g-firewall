@@ -108,6 +108,18 @@ def build(raw_dir: str, out_dir: str) -> dict:
                         "/myths/%s" % c["id"], it["ref"], it["ref"].get("loc"))
                 elif it["kind"] in ("data", "model"):
                     add(cid, it["klass"], g["title"], it["text"], it.get("link") or ("/evidence/%s" % it["accession"] if it.get("accession") else "/myths/%s" % c["id"]))
+    if os.path.exists(os.path.join(out_dir, "matrix.json")):
+        mx = load("matrix.json")
+        phase = {p["id"]: p["name"] for p in mx["phases"]}
+        for c in mx["cells"]:
+            said = " ".join(it["text"] for it in c["items"] if it["kind"] in ("data", "model", "reading"))
+            add("mx:%s" % c["id"], "derived", "Our reading: fire behaviour matrix, %s" % c["name"].lower(),
+                "Fire behaviour \"%s\" (phase: %s; pillar: %s). On the space station: %s. In a lunar habitat: %s. %s"
+                % (c["name"], phase[c["phase"]].lower(), c["pillar"], mx["words"][c["iss"]], mx["words"][c["lunar"]], said), "/playbooks/%s" % c["id"])
+        for s in mx["playbook"]:
+            add("pb:%s" % s["id"], "derived", "Our reading: response step %d, %s" % (s["n"], s["step"].lower()),
+                "Response step %d of %d in documented spacecraft fire responses: %s. Evidence on the space station: %s. In a lunar habitat: %s (evidence from %s). %s %s"
+                % (s["n"], len(mx["playbook"]), s["step"], s["iss"], s["lunar"], s["lunar_basis"], s["why"], s["adds"] or ""), "/playbooks/step-%s" % s["id"])
     env, val = load("envelope.json"), load("validation.json") if os.path.exists(os.path.join(out_dir, "validation.json")) else None
     both = sum(1 for p in env["points"] if p["p"] is not None)
     add("env:summary", "derived", "Atmosphere map: where the tests are",

@@ -91,10 +91,6 @@ class Envelope(unittest.TestCase):
         self.assertAlmostEqual(E.zst("C4H10", 0.031, 0.389), 0.654, places=3)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class Quotations(unittest.TestCase):
     def test_a_quotation_is_found_only_if_the_document_holds_it(self):
         from zgf.literature import Library, norm
@@ -127,3 +123,58 @@ class Canonical(unittest.TestCase):
         self.assertAlmostEqual(pts["PSI-69"]["p"], 101.33, places=1)       # mmHg
         self.assertAlmostEqual(pts["PSI-39"]["p"], 50.66, places=1)        # atm, written in the cell
         self.assertAlmostEqual(pts["PSI-159"]["p"], 202.66, places=1)      # bar
+
+
+class Matrix(unittest.TestCase):
+    """The matrix may not claim more than its evidence, and a playbook step must be documented."""
+
+    def doc(self):
+        from zgf import validate as V
+        quote = {"kind": "quote", "quote": "x", "quote_verified": True, "ref": {"ledger_seq": 1}}
+        return V, {"phases": [{"id": "spread"}], "pillars": ["suppression"], "words": {"evidence": "", "bounded": "", "gap": "", "na": ""},
+                   "cells": [{"id": "a", "phase": "spread", "pillar": "suppression", "iss": "evidence", "lunar": "gap", "items": [quote]}],
+                   "playbook": [{"id": "s", "documented": [quote], "cells": ["a"], "iss": "supported", "lunar": "gap"}]}
+
+    def test_a_sound_matrix_passes(self):
+        V, mx = self.doc()
+        self.assertEqual(V.matrix(mx), 2)
+
+    def test_measured_needs_a_measurement_or_a_checked_quotation(self):
+        V, mx = self.doc()
+        mx["cells"][0]["items"] = [{"kind": "reading", "text": "we think so"}]
+        with self.assertRaises(V.IntegrityError):
+            V.matrix(mx)
+        mx["cells"][0]["items"] = [{"kind": "quote", "quote": "x", "quote_verified": False, "ref": {}}]
+        with self.assertRaises(V.IntegrityError):
+            V.matrix(mx)
+
+    def test_an_invented_step_stops_the_build(self):
+        V, mx = self.doc()
+        mx["playbook"][0]["documented"] = [{"kind": "reading", "text": "a step we made up"}]
+        with self.assertRaises(V.IntegrityError):
+            V.matrix(mx)
+
+    def test_no_step_is_supported_in_lunar_gravity_and_no_step_names_a_missing_behaviour(self):
+        V, mx = self.doc()
+        mx["playbook"][0]["lunar"] = "supported"
+        with self.assertRaises(V.IntegrityError):
+            V.matrix(mx)
+        V, mx = self.doc()
+        mx["playbook"][0]["cells"] = ["nowhere"]
+        with self.assertRaises(V.IntegrityError):
+            V.matrix(mx)
+
+    def test_the_built_matrix(self):
+        import json
+        p = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "web", "public", "data", "v1", "matrix.json")
+        if not os.path.exists(p):
+            self.skipTest("no derived data in this checkout")
+        mx = json.load(open(p, encoding="utf-8"))
+        self.assertEqual(mx["coverage"]["lunar"]["evidence"], 0)          # PSI holds no partial-gravity rows
+        self.assertEqual(mx["playbook_coverage"]["lunar"]["supported"], 0)
+        self.assertTrue(all(s["lunar_basis"] for s in mx["playbook"]))    # every lunar badge says where its evidence was taken
+        self.assertEqual({c["phase"] for c in mx["cells"]}, {p["id"] for p in mx["phases"]})
+
+
+if __name__ == "__main__":
+    unittest.main()

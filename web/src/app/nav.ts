@@ -37,7 +37,7 @@ export const NAV: NavGroup[] = [
     name: "Alarm trust",
     items: [
       { path: "/alarm", label: "Alarm trust lab" },
-      { path: "/playbooks", label: "Matrix and playbooks", needs: "nasa" },
+      { path: "/playbooks", label: "Fire matrix and playbook", needs: "nasa" },
     ],
   },
   {
