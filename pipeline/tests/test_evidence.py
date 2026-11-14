@@ -207,5 +207,26 @@ class Briefs(unittest.TestCase):
         self.assertEqual(self.B.check("PSI-0", ok, out, self.prof, set()), ["the record is set aside as not combustion science"])
 
 
+class Facets(unittest.TestCase):
+    """The pillar marks follow written rules on what a record set out to do, not on passing mentions."""
+
+    def setUp(self):
+        from zgf import rank as R
+        self.of = R.pillars_of
+
+    def test_a_smoke_point_is_a_soot_property_not_detection(self):
+        self.assertEqual(self.of("Smoke Point In Co-flow Experiment", "Find the smoke point of gas jet flames."), [])
+        self.assertEqual(self.of("Smoke Aerosol Measurement Experiment", "Measure smoke particles."), ["detection"])
+
+    def test_suppression_needs_the_title_or_named_suppressants(self):
+        self.assertEqual(self.of("Flame Extinguishment Experiment", "Burn droplets."), ["suppression"])
+        self.assertEqual(self.of("Cool Flames Investigation", "Study how droplets burn and reach extinction."), [])
+        self.assertEqual(self.of("Droplet burning", "Rate the effectiveness of fire suppressants."), ["suppression"])
+
+    def test_a_record_may_serve_two_pillars_or_none(self):
+        self.assertEqual(self.of("Burning and Suppression of Solids", "Study flammability and flame spread."), ["prevention", "suppression"])
+        self.assertEqual(self.of("Flame Design", "Study soot inception in spherical flames."), [])
+
+
 if __name__ == "__main__":
     unittest.main()

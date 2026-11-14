@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { href } from "../app/router";
 import { fmtBytes, fmtInt, useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
-import type { BriefsDoc, CuratorDoc, CuratorFinding, Investigation, InvestigationsDoc, ProfilesDoc, TableDoc, TableProfile, TableSummary } from "../lib/types";
+import type { BriefsDoc, CuratorDoc, CuratorFinding, Investigation, InvestigationsDoc, ProfilesDoc, RankDoc, RankFacets, TableDoc, TableProfile, TableSummary } from "../lib/types";
 import { SourceBtn } from "../components/Source";
 import { useReceipt } from "../components/Receipt";
 import { IconArrow, IconWarn } from "../components/icons";
@@ -58,8 +58,18 @@ export function FindingRow({ f, link }: { f: CuratorFinding; link?: boolean }) {
 
 interface AreaDoc { listed: { name: string; status: string; roses_eligible: string; accession: string | null }[]; listed_n?: number; matched_n?: number; listed_not_in_search?: string[]; search_not_listed?: string[]; drift: { statement: string } }
 
-function Explorer({ doc, findings, briefs }: { doc: InvestigationsDoc; findings: CuratorFinding[]; briefs: BriefsDoc | null }) {
+const PILLAR = ["prevention", "detection", "suppression"] as const;
+const FUEL: [string, string][] = [["solid", "Solids"], ["droplet", "Droplets"], ["gas", "Gas flames"], ["smoke", "Smoke"], ["emulator", "Burner as a solid"]];
+const STATES: [keyof Omit<RankFacets, "pillars">, string][] = [["oxygen", "Oxygen"], ["pressure", "Pressure"], ["flow", "Air flow"], ["outcome", "Outcome"]];
+const flip = (set: Set<string>, v: string) => { const n = new Set(set); if (n.has(v)) n.delete(v); else n.add(v); return n; };
+
+function Explorer({ doc, findings, briefs, rank }: { doc: InvestigationsDoc; findings: CuratorFinding[]; briefs: BriefsDoc | null; rank: RankDoc | null }) {
   const area = useData<AreaDoc>("research_area.json");
+  const [pillars, setPillars] = useState<Set<string>>(new Set());
+  const [fuels, setFuels] = useState<Set<string>>(new Set());
+  const [states, setStates] = useState<Set<string>>(new Set());
+  const feat = useMemo(() => new Map((rank?.items ?? []).map((r) => [r.accession, r])), [rank]);
+  const faceted = pillars.size + fuels.size + states.size > 0;
   const [q, setQ] = useState("");
   const [scope, setScope] = useState<"in" | "all">("in");
   const [grav, setGrav] = useState<"all" | "micro" | "ground">("all");
@@ -81,12 +91,18 @@ function Explorer({ doc, findings, briefs }: { doc: InvestigationsDoc; findings:
     const needle = q.trim().toLowerCase();
     const r = doc.items.filter((i) =>
       (scope === "all" || i.scope.in_scope) && (grav === "all" || i.gravity === grav) && (fam === "all" || i.hardware_family === fam) &&
+      (!faceted || (() => {                       // within a group any choice may match; across groups all must
+        const f = feat.get(i.accession);
+        if (!f) return false;
+        return (pillars.size === 0 || f.facets.pillars.some((p) => pillars.has(p))) && (fuels.size === 0 || fuels.has(f.kind)) &&
+          Array.from(states).every((s) => f.facets[s as keyof Omit<RankFacets, "pillars">]);
+      })()) &&
       (!needle || [i.accession, i.acronym, i.title, i.sub_research_area, i.hardware, i.objective, i.platform].join(" ").toLowerCase().includes(needle)));
     if (order === "tests") r.sort((a, b) => tests(b) - tests(a));
     else if (order === "data") r.sort((a, b) => b.files.bytes_listed - a.files.bytes_listed);
     else r.sort((a, b) => accNo(a.accession) - accNo(b.accession));
     return r;
-  }, [doc, q, scope, grav, fam, order]);
+  }, [doc, q, scope, grav, fam, order, faceted, feat, pillars, fuels, states]);
   const out = doc.items.filter((i) => !i.scope.in_scope);
 
   return (
@@ -125,6 +141,27 @@ function Explorer({ doc, findings, briefs }: { doc: InvestigationsDoc; findings:
           </select>
         </label>
       </div>
+      {rank && (
+        <div className="facets" aria-label="Narrow the list">
+          <div className="facets__group"><span className="facets__name" title={Object.values(rank.facet_rules.pillars).join(" · ")}>Pillar</span>
+            {PILLAR.map((p) => <button key={p} type="button" className="facet" aria-pressed={pillars.has(p)} onClick={() => setPillars(flip(pillars, p))}>{p[0].toUpperCase() + p.slice(1)}</button>)}</div>
+          <div className="facets__group"><span className="facets__name">What burns</span>
+            {FUEL.map(([k, label]) => <button key={k} type="button" className="facet" aria-pressed={fuels.has(k)} onClick={() => setFuels(flip(fuels, k))}>{label}</button>)}</div>
+          <div className="facets__group"><span className="facets__name" title={`Oxygen: ${rank.facet_rules.oxygen}. Pressure: ${rank.facet_rules.pressure}. Air flow: ${rank.facet_rules.flow}. Outcome: ${rank.facet_rules.outcome}.`}>Its table states</span>
+            {STATES.map(([k, label]) => <button key={k} type="button" className="facet" aria-pressed={states.has(k)} onClick={() => setStates(flip(states, k))}>{label}</button>)}</div>
+          <span className="note facets__count" role="status">{rows.length} of {scope === "all" ? doc.items.length : nIn} shown{faceted && <> · <button type="button" className="linklike" onClick={() => { setPillars(new Set()); setFuels(new Set()); setStates(new Set()); }}>clear</button></>}</span>
+          <details className="brief__how facets__how">
+            <summary>How a record gets these marks</summary>
+            <p className="note" style={{ margin: "6px 0 0" }}>
+              These are this project's sorting rules, applied by code to NASA's own text and tables; they are not NASA's categories.
+              {PILLAR.map((p) => <span key={p}> <b>{p[0].toUpperCase() + p.slice(1)}</b>: {rank.facet_rules.pillars[p]}.</span>)}
+              {" "}<b>What burns</b> is the fuel form in the record's table.
+              {STATES.map(([k, label]) => <span key={k}> <b>{label}</b>: {rank.facet_rules[k as keyof Omit<RankFacets, "pillars">]}.</span>)}
+              {" "}A record with no mark under Pillar matched none of the three rules; it is still in the list.
+            </p>
+          </details>
+        </div>
+      )}
 
       <div>
         <div className="rec rec--head">
@@ -439,6 +476,7 @@ export function Evidence({ route, manifest }: PageProps) {
   const cur = useData<CuratorDoc>(ready ? "curator_report.json" : null);
   const prof = useData<ProfilesDoc>(ready && route.segs[1] ? "profiles.json" : null);
   const briefs = useData<BriefsDoc>(ready ? "briefs.json" : null);
+  const rank = useData<RankDoc>(ready ? "rank_features.json" : null);
   if (!ready) return <Waiting route={route} manifest={manifest} />;
   if (inv.error) return <div className="empty"><p className="empty__title">The investigations could not be loaded</p><p style={{ marginTop: 6 }}>{inv.error}</p></div>;
   if (!inv.data) return <p className="note">Loading the records fetched from NASA…</p>;
@@ -449,5 +487,5 @@ export function Evidence({ route, manifest }: PageProps) {
     if (!one) return <div className="empty"><p className="empty__title">No record {acc} in the combustion search</p><p style={{ marginTop: 6 }}><a href={href("/evidence")}>See all investigations</a></p></div>;
     return <Card key={one.accession} inv={one} findings={findings} profiles={prof.data} brief={briefs.data} />;
   }
-  return <Explorer doc={inv.data} findings={findings} briefs={briefs.data} />;
+  return <Explorer doc={inv.data} findings={findings} briefs={briefs.data} rank={rank.data} />;
 }

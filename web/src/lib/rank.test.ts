@@ -3,11 +3,11 @@ import { normalise, rankAll, stability } from "./rank";
 import type { RankDoc, RankItem } from "./types";
 
 const item = (accession: string, a: number, b: number, lensA = 0): RankItem => ({
-  accession, acronym: "", title: accession, gravity: "micro", kind: "solid", rows: 1,
+  accession, acronym: "", title: accession, gravity: "micro", kind: "solid", rows: 1, facets: { pillars: [], oxygen: false, pressure: false, flow: false, outcome: false },
   shared: { a: { score: a, why: "" }, b: { score: b, why: "" } }, by_lens: { L: { c: { score: lensA, why: "" } }, M: { c: { score: 1 - lensA, why: "" } } },
 });
 const doc: RankDoc = {
-  klass: "derived", note: "", near_rule: "", factors: [{ id: "a", label: "A", rule: "" }, { id: "b", label: "B", rule: "" }, { id: "c", label: "C", rule: "" }],
+  klass: "derived", note: "", near_rule: "", facet_rules: { pillars: {}, oxygen: "", pressure: "", flow: "", outcome: "" }, factors: [{ id: "a", label: "A", rule: "" }, { id: "b", label: "B", rule: "" }, { id: "c", label: "C", rule: "" }],
   lenses: [], items: [item("PSI-1", 1, 1, 1), item("PSI-2", 0.5, 0.5, 0.5), item("PSI-3", 0.9, 0.1, 0), item("PSI-4", 0.1, 0.9, 0)],
 };
 

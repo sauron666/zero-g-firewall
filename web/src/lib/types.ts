@@ -327,6 +327,7 @@ export interface RankLens {
   atmospheres: [string, number, number][];
   weights: Record<string, number>;
 }
+export interface RankFacets { pillars: string[]; oxygen: boolean; pressure: boolean; flow: boolean; outcome: boolean }
 export interface RankItem {
   accession: string;
   acronym: string;
@@ -334,11 +335,14 @@ export interface RankItem {
   gravity: "micro" | "ground" | "unknown";
   kind: string;
   rows: number;
+  /** what the record is about and what its table states, each by a written rule (facet_rules) */
+  facets: RankFacets;
   shared: Record<string, RankFactor>;
   by_lens: Record<string, Record<string, RankFactor>>;
 }
 export interface RankDoc {
   klass: Klass;
+  facet_rules: { pillars: Record<string, string>; oxygen: string; pressure: string; flow: string; outcome: string };
   note: string;
   near_rule: string;
   factors: { id: string; label: string; rule: string }[];

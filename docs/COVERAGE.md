@@ -1,14 +1,14 @@
 # Coverage of the plan, feature by feature
 
-Checked on 14 November 2026 at 15:48 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
+Checked on 14 November 2026 at 15:55 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
 
 | Priority | Features | Done | Partial | Not built |
 |---|---|---|---|---|
-| P0 | 28 | 23 | 5 | 0 |
+| P0 | 28 | 24 | 4 | 0 |
 | P1 | 59 | 35 | 8 | 16 |
 | P2 | 38 | 2 | 9 | 27 |
 | P3 | 5 | 0 | 0 | 5 |
-| All | 130 | 60 | 22 | 48 |
+| All | 130 | 61 | 21 | 48 |
 
 ## Definition of done (specification, section 0)
 
@@ -57,7 +57,7 @@ Checked on 14 November 2026 at 15:48 Sofia time against the 130 features of the 
 | A15 | P2 | **not built** | Re-sync command with a diff report |  |
 | B01 | P0 | done | Investigation Cards | cards with NASA's text, what varied, table, files, people, publications; no separate fuel and condition summary block |
 | B02 | P0 | done | "What varied / what stayed constant" per investigation, computed from the real table |  |
-| B03 | P0 | **partial** | Explorer with search and facets (pillar, fuel phase, hardware family, platform, gravity regime, oxygen, pressure, flow, data richness) | search, scope, flight or ground, hardware; no facets for pillar, fuel phase, oxygen, pressure, flow |
+| B03 | P0 | done | Explorer with search and facets (pillar, fuel phase, hardware family, platform, gravity regime, oxygen, pressure, flow, data richness) | search, scope, flight or ground, hardware, and facets for pillar (three written rules), what burns, and what the table states (oxygen, pressure, air flow, outcome); the rules are shown under the facets; data richness is a sort order, not a facet |
 | B04 | P0 | done | Ranking engine, deterministic and transparent | ten factors, five missions, weights, stability |
 | B05 | P0 | **partial** | Compare two to four investigations | up to three records compared factor by factor; no shared-hardware or comparability warnings |
 | B06 | P0 | done | Atmosphere Envelope Map (oxygen fraction against pressure) |  |

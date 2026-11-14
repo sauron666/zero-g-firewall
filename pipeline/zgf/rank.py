@@ -54,6 +54,23 @@ KINDS = [
 FLOW = re.compile(r"air ?flow|flow velocity|inlet velocity|air rate|\bfan\b|flow direction|^direction$|flow restrictor|air display", re.I)   # ambient flow, not a burner's fuel or oxidizer feed
 OUTCOME = re.compile(r"test end|self.?\s?-?ext|burn time|burn length|spread|extinction|ignit|cool flame|burning rate|rt/r0|flame off", re.I)
 GASES = re.compile(r"\bco2?\b|ppm", re.I)
+# The challenge's three pillars, read from what a record says it set out to do: its title and its objective, not passing
+# mentions elsewhere. A record may serve several, or none (fundamental flame science).
+PILLARS = [
+    ("prevention", r"flammab\w*|materials? (selection|screening)|ignition|flame spread|limiting oxygen|nasa.?std.?6001", None,
+     "its title or objective speaks of flammability, ignition, flame spread or material screening"),
+    ("detection", r"smoke(?![ -]?point)|aerosol|particulate|detector|detection", None,
+     "its title or objective speaks of smoke, aerosols, particulates or detection (a smoke point is a soot property, not detection)"),
+    ("suppression", r"fire suppress\w*|suppressant", r"suppress|extinguish",
+     "its title names suppression or extinguishment, or its objective names fire suppressants"),
+]
+
+
+def pillars_of(title: str, objective: str) -> list[str]:
+    """Which of the three pillars a record serves, by the written rules above. An empty list is an answer: fundamental flame science."""
+    t = str(title or "").lower()
+    aim = (t + " " + str(objective or "")).lower()
+    return [pid for pid, pat, in_title, _ in PILLARS if re.search(pat, aim) or (in_title and re.search(in_title, t))]
 
 
 def kind_of(inv: dict) -> tuple[str, float, str]:
@@ -116,8 +133,12 @@ def build(out_dir: str) -> dict:
             else:
                 gs, gw = (0.7, "Taken in free fall, one of the two settings a suit works in.") if g == "micro" else (0.3, "Ground work at 1 g.")
             by_lens[lens["id"]] = {"atmosphere": {"score": round(best, 3), "why": why}, "gravity": {"score": gs, "why": gw}}
-        items.append({"accession": acc, "acronym": i.get("acronym") or "", "title": i["title"], "gravity": i["gravity"], "kind": kind, "rows": rows, "shared": shared, "by_lens": by_lens})
-    doc = {"klass": "derived",
+        facets = {"pillars": pillars_of(i.get("title"), i.get("objective")),
+                  "oxygen": bool(pts), "pressure": any(p["p"] is not None for p in pts), "flow": bool(flow_cols), "outcome": bool(out_cols)}
+        items.append({"accession": acc, "acronym": i.get("acronym") or "", "title": i["title"], "gravity": i["gravity"], "kind": kind, "rows": rows, "facets": facets, "shared": shared, "by_lens": by_lens})
+    facet_rules = {"pillars": {pid: why for pid, _, _, why in PILLARS}, "oxygen": "its table has a row on the atmosphere map", "pressure": "at least one of those rows states pressure",
+                   "flow": "its table has a column for the ambient air flow", "outcome": "its table has a column that says what happened"}
+    doc = {"klass": "derived", "facet_rules": facet_rules,
            "note": "A score orders reading. It is built from the stated rules below and the weights the reader sets. It is not a probability and not a safety rating.",
            "near_rule": "within %.2f in oxygen fraction and %d%% in pressure" % (NEAR_X, NEAR_P * 100),
            "factors": [{"id": a, "label": b, "rule": c} for a, b, c in FACTORS], "lenses": LENSES, "items": items}

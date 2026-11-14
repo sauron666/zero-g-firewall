@@ -184,3 +184,14 @@ a.rec:hover { background: var(--raised); }
 .gap__num { font-size: clamp(2.2rem, 4vw, 3.2rem); font-weight: 700; line-height: 1; color: var(--ink); }
 .gap__unit { font-size: var(--t-13); color: var(--ink-2); max-width: 26ch; }
 @media (max-width: 760px) { .gap__head { grid-template-columns: minmax(0, 1fr); } .gap, .lesson { padding: 16px; } }
+
+/* Facets: what a record is about and what its table states, each from a written rule. */
+.facets { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 22px; }
+.facets__group { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.facets__name { font-size: var(--t-12); color: var(--ink-3); margin-right: 3px; }
+.facet { height: 28px; padding: 0 10px; border: 1px solid var(--hairline); border-radius: 999px; background: var(--surface); color: var(--ink-2); font: inherit; font-size: var(--t-12); cursor: pointer; }
+.facet:hover { border-color: var(--axis); color: var(--ink); }
+.facet[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--ink-inverse); font-weight: 700; }
+.facets__count { margin-left: auto; }
+.facets__how { flex-basis: 100%; }
+.facets__how .note { max-width: 96ch; }
