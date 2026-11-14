@@ -85,6 +85,7 @@ details.howto > summary::after { margin-left: 2px; }
 /* ---------- the opening page: mission control ---------- */
 .deck { display: grid; gap: 14px; }
 .deck__strip { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.deck__strip--page { grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); }
 .tile {
   position: relative; display: grid; align-content: start; gap: 2px; min-width: 0; padding: 12px 14px 12px; border: 1px solid var(--hairline); border-radius: var(--radius);
   background: linear-gradient(180deg, var(--panel-wash), var(--surface) 70%); color: var(--ink); text-decoration: none; overflow: hidden;
@@ -206,9 +207,9 @@ a.check:hover canvas { border-color: var(--g-micro); }
 .techrow a { color: var(--ink-2); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
 .techrow a:hover { color: var(--ink); text-decoration: underline; }
 
-@media (max-width: 1240px) { .deck__strip { grid-template-columns: repeat(3, minmax(0, 1fr)); } .stops { grid-template-columns: repeat(4, minmax(0, 1fr)); } .span-3, .span-4, .span-5 { grid-column: span 6; } .span-7, .span-8 { grid-column: span 12; } }
+@media (max-width: 1240px) { .deck__strip:not(.deck__strip--page) { grid-template-columns: repeat(3, minmax(0, 1fr)); } .stops { grid-template-columns: repeat(4, minmax(0, 1fr)); } .span-3, .span-4, .span-5 { grid-column: span 6; } .span-7, .span-8 { grid-column: span 12; } }
 @media (max-width: 760px) {
-  .deck__strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } .deck__row { grid-template-columns: minmax(0, 1fr); }
+  .deck__strip, .deck__strip--page { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } .deck__row { grid-template-columns: minmax(0, 1fr); }
   .span-3, .span-4, .span-5, .span-7, .span-8, .span-12 { grid-column: auto; }
   .hero { grid-template-columns: minmax(0, 1fr); } .stops { grid-template-columns: repeat(2, minmax(0, 1fr)); } .checks2 { grid-template-columns: minmax(0, 1fr); }
 }

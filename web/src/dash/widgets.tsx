@@ -28,17 +28,24 @@ export function useCountUp(target: number | null, ms = 900): number | null {
 }
 
 export function Tile({ label, value, decimals = 0, unit, of, sub, to, tone = "micro", led }: {
-  label: string; value: number | null; decimals?: number; unit?: string; of?: string; sub: string; to: string; tone?: "micro" | "partial" | "ok" | "flame"; led?: boolean;
+  label: string; value: number | null; decimals?: number; unit?: string; of?: string; sub: string; to?: string; tone?: "micro" | "partial" | "ok" | "flame"; led?: boolean;
 }) {
   const v = useCountUp(value);
   const shown = v == null ? "–" : decimals ? v.toFixed(decimals) : fmtInt(Math.round(v));
-  return (
-    <a className={`tile tile--${tone}`} href={to} aria-label={`${label}: ${value == null ? "not loaded" : decimals ? value.toFixed(decimals) : fmtInt(value)}${unit ? ` ${unit}` : ""} ${of ?? ""}. ${sub}`}>
+  const say = `${label}: ${value == null ? "not loaded" : decimals ? value.toFixed(decimals) : fmtInt(value)}${unit ? ` ${unit}` : ""} ${of ?? ""}. ${sub}`;
+  const body = (
+    <>
       <span className="tile__label">{label}</span>
       <span className="tile__value">{shown}{unit && <small>{unit}</small>}{of && <small>{of}</small>}</span>
       <span className="tile__sub">{led && <span className="dot dot--ok" />}{sub}</span>
-    </a>
+    </>
   );
+  return to ? <a className={`tile tile--${tone}`} href={to} aria-label={say}>{body}</a> : <div className={`tile tile--${tone}`} role="group" aria-label={say}>{body}</div>;
+}
+
+/** The readings at the head of a page: the few numbers the page is about, before any explanation. */
+export function Readings({ children }: { children: React.ReactNode }) {
+  return <div className="deck__strip deck__strip--page">{children}</div>;
 }
 
 /** A ring that fills to value out of total. With nothing measured it is drawn as an empty dashed ring, never as a thin arc. */

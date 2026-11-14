@@ -5,6 +5,7 @@ import { fmtInt, useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
 import type { EnvelopeDoc, EnvelopePoint, EnvelopeSeries, RankDoc, TableSummary } from "../lib/types";
 import { emit } from "../mascot/bus";
+import { Readings, Tile } from "../dash/widgets";
 import { useReceipt } from "../components/Receipt";
 import { Scatter, ScatterGroup, ScatterLegend, ScatterMark, ScatterPoint, Shape, shapePath } from "../viz/Scatter";
 import { PageProps, stub } from "./stubs";
@@ -144,10 +145,14 @@ export function Envelope({ route, manifest }: PageProps) {
   return (
     <div className="stack" style={{ ["--gap" as string]: "22px" }}>
       <h1 className="page-title">Atmosphere map</h1>
-      <p className="lede" style={{ maxWidth: "64ch" }}>
-        {fmtInt(nBoth)} test rows in NASA's tables state both oxygen and pressure. {near("challenge_limit")?.n_near ?? 0} lie near 30% oxygen at 10.2 psia
-        and {near("exploration")?.n_near ?? 0} near 34% at 8.2 psia. {solidsBoth === 0 ? "None of them is a solid material." : ""} {d.gravity_counts.partial === 0 ? "None was taken in lunar or Martian gravity." : ""}
-      </p>
+      <Readings>
+        <Tile label="Rows with oxygen" value={d.points.length} sub="test rows of NASA's tables" />
+        <Tile label="With pressure too" value={nBoth} sub="placed on the map" />
+        <Tile label="Near 30% oxygen" value={near("challenge_limit")?.n_near ?? 0} sub="at 10.2 psia, the lunar limit" />
+        <Tile label="Near 34% oxygen" value={near("exploration")?.n_near ?? 0} sub="at 8.2 psia, exploration" />
+        <Tile label="Solids with pressure" value={solidsBoth} sub="solid-material rows" tone="flame" />
+        <Tile label="In partial gravity" value={d.gravity_counts.partial} sub="lunar or Martian" tone="partial" />
+      </Readings>
 
       {rank.data && (
         <div className="stack" style={{ ["--gap" as string]: "10px" }}>

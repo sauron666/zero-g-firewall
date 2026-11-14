@@ -1,3 +1,4 @@
+import { Readings, Tile } from "../dash/widgets";
 import { useMemo, useState } from "react";
 import { href } from "../app/router";
 import { fmtBytes, fmtInt, useData } from "../lib/data";
@@ -108,10 +109,13 @@ function Explorer({ doc, findings, briefs, rank }: { doc: InvestigationsDoc; fin
   return (
     <div className="stack" style={{ ["--gap" as string]: "22px" }}>
       <h1 className="page-title">Investigations</h1>
-      <p className="lede">
-        NASA's PSI repository returns {doc.search_total} records for "combustion". {nIn} are combustion science.
-        {out.length > 0 && <> {out.length === 1 ? "One is" : `${out.length} are`} not ({out.map((i) => i.accession).join(", ")}): the search matched a word, and each is kept here with the reason it is set aside.</>}
-      </p>
+      <Readings>
+        <Tile label="Combustion records" value={nIn} of={`of ${doc.search_total}`} sub="returned by PSI for &quot;combustion&quot;" />
+        <Tile label="Test rows" value={doc.items.filter((i) => i.scope.in_scope).reduce((a, i) => a + i.tables.reduce((b, t) => b + (t.rows ?? 0), 0), 0)} sub="in the experimental tables" />
+        <Tile label="Flight experiments" value={doc.items.filter((i) => i.scope.in_scope && i.gravity === "micro").length} sub="taken in free fall" />
+        <Tile label="Archive behind them" value={doc.items.filter((i) => i.scope.in_scope).reduce((a, i) => a + (i.files?.bytes_listed ?? 0), 0) / 1e12} decimals={1} unit="TB" sub="listed in PSI, not fetched" tone="flame" />
+      </Readings>
+      {out.length > 0 && <p className="note" style={{ maxWidth: "88ch" }}>{out.length === 1 ? "One record is" : `${out.length} records are`} set aside ({out.map((i) => i.accession).join(", ")}): the search matched a word, and each is listed with the reason.</p>}
       {briefs && <p className="note" style={{ maxWidth: "88ch" }}>Summaries under each title are AI-written and checked by code against the record's own text and numbers. NASA's words are on each record's page.</p>}
       <div className="toolbar">
         <label className="search">

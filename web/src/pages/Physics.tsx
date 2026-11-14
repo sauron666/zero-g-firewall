@@ -1,3 +1,5 @@
+import { Readings, Tile } from "../dash/widgets";
+import type { DropletDoc, ValidationDoc } from "../lib/types";
 import { useState } from "react";
 import { scaleLinear } from "d3-scale";
 import { line as d3line } from "d3-shape";
@@ -138,6 +140,8 @@ function Num({ label, value, set, step, min, max, unit }: { label: string; value
 }
 
 export function Physics() {
+  const val = useData<ValidationDoc>("validation.json");
+  const drops = useData<DropletDoc>("droplets.json");
   const atm = useData<AtmModel>("model/atmospheres.json");
   const scl = useData<ScalingModel>("model/scaling.json");
   const openReceipt = useReceipt();
@@ -158,6 +162,14 @@ export function Physics() {
         <h1 className="page-title">Flame physics</h1>
         <p className="lede">Four small models, each simple enough to check by hand. They bound what has not been measured yet.</p>
       </div>
+      {(val.data || drops.data) && (
+        <Readings>
+          {val.data && <Tile label="Flame temperature" value={val.data.overall.closer_convention_per_table.mean_abs ?? null} decimals={1} unit="K" sub="mean gap to NASA's own column" tone="flame" to="#physics" />}
+          {val.data && <Tile label="Tests compared" value={val.data.overall.closer_convention_per_table.n} sub={`in ${val.data.tables.length} NASA tables`} />}
+          {drops.data && <Tile label="Droplet burn time" value={drops.data.within["10"]} of={`of ${drops.data.n_usable}`} sub="d² law within 10% of NASA" />}
+          {drops.data && <Tile label="Law over stated time" value={drops.data.ratio.median} decimals={2} sub="median, FLEX droplets" />}
+        </Readings>
+      )}
 
       <section className="panel" data-klass="model">
         <div className="panel__head">
