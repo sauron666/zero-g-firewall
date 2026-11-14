@@ -1,14 +1,14 @@
 # Coverage of the plan, feature by feature
 
-Checked on 14 November 2026 at 14:53 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
+Checked on 14 November 2026 at 15:06 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
 
 | Priority | Features | Done | Partial | Not built |
 |---|---|---|---|---|
 | P0 | 28 | 22 | 6 | 0 |
-| P1 | 59 | 24 | 12 | 23 |
+| P1 | 59 | 29 | 10 | 20 |
 | P2 | 38 | 1 | 9 | 28 |
 | P3 | 5 | 0 | 0 | 5 |
-| All | 130 | 47 | 27 | 56 |
+| All | 130 | 52 | 25 | 53 |
 
 ## Definition of done (specification, section 0)
 
@@ -115,12 +115,12 @@ Checked on 14 November 2026 at 14:53 Sofia time against the 130 features of the 
 | E15 | P1 | **not built** | Detector lineage |  |
 | F01 | P0 | done | Build-time card generation with validators | build check with planted-row tests (pipeline/zgf/validate.py); every quotation searched in the stored text |
 | F02 | P0 | done | Deterministic fallback with no key and no network |  |
-| F03 | P1 | **not built** | Orchestrator with typed tools (search, card, compare, envelope, thermo, transport, triage) |  |
-| F04 | P1 | **partial** | Validation agent | the checker covers citations, numbers and verdicts |
-| F05 | P1 | **not built** | Agent activity pane (tool trace, sources, duration, errors) | the Ask page shows sources and removed sentences, not a tool trace |
+| F03 | P1 | done | Orchestrator with typed tools (search, card, compare, envelope, thermo, transport, triage) | a rule-based planner calls typed tools (screen, count near an atmosphere, rank for a mission, matrix coverage, curator notes, fetch a record, search, compose, check); counts and rankings are computed by code |
+| F04 | P1 | done | Validation agent | every sentence is checked against its cited passage; model answers also for numbers and verdicts |
+| F05 | P1 | done | Agent activity pane (tool trace, sources, duration, errors) | the trace under each answer lists every tool call with arguments, result and time, as it ran |
 | F06 | P1 | done | Structured outputs and a fail-closed citation resolver |  |
-| F07 | P1 | **partial** | Prompt-injection defences and a poisoned-document demonstration | tested with a poisoned passage; not demonstrated on a page |
-| F08 | P1 | **not built** | Evaluation harness |  |
+| F07 | P1 | done | Prompt-injection defences and a poisoned-document demonstration | on the Ask page: a planted note, two gates, the checker, and what the checker alone would have let through; can be sent to a connected model |
+| F08 | P1 | done | Evaluation harness | 36 questions (gold, computed, abstention, adversarial; 7 held out) run in the browser and in the test suite; 35 pass, held out 6 of 7 |
 | F09 | P2 | **not built** | MCP server exposing the evidence tools to any assistant |  |
 | F10 | P2 | **partial** | Multi-provider adapter, cost telemetry, response cache labelled as cached | Anthropic, OpenAI, Gemini, OpenAI-compatible and local endpoints; no cost telemetry or cache; not run against live services |
 | F11 | P2 | **not built** | Narration with captions, disclosed as AI-generated |  |

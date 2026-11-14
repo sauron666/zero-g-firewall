@@ -1,0 +1,50 @@
+/* The evidence agent: its trace, its scorecard and the poisoned-passage demonstration. Ink only; marks are drawn. */
+.trace { margin-top: 16px; border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--sunken); }
+.trace > summary { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 14px; padding: 10px 14px; cursor: pointer; list-style: none; }
+.trace > summary::-webkit-details-marker { display: none; }
+.trace__title { font-weight: 700; font-size: var(--t-13); }
+.trace__title::before { content: "+"; display: inline-block; width: 16px; color: var(--ink-3); font-weight: 400; }
+.trace[open] .trace__title::before { content: "\2212"; }
+.trace__meta { font-size: var(--t-12); color: var(--ink-3); font-family: var(--font-data); }
+.trace__steps { list-style: none; margin: 0; padding: 4px 14px 12px 14px; counter-reset: step; }
+.trace__step { position: relative; padding: 10px 0 10px 30px; border-top: 1px solid var(--hairline); counter-increment: step; }
+.trace__step::before { content: counter(step); position: absolute; left: 0; top: 10px; width: 20px; height: 20px; display: grid; place-items: center; border: 1px solid var(--axis); border-radius: 50%; font-size: 11px; font-family: var(--font-data); color: var(--ink-2); background: var(--surface); }
+.trace__step[data-empty="true"]::before { border-style: dashed; }
+.trace__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.trace__tool { font-family: var(--font-data); font-size: var(--t-12); font-weight: 700; color: var(--ink); }
+.trace__what { font-size: var(--t-12); color: var(--ink-2); }
+.trace__ms { margin-left: auto; font-family: var(--font-data); font-size: 11px; color: var(--ink-3); }
+.trace__args { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 5px; }
+.trace__arg, .trace__reads { font-family: var(--font-data); font-size: 11px; padding: 1px 6px; border: 1px solid var(--hairline); border-radius: 3px; color: var(--ink-2); background: var(--surface); overflow-wrap: anywhere; }
+.trace__reads { border-style: dotted; color: var(--ink-3); }
+.trace__why { margin-top: 5px; font-size: var(--t-12); color: var(--ink-3); }
+.trace__out { margin-top: 3px; font-size: var(--t-13); color: var(--ink); overflow-wrap: anywhere; }
+.asknote { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; padding: 10px 12px; margin-top: 10px; border: 1px dashed var(--axis); border-radius: var(--radius); font-size: var(--t-13); color: var(--ink-2); }
+
+.score { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.score__tile { padding: 12px 14px; border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface); }
+.score__num { font-size: var(--t-26); font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.score__num small { font-size: var(--t-14); font-weight: 400; color: var(--ink-3); }
+.score__lab { margin-top: 2px; font-size: var(--t-12); color: var(--ink-2); }
+.score__bar { margin-top: 8px; height: 6px; border-radius: 3px; background: var(--hairline); overflow: hidden; }
+.score__bar i { display: block; height: 100%; background: var(--ink); border-radius: 3px; }
+.mark { display: inline-grid; place-items: center; width: 18px; height: 18px; border: 1.5px solid var(--ink); border-radius: 50%; }
+.mark--no { border-style: dashed; color: var(--ink-2); border-color: var(--ink-3); }
+.evaltable td:first-child, .evaltable th:first-child { width: 34px; }
+.evaltable .q { font-family: var(--font-claim); font-size: 1rem; }
+
+.poison { display: grid; gap: 14px; }
+.poison__note { font-family: var(--font-data); font-size: var(--t-13); line-height: 1.5; padding: 12px 14px; border: 1px dashed var(--axis); border-radius: var(--radius); overflow-wrap: anywhere;
+  background: repeating-linear-gradient(135deg, transparent 0 8px, var(--hairline) 8px 9px), var(--sunken); }
+.gate { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; padding: 10px 0; border-top: 1px solid var(--hairline); }
+.gate b { font-size: var(--t-14); }
+.gate p { font-size: var(--t-13); color: var(--ink-2); margin-top: 2px; }
+.verdicts { width: 100%; border-collapse: collapse; font-size: var(--t-13); }
+.verdicts th, .verdicts td { text-align: left; vertical-align: top; padding: 8px 10px; border-top: 1px solid var(--hairline); }
+.verdicts th { font-size: var(--t-12); color: var(--ink-3); font-weight: 400; }
+.verdicts td:first-child { font-family: var(--font-claim); font-size: 1rem; width: 42%; }
+.verdicts .out { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 8px; align-items: start; }
+.verdicts tr.is-leak td { box-shadow: inset 3px 0 0 var(--ink); background: var(--raised); }
+@media (max-width: 760px) { .score { grid-template-columns: repeat(2, minmax(0, 1fr)); } .verdicts thead { display: none; } .verdicts td { display: block; border-top: 0; padding: 4px 10px; } .verdicts tr { display: block; border-top: 1px solid var(--hairline); padding: 6px 0; } }
+.linklike { border: 0; background: none; padding: 0; font: inherit; color: var(--ink); text-align: left; cursor: pointer; text-decoration: underline; text-decoration-color: var(--axis); text-underline-offset: 3px; }
+.linklike:hover { text-decoration-color: var(--ink); }

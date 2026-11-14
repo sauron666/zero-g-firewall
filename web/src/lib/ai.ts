@@ -60,7 +60,7 @@ export function checkerPrompt(question: string, hits: Hit[], draft: string): str
 
 export interface Sentence { text: string; cites: number[] }
 export interface Verified { kept: Sentence[]; dropped: { text: string; reason: string }[]; abstained: boolean }
-const VERDICT = /\b(is|are|was|were|be|completely|perfectly|totally) safe\b|\bprobabilit|\b\d+(\.\d+)?\s?% (chance|probability|likelihood|risk)|\brisk score\b|\bsafety rating\b|\bguarantee/i;
+export const VERDICT = /\b(is|are|was|were|be|completely|perfectly|totally) safe\b|\bprobabilit|\b\d+(\.\d+)?\s?% (chance|probability|likelihood|risk)|\brisk score\b|\bsafety rating\b|\bguarantee/i;
 const num = (s: string) => (s.replace(/\[\d+\]/g, " ").match(/\d+(?:[.,]\d+)*/g) ?? []).map((n) => n.replace(/,/g, "").replace(/\.0+$/, "").replace(/(\.\d*?)0+$/, "$1"));
 
 /** Keep a sentence only if it cites passages that exist, its numbers are in those passages, and it gives no verdict. */

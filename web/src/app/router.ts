@@ -12,8 +12,11 @@ export interface Route {
 }
 
 function parse(): Route {
-  const raw = decodeURIComponent(window.location.hash.replace(/^#/, ""));
-  const [p, q = ""] = raw.split("?");
+  const hash = window.location.hash.replace(/^#/, "");
+  const cut = hash.indexOf("?");                       // the query is split off before decoding, so a question may hold "?" and "%"
+  let p = cut < 0 ? hash : hash.slice(0, cut);
+  try { p = decodeURIComponent(p); } catch { /* a stray percent sign: use the text as it is */ }
+  const q = cut < 0 ? "" : hash.slice(cut + 1);
   const segs = p.startsWith("/") ? p.split("/").filter(Boolean) : p.split("--").filter(Boolean);
   const query = new URLSearchParams(q);
   new URLSearchParams(window.location.search).forEach((v, k) => {
