@@ -1,14 +1,14 @@
 # Coverage of the plan, feature by feature
 
-Checked on 14 November 2026 at 17:00 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
+Checked on 14 November 2026 at 17:02 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
 
 | Priority | Features | Done | Partial | Not built |
 |---|---|---|---|---|
 | P0 | 28 | 28 | 0 | 0 |
-| P1 | 59 | 38 | 7 | 14 |
+| P1 | 59 | 39 | 7 | 13 |
 | P2 | 38 | 2 | 9 | 27 |
 | P3 | 5 | 0 | 0 | 5 |
-| All | 130 | 68 | 16 | 46 |
+| All | 130 | 69 | 16 | 45 |
 
 ## Definition of done (specification, section 0)
 
@@ -77,7 +77,7 @@ Checked on 14 November 2026 at 17:00 Sofia time against the 130 features of the 
 | B20 | P0 | done | Official Resources Coverage panel | 10 of 10 |
 | B21 | P1 | done | Myth vs Evidence | three cards, 25 quotations checked |
 | B22 | P1 | done | Gap-to-plan map |  |
-| B23 | P1 | **not built** | Nearest-evidence finder at row level |  |
+| B23 | P1 | done | Nearest-evidence finder at row level | on the atmosphere map: a design point (oxygen, pressure or any pressure, fuel form), the nearest rows of NASA's tables with their distance in near windows, a receipt on each, and a CSV with source file and SHA-256; counts agree with the map's own near rule (tested) |
 | C01 | P1 | done | Thermochemistry engine validated against NASA's `Tad` and `Zst` columns (PSI-10, PSI-159) | 587 rows, mean difference 2.1 K |
 | C02 | P1 | done | Atmosphere explorer |  |
 | C03 | P1 | done | Droplet engine | the d-squared law checked on four columns of NASA's FLEX table (195 rows, 152 within 10%), the measured rates against oxygen, and a calculator that takes its rate only from tests near the chosen oxygen |

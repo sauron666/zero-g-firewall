@@ -27,7 +27,7 @@ export interface ScatterMark {
   x: number;
   y: number;
   label: string;
-  kind: "target" | "diamond";
+  kind: "target" | "diamond" | "pin";      // pin: a point the reader set
   place?: "right" | "left" | "above" | "below";
 }
 export interface ScatterProps {
@@ -152,7 +152,12 @@ export function Scatter(p: ScatterProps) {
           const ty = pl === "above" ? Y - 13 : pl === "below" ? Y + 22 : Y + 4;
           return (
             <g key={"m" + i}>
-              {k.kind === "target" ? (
+              {k.kind === "pin" ? (
+                <>
+                  <circle cx={X} cy={Y} r={11} fill="none" stroke="var(--ink)" strokeWidth={1.2} strokeDasharray="2 3" />
+                  <circle cx={X} cy={Y} r={4.5} fill="var(--ink)" stroke="var(--surface)" strokeWidth={1.5} />
+                </>
+              ) : k.kind === "target" ? (
                 <>
                   <circle cx={X} cy={Y} r={7.5} fill="none" stroke="var(--ink)" strokeWidth={1.6} />
                   <path d={`M${X - 12} ${Y}H${X - 4}M${X + 4} ${Y}H${X + 12}M${X} ${Y - 12}V${Y - 4}M${X} ${Y + 4}V${Y + 12}`} stroke="var(--ink)" strokeWidth={1.6} />

@@ -6,6 +6,7 @@ import { KlassBadge } from "../lib/klass";
 import type { EnvelopeDoc, EnvelopePoint, EnvelopeSeries, RankDoc, TableSummary } from "../lib/types";
 import { emit } from "../mascot/bus";
 import { Readings, Tile } from "../dash/widgets";
+import { DesignPoint, nearestCsv, nearestRows } from "../lib/nearest";
 import { useReceipt } from "../components/Receipt";
 import { Scatter, ScatterGroup, ScatterLegend, ScatterMark, ScatterPoint, Shape, shapePath } from "../viz/Scatter";
 import { PageProps, stub } from "./stubs";
@@ -49,6 +50,82 @@ function Strip({ points, groups, yDomain, onPick }: { points: EnvelopePoint[]; g
   );
 }
 
+const PSI = 6.894757;
+const FORMS: [string | null, string][] = [[null, "All"], ["solid", "Solids"], ["droplet", "Droplets"], ["gas", "Gas flames"]];
+
+/** The rows of NASA's tables closest to a cabin the reader describes, ready to save for a model. */
+function Nearest({ d, at, setAt, files, onPick }: { d: EnvelopeDoc; at: DesignPoint; setAt: (p: DesignPoint) => void; files: Map<string, { file: string; sha256: string; ledger_seq: number }>; onPick: (p: EnvelopePoint) => void }) {
+  const [unit, setUnit] = useState<"kPa" | "psia">("psia");
+  const [k, setK] = useState(12);
+  const res = useMemo(() => nearestRows(d, at, k), [d, at, k]);
+  const shownP = at.p == null ? "" : unit === "kPa" ? String(Number(at.p.toFixed(1))) : String(Number((at.p / PSI).toFixed(2)));
+  const save = () => {
+    const csv = nearestCsv(nearestRows(d, at, k).rows, at, files);
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    const a = document.createElement("a");
+    a.href = url; a.download = `zgf_nearest_o2-${Math.round(at.x * 100)}${at.p == null ? "" : `_p-${Math.round(at.p)}kPa`}${at.kind ? `_${at.kind}` : ""}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 2000);
+  };
+  const first = res.rows[0];
+  return (
+    <section className="panel" data-klass="derived" id="nearest">
+      <div className="panel__head">
+        <div>
+          <h2 className="panel__title">Nearest tests to a design point</h2>
+          <p className="panel__sub">Describe a cabin. The rows of NASA's tables closest to it are listed and can be saved as a CSV for a model. The point is drawn on the map above.</p>
+        </div>
+        <KlassBadge k="derived" note="distance in near windows" />
+      </div>
+      <div className="near__ctl">
+        <div className="msg__chips">
+          {d.near_presets.map((n) => <button key={n.id} type="button" className="chipbtn" aria-pressed={Math.abs(at.x - n.x_o2) < 1e-6 && at.p != null && Math.abs(at.p - n.p_kpa) < 0.05} onClick={() => setAt({ ...at, x: n.x_o2, p: n.p_kpa })}>{n.label}</button>)}
+        </div>
+        <label className="field near__f"><span>Oxygen, %</span>
+          <input type="number" min={5} max={100} step={0.5} value={Number((at.x * 100).toFixed(1))} onChange={(e) => { const v = Number(e.target.value); if (v > 0 && v <= 100) setAt({ ...at, x: v / 100 }); }} /></label>
+        <label className="field near__f"><span>Pressure, {unit}</span>
+          <input type="number" min={0} step={unit === "kPa" ? 1 : 0.1} value={shownP} placeholder="any" onChange={(e) => { const v = Number(e.target.value); setAt({ ...at, p: e.target.value === "" || !(v > 0) ? null : unit === "kPa" ? v : v * PSI }); }} /></label>
+        <div className="seg" role="group" aria-label="Pressure unit">
+          {(["psia", "kPa"] as const).map((u) => <button key={u} type="button" aria-pressed={unit === u} onClick={() => setUnit(u)}>{u}</button>)}
+          <button type="button" aria-pressed={at.p == null} onClick={() => setAt({ ...at, p: at.p == null ? 101.325 : null })}>any pressure</button>
+        </div>
+        <div className="seg" role="group" aria-label="What burns">
+          {FORMS.map(([id, label]) => <button key={label} type="button" aria-pressed={at.kind === id} onClick={() => setAt({ ...at, kind: id })}>{label}</button>)}
+        </div>
+      </div>
+      <p className="claim claim--m" style={{ maxWidth: "62ch", margin: "14px 0 10px" }} role="status">
+        {res.pool === 0 ? "No row of that kind states what is asked."
+          : <>{res.within === 0 ? "No row lies" : `${fmtInt(res.within)} ${res.within === 1 ? "row lies" : "rows lie"}`} inside the near window of this point, out of {fmtInt(res.pool)} that can be compared.
+            {first && res.within === 0 && <> The closest is {first.d.toFixed(1)} windows away.</>}</>}
+        {at.p != null && at.kind === "solid" && res.pool === 0 && " The solid-material tables state no pressure: choose any pressure to compare them by oxygen."}
+      </p>
+      {res.rows.length > 0 && (
+        <div className="table-wrap">
+          <table className="table">
+            <thead><tr><th>Record</th><th>Experiment</th><th className="r">Row</th><th className="r">Oxygen</th><th className="r">Pressure, kPa</th><th style={{ paddingLeft: 18 }}>Fuel, as written</th><th>Outcome, as written</th><th className="r">Distance</th></tr></thead>
+            <tbody>
+              {res.rows.map((r) => (
+                <tr key={r.pt.t + r.pt.r} onClick={() => onPick(r.pt)} style={{ cursor: "pointer" }} title="Click for the receipt of this row">
+                  <td className="strong"><a href={href(`/evidence/${r.pt.a}`)} onClick={(e) => e.stopPropagation()}>{r.pt.a}</a></td><td>{r.pt.s}</td><td className="r num">{r.pt.r + 1}</td>
+                  <td className="r num">{(r.pt.x * 100).toFixed(1)}%</td><td className="r num">{r.pt.p == null ? "not stated" : r.pt.p.toFixed(1)}</td>
+                  <td style={{ paddingLeft: 18 }}>{r.pt.f || "(empty)"}</td><td>{r.pt.o ?? ""}</td><td className="r num strong">{r.d.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      <div className="row" style={{ justifyContent: "space-between", marginTop: 12, ["--gap" as string]: "10px" }}>
+        <div className="row" style={{ ["--gap" as string]: "8px" }}>
+          <button type="button" className="btn btn--primary btn--sm" onClick={save} disabled={res.rows.length === 0}>Save these rows as CSV</button>
+          <div className="seg" role="group" aria-label="How many rows">{[12, 50, 200].map((n) => <button key={n} type="button" aria-pressed={k === n} onClick={() => setK(n)}>{n}</button>)}</div>
+        </div>
+        <p className="note" style={{ flex: "1 1 360px", maxWidth: "70ch" }}>Distance 1 is the edge of the near window: {d.near_rule.replace("within ", "")}. Every value in the file is as NASA wrote it, with the source file and its SHA-256; the distance is this site's.</p>
+      </div>
+    </section>
+  );
+}
+
 export function Envelope({ route, manifest }: PageProps) {
   const ready = !!manifest?.nasa;
   const env = useData<EnvelopeDoc>(ready ? "envelope.json" : null);
@@ -59,6 +136,8 @@ export function Envelope({ route, manifest }: PageProps) {
   const lens = rank.data?.lenses.find((l) => l.id === mission);
   const pure = !!lens?.atmospheres.some((a) => a[1] > 0.45);
   const [zoom, setZoom] = useState<"all" | "tests">("all");
+  const [at, setAt] = useState<DesignPoint>({ x: 0.3, p: 70.33, kind: null });
+  const files = useMemo(() => new Map((idx.data?.items ?? []).filter((x) => x.artifact).map((x) => [x.artifact as string, { file: x.file, sha256: x.sha256, ledger_seq: x.ledger_seq }])), [idx.data]);
   useEffect(() => { if (lens) setZoom(pure ? "all" : "tests"); }, [lens?.id, pure]);
   useEffect(() => { if (lens) emit({ type: "CONTEXT", g: lens.gravity === "partial" ? (lens.id === "mars" ? 0.3794 : 0.1654) : 0, source: "mission" }); }, [lens?.id, lens?.gravity]);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
@@ -132,6 +211,7 @@ export function Envelope({ route, manifest }: PageProps) {
     ...atm.data.presets.map((a) => ({ x: a.p_kpa, y: a.x_o2, kind: "target" as const, label: SHORT[a.id]?.label ?? a.name, place: SHORT[a.id]?.place })),
     ...atm.data.historical.map((a) => ({ x: a.p_kpa, y: a.x_o2, kind: "diamond" as const, label: SHORT[a.id]?.label ?? a.name, place: SHORT[a.id]?.place })),
   ] : [];
+  if (at.p != null && !d.near_presets.some((n) => Math.abs(n.x_o2 - at.x) < 1e-6 && Math.abs(n.p_kpa - (at.p as number)) < 0.05)) marks.push({ x: at.p, y: at.x, kind: "pin", label: "design point", place: "above" });
   const curve = atm.data ? [{ pts: Array.from({ length: 150 }, (_, i) => 20 + i * 2).map((p) => [p, 21.23 / p] as [number, number]), label: "same oxygen partial pressure as sea-level air",
     labelAt: (zoom === "all" ? [50, 0.5] : [150, 0.158]) as [number, number] }] : [];
   const win = d.near ?? { dx: 0.03, dp: 0.15 };
@@ -206,6 +286,8 @@ export function Envelope({ route, manifest }: PageProps) {
           Rows left out: {d.series.map((s) => `${s.id} ${s.no_oxygen + s.pressure_not_usable}`).join(", ")} (no oxygen value, or a pressure of 0).
         </p>
       </section>
+
+      <Nearest d={d} at={at} setAt={setAt} files={files} onPick={pick} />
 
       <section>
         <div className="section__head"><h2 className="h2">How much evidence sits near each crew atmosphere</h2><KlassBadge k="derived" note={`near means ${d.near_rule}`} /></div>

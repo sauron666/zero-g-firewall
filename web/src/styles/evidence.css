@@ -249,3 +249,10 @@ button.cov__cell:hover, button.cov__cell:focus-visible { outline: 2px solid var(
 .drop__inputs { display: grid; gap: 10px; }
 .drop__inputs .wslider { grid-template-columns: minmax(0, 1fr) 64px; }
 @media (max-width: 520px) { .drop { grid-template-columns: minmax(0, 1fr); justify-items: center; } .drop__side { width: 100%; } }
+
+/* Nearest tests to a design point */
+.near__ctl { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 14px; }
+.near__ctl .msg__chips { flex-basis: 100%; }
+.near__f { width: 120px; }
+.near__f input { width: 100%; }
+.chipbtn[aria-pressed="true"] { border-color: var(--g-micro); color: var(--ink); background: color-mix(in srgb, var(--g-micro) 18%, var(--surface)); }
