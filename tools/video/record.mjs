@@ -5,7 +5,9 @@
  *   node tools/video/record.mjs web/dist out_dir            full render (900 frames in ten scenes, 1920x1080, 30 fps)
  *   node tools/video/record.mjs web/dist out_dir --preview  one still per scene, to check the framing first
  *
- * The page's clock is driven by this script (Playwright's clock), so every run films the same frames.
+ * The pointer, the captions and every control are moved by frame number, so every run films the same actions.
+ * The clock in the top bar is set to the film's own time (ten o'clock plus the frame's place in the film), so it
+ * reads the same on a slow machine and a fast one, and a scene filmed again with --only keeps its place.
  * Nothing in the picture is generated: it is the site, with captions and a pointer drawn on top.
  * Needs: playwright (with Chromium) and ffmpeg.
  */
@@ -42,7 +44,9 @@ const base = `http://localhost:${server.address().port}`;
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: DSF, colorScheme: "dark" });
 const page = await ctx.newPage();
-await page.clock.install({ time: new Date("2026-11-15T10:00:00Z") });
+const T0 = Date.parse("2026-11-15T10:00:00Z");
+await page.clock.install({ time: T0 });
+await page.clock.setFixedTime(T0);          // timers keep running; only what the page reads as the time of day is ours
 await page.goto(base + "/");
 await page.waitForSelector(".fanswitch");
 await page.waitForTimeout(900);
@@ -134,6 +138,7 @@ async function scene(name, n, setup, per, stills = []) {
     ff = spawn("ffmpeg", ["-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", String(FPS), "-c:v", "mjpeg", "-i", "-", "-vf", "format=yuv420p", "-c:v", "libx264", "-crf", "18", "-preset", "veryfast", "-pix_fmt", "yuv420p", "-r", String(FPS), tmp], { stdio: ["pipe", "inherit", "inherit"] });
   }
   for (let i = 0; i < n; i++) {
+    await page.clock.setFixedTime(T0 + Math.round((total + i) * MS));
     for (const a of acts) await a(i);
     if (per) await per(i);
     if (ringAge >= 0) { await page.evaluate(([x, y, u]) => window.__zgf.ring(x, y, u), [ringAt[0], ringAt[1], ringAge / 11]); ringAge = ringAge >= 11 ? -1 : ringAge + 1; }
