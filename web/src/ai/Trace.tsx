@@ -6,7 +6,7 @@ export function Trace({ run, model, open = false }: { run: AgentRun; model?: { b
   return (
     <details className="trace" open={open}>
       <summary>
-        <span className="trace__title">What the engine did</span>
+        <span className="trace__title">Steps taken</span>
         <span className="trace__meta">{n} steps · {run.ms < 1 ? "under 1" : Math.round(run.ms)} ms · planner: {model ? "rules, then a model writes" : "rules, no model"}</span>
       </summary>
       <ol className="trace__steps">
@@ -30,7 +30,7 @@ export function Trace({ run, model, open = false }: { run: AgentRun; model?: { b
             <li className="trace__step"><div className="trace__head"><code className="trace__tool">write_with_model</code><span className="trace__what">A model rephrases the passages</span>{model.ms != null && <span className="trace__ms">{Math.round(model.ms)} ms</span>}</div>
               <div className="trace__args"><span className="trace__arg">model = {model.by}</span><span className="trace__reads">reads the passages found, as data</span></div>
               <p className="trace__out">The model received numbered passages and the rule that every sentence must cite one.</p></li>
-            <li className="trace__step"><div className="trace__head"><code className="trace__tool">verify_model_answer</code><span className="trace__what">The checker judges each sentence</span></div>
+            <li className="trace__step"><div className="trace__head"><code className="trace__tool">verify_model_answer</code><span className="trace__what">Each sentence is verified against its source</span></div>
               <p className="trace__out">{model.kept} kept, {model.dropped} removed. A sentence is removed if it cites nothing that was given, carries a number its source lacks, or gives a verdict or a probability.</p></li>
           </>
         )}

@@ -67,6 +67,10 @@ export interface Manifest {
     /** quotations shown on the site, and how many of them were found word for word in the stored documents */
     quotes?: number;
     quotes_verified?: number;
+    /** passages in the search index */
+    passages?: number;
+    droplet_rows_checked?: number;
+    droplet_rows_within_10pct?: number;
   };
   artifacts: Record<string, { sha256: string; bytes: number; klass: string }>;
 }

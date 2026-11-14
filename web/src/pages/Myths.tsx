@@ -83,7 +83,7 @@ function Card({ c, open }: { c: MythCard; open: boolean }) {
         <div className="myth__answer">
           <h2 className="h2">{c.question}</h2>
           <p className="lede" style={{ maxWidth: "62ch", color: "var(--ink)" }}>{c.answer}</p>
-          <p className="note">The short answer is our reading of the evidence below. It is not a NASA conclusion and not operational advice.</p>
+          <p className="note">The short answer is our reading of the sources below, not a NASA conclusion or operational advice.</p>
         </div>
         <div className="balance">
           <div className="stack" style={{ ["--gap" as string]: "22px" }}>{left.map((g, i) => <Group key={i} g={g} />)}</div>

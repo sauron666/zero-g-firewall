@@ -112,7 +112,7 @@ function Explorer({ doc, findings, briefs, rank }: { doc: InvestigationsDoc; fin
         NASA's PSI repository returns {doc.search_total} records for "combustion". {nIn} are combustion science.
         {out.length > 0 && <> {out.length === 1 ? "One is" : `${out.length} are`} not ({out.map((i) => i.accession).join(", ")}): the search matched a word, and each is kept here with the reason it is set aside.</>}
       </p>
-      {briefs && <p className="note" style={{ maxWidth: "88ch" }}>The line in serif under each title is an AI brief: this project's reading of the record, written with an AI model and checked by code against the record's own text and numbers. NASA's words are on each record's page.</p>}
+      {briefs && <p className="note" style={{ maxWidth: "88ch" }}>Summaries under each title are AI-written and checked by code against the record's own text and numbers. NASA's words are on each record's page.</p>}
       <div className="toolbar">
         <label className="search">
           <span className="sr">Search the records</span>
@@ -178,7 +178,7 @@ function Explorer({ doc, findings, briefs, rank }: { doc: InvestigationsDoc; fin
                 <span>
                   <span className="rec__title">{i.acronym ? `${i.acronym}: ` : ""}{i.title}</span>
                   {!i.scope.in_scope && <span className="rec__sub" style={{ display: "block" }}>Set aside: {i.scope.reason}.</span>}
-                  {briefs?.items[i.accession] && <span className="rec__brief" title="AI brief: our reading, checked by code against the record">{briefs.items[i.accession].what}</span>}
+                  {briefs?.items[i.accession] && <span className="rec__brief" title="AI-written summary, checked by code against the record">{briefs.items[i.accession].what}</span>}
                 </span>
                 <span className="hide-s rec__sub">{i.sub_research_area || "not stated"}</span>
                 <span className="hide-s rec__sub"><Gravity g={i.gravity} platform={i.platform} /></span>
@@ -351,11 +351,11 @@ function Card({ inv, findings, profiles, brief }: { inv: Investigation; findings
       </header>
 
       {mineBrief && brief && (
-        <section className="brief" aria-label="AI brief">
-          <div className="brief__head"><span className="ev__tag">AI brief</span><span className="note">our reading, not NASA's words · checked by code against this record</span></div>
+        <section className="brief" aria-label="Summary">
+          <div className="brief__head"><span className="ev__tag">Summary</span><span className="note">AI-written, checked by code against this record · NASA's words follow below</span></div>
           <p className="brief__what">{mineBrief.what}</p>
           <p className="brief__why">{mineBrief.why}</p>
-          <details className="brief__how"><summary>How this brief was made and checked</summary>
+          <details className="brief__how"><summary>How it was written and checked</summary>
             <p>{brief.how}</p><p>Written by {brief.written_by}, {brief.when}. {brief.dropped.length === 0 ? "No brief was dropped in this build." : `${brief.dropped.length} briefs were dropped in this build.`}</p></details>
         </section>
       )}

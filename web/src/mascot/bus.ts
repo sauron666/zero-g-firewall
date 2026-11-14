@@ -12,7 +12,8 @@ export type IskraEvent =
   | { type: "FANS"; on: boolean }
   | { type: "TOUR_STEP"; id: string; text: string }
   | { type: "TOUR_END" }
-  | { type: "SUCCESS"; text?: string };
+  | { type: "SUCCESS"; text?: string }
+  | { type: "ASK"; q?: string };            // open the conversation, with a question if one is given
 
 type Fn = (e: IskraEvent) => void;
 const subs = new Set<Fn>();

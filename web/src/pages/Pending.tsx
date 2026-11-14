@@ -7,7 +7,7 @@ const WILL: Record<string, string> = {
   "/rank": "Investigations ranked for a mission you choose, with the breakdown of each score and how stable the ranking is when the weights change.",
   "/envelope": "Every real test point in oxygen fraction against pressure, with habitat atmospheres, the normoxic curve, historical points and the regions nobody has tested.",
   "/gaps": "Where PSI has no data, and which planned experiment is designed to fill each gap.",
-  "/lessons": "Apollo 1, Apollo 13, Mir and the Artemis II alarm, and four Earth applications, each linked to the evidence.",
+  "/lessons": "Apollo 1, Apollo 13 and Mir, and three uses on Earth, each in NASA's own sentences.",
   "/alarm": "A lab for one question: is this alarm real? Smoke, dust, a failing sensor and tampered data, tested against signed telemetry.",
   "/playbooks": "A matrix of fire behaviour by phase and phenomenon, and response steps for the station and for a lunar habitat, each step with its evidence.",
   "/ask": "Questions answered from the evidence, every sentence cited to a table row or a page. Works with no model, with a local model, or with cloud models that check each other.",

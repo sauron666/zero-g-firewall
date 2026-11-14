@@ -1,10 +1,12 @@
 # Design system
 
-The interface must look like nobody else's entry and stay honest about what it shows. These rules are binding; change them only by logging a decision.
+The interface is a flight deck: a dark instrument panel in deep space blue, lit by the blue of a flame in free fall. It must look like nobody else's entry and stay honest about what it shows. These rules are binding; change them only by logging a decision.
+
+**Show the engineering. Demonstrate the science. Let the results speak.** A page leads with a result, a chart or a control. Explanation of how the site works is one short sentence, or sits in a folded "How it works". Reference pages for engineers (method, ledger, data, refutation) come last in the navigation.
 
 ## Three principles
 
-1. **Colour is evidence, chrome is ink.** Hue is reserved for two things: the gravity regime (blue = free fall, orange = 1 g, green = partial gravity; tokens `--g-micro`, `--g-earth`, `--g-partial`) and alarm status (`--ok`, `--warn`, `--serious`, `--critical`, always with an icon and a word). Buttons, links, panels and navigation are neutral ink. One more hue exists for a two-scenario comparison (`--series-b`; the first scenario is drawn in ink). Do not add hues.
+1. **Colour is evidence; the flame's blue is the one light.** Hue means: the gravity regime (blue = free fall, orange = 1 g, green = partial gravity; tokens `--g-micro`, `--g-earth`, `--g-partial`) and alarm status (`--ok`, `--warn`, `--serious`, `--critical`, always with an icon and a word). The same blue lights the active control, the primary button, the current page and the edge of a panel (`--accent`, `--glow`): it is the product's identity, the colour of a soot-free flame. No other decorative hue. One more hue exists for a two-scenario comparison (`--series-b`).
 2. **Two voices.** *STIX Two Text* (the typeface of scientific publishing) carries claims, findings and quotations: things that can be true or false. *B612* (designed for cockpit displays) carries the instrument: labels, controls, numbers. *B612 Mono* is for hashes, identifiers and code only. Classes: `.claim`, `.claim--hero`, `.claim--l`, `.claim--m`, `.lede`, `.prose`, `blockquote.quote` for the serif voice; everything else is the sans voice. Numbers, including large ones, are always sans.
 3. **Evidence class is drawn, not coloured.** Every panel that shows content of one class sets `data-klass` (left border style) and carries a `<KlassBadge>` (glyph plus word). Clicking a badge or a number opens its **receipt** (`useReceipt()`): the one paper-coloured object in the interface. Synthetic content also gets the striped warning treatment (`.banner--synthetic`, `data-klass="synthetic"`).
 
@@ -14,9 +16,9 @@ All colours, type sizes and spacing live in `web/src/styles/tokens.css`. Light v
 
 ## Layout
 
-- Shell: grouped rail on the left, a thin top bar with status chips, content up to 1360 px. Below 980 px the rail becomes a drawer.
-- A page opens with `h1.page-title` (plain name, sans) and one `p.lede` (serif) that says what the page lets you do. No eyebrow labels, no all-caps, no decorative numbering. Number things only when they are a sequence.
-- Panels are flat: one hairline border, radius 5 px, no shadows, no gradients as decoration. Do not chop a page into identical cards; use a panel when content is a separate object.
+- Shell: rail on the left grouped by what a visitor does (Mission, Explore, Compare, Simulate, Search, Verify), a thin top bar with status chips and a UTC clock, content up to 1360 px. Below 980 px the rail becomes a drawer. Behind everything: a faint grid and two soft glows (`.shell::before` in `styles/deck.css`).
+- A page opens with `h1.page-title` (plain name, sans) and one `p.lede` (serif) that says what the page lets you do. Small labels in B612 Mono, sentence case, never all-caps. Number things only when they are a sequence.
+- Panels: one hairline border, a faint wash at the top, radius 5 to 7 px. Dashboard panels (`.dpanel`) carry two corner brackets and a head with a status light. Big numbers glow softly in the dark theme. Use a panel when content is a separate object.
 - One filter row above everything it scopes (`.controls`, `.seg`), never inside a chart panel.
 - Side gutter at least 16 px at every width; nothing scrolls sideways except tables in `.table-wrap`.
 
@@ -34,24 +36,26 @@ All colours, type sizes and spacing live in `web/src/styles/tokens.css`. Light v
 
 Plain verbs, sentence case, no filler. Name things by what a person recognises ("Rank for a mission", not "Scoring engine"). A control says what it does ("Stop the fans"). Empty states say what will appear and what to run. Errors say what went wrong and how to fix it. No em-dash asides, no "not X but Y" constructions, no emoji, no arrows appended to links.
 
-Honesty wording that recurs: "may", "not yet measured", "illustration", "upper bound", "relative units", "our reading". The phrase "Independent project, not endorsed by NASA" stays in the rail.
+Lead with what was found. A real scientific limit is stated once, beside the result it limits, in a few words ("unmeasured", "bounded by a model", "illustration", "our reading"); it is not repeated as a refrain. Do not describe the machinery ("the agent", "the checker", "the engine") where a verb for the visitor will do: Search, Compare, Verify, Explore. The phrase "Independent project, not endorsed by NASA" stays in the rail.
+
+AI assistance is disclosed in one sentence on the Method page with a link to `docs/AI_USE.md`. Text on the site that a model wrote (the record summaries) carries a short label. Nothing else on the site talks about how it was built.
 
 ## Motion
 
-Motion answers an action (the fan switch, the time slider, a drawer). One ambient motion exists: the flames. Everything respects `prefers-reduced-motion`.
+Motion answers an action (the fan switch, the time slider, a drawer, a question to ISKRA). Ambient motion is limited to the flames, ISKRA's lantern, the clock and the ledger chain on mission control; numbers on mission control run up once. Everything respects `prefers-reduced-motion`.
 
 ## Accessibility
 
 Visible keyboard focus, `aria-label` on every canvas and SVG, controls reachable by keyboard, contrast kept in both themes, class and status never by colour alone.
 
-## The opening page, the quick search, the companion
+## Mission control, the quick search, ISKRA
 
-- The opening page is a console: the question with the two flame windows, then three instruments (the evidence agent, what NASA has measured in two habitats, the alarm lab), then the counts, then the routes by challenge verb. Every instrument links to its full page.
-- Quick search opens with Ctrl or Command with K, with a slash, or from the top bar. A word or two finds a place; a sentence is a question for the agent.
-- Navigation items carry a line icon from `components/icons.tsx`, in ink. Icons never carry meaning alone: the label is always there.
-- ISKRA, the companion (`web/src/mascot/`), lives at the foot of the rail and in the tour bar. It never floats over content. Its flame follows gravity and the fans (`flame.ts`); its ring is drawn per class (`Lantern.tsx`, `RING`), in ink; its lines never state data. Pages talk to it only through `mascot/bus.ts`.
+- The opening page is mission control (`pages/Home.tsx`, `dash/widgets.tsx`, `styles/deck.css`): a strip of six readings, the question with the two flame windows and the fan switch, then instrument panels that each show one result and link to its page (where NASA has tested, behaviours measured, the alarm, the model checks, what to read first, the ledger), then the eight stops and a row of links for engineers. Every number on it is read from the build's data files.
+- The flames (`components/FlameCanvas.tsx`) are drawn as a thin luminous sheet around a fuel sphere: blue on the windward side, a warm glow of soot inside that grows with gravity and flow; a dying flame shrinks to a blue cap. They are schematics and labelled so.
+- Quick search opens with Ctrl or Command with K, with a slash, or from the top bar. A word or two finds a place; a sentence is a question for ISKRA.
+- ISKRA, the companion (`web/src/mascot/`), is on every page as a launcher in the lower right corner (`mascot/Chat.tsx`). It opens a conversation: questions in plain words, answered by the same engine as the Ask page, with a source beside each sentence. It knows which page the visitor is on, suggests questions for it, and can open a page when asked. The lantern glows while it searches and when it answers. The launcher folds to the lantern after a few seconds and can be hidden from the conversation. Its flame follows gravity and the fans (`flame.ts`); its ring is drawn per class (`Lantern.tsx`, `RING`); its own lines never state data. Pages talk to it only through `mascot/bus.ts` (`ASK` opens the conversation).
 - Coverage of the fire matrix is drawn as a square: full, half, empty with a dashed edge, or a dash. Its one hue is the gravity regime of the habitat.
 
 ## Components you already have
 
-`KlassBadge`, `ReceiptProvider/useReceipt`, `Porthole`, `FlameCanvas` (schematic flame that follows gravity and flow), `FanSwitch`, `SmokeView`, `LineChart`, `useWidth`, `useData`, `.panel`, `.statline`, `.table`, `.kv`, `.seg`, `.chip`, `.banner`, `.empty`, `.choice`, `details.fold`. Reuse them before writing new ones.
+`Tile`, `Ring`, `MiniCover`, `MiniParity`, `TopFive`, `Chain`, `AlarmSpark` (mission control), `OxygenCover`, `DropletPanel`, `IskraChat`, `KlassBadge`, `ReceiptProvider/useReceipt`, `Porthole`, `FlameCanvas` (schematic flame that follows gravity and flow), `FanSwitch`, `SmokeView`, `LineChart`, `useWidth`, `useData`, `.panel`, `.statline`, `.table`, `.kv`, `.seg`, `.chip`, `.banner`, `.empty`, `.choice`, `details.fold`. Reuse them before writing new ones.

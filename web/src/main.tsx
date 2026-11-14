@@ -6,6 +6,7 @@ import "./styles/trust.css";
 import "./styles/ai.css";
 import "./styles/home.css";
 import "./styles/mascot.css";
+import "./styles/deck.css";
 import { App } from "./app/App";
 
 createRoot(document.getElementById("root")!).render(

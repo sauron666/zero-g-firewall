@@ -9,7 +9,7 @@ export interface Stop { id: string; to: string; verb: string; text: (m: Manifest
 const n = (v: number | undefined) => (v == null ? "the" : v.toLocaleString("en-US"));
 /** The path through the north-star question. Each stop names the challenge verb it serves. Every stop works offline. */
 export const STOPS: Stop[] = [
-  { id: "question", to: "", verb: "Question", fans: false, text: () => "Kill the fans? One switch, two habitats. In free fall the flame starves. In lunar gravity it may not: gravity is a fan nobody can switch off." },
+  { id: "question", to: "", verb: "Question", fans: false, text: () => "Kill the fans? One switch, two habitats. In one NASA test in free fall the flame went out within two seconds. In lunar gravity it may keep burning: gravity is a fan nobody can switch off." },
   { id: "interpret", to: "myths--fans", verb: "Interpret", text: () => "NASA tested it, and NASA's own guide calls the rule a misconception. Both sides, every quotation checked against the stored document." },
   { id: "model", to: "paradox", verb: "Model", text: () => "Two realities that differ only in ventilation. With the fans off, a detector in the duct may never see the smoke." },
   { id: "find", to: "envelope", verb: "Find", text: (m) => `Every real test by oxygen and pressure: ${n(m?.nasa?.envelope_points)} rows from NASA's tables. None was taken in lunar or Martian gravity.` },
@@ -17,7 +17,7 @@ export const STOPS: Stop[] = [
   { id: "summarize", to: "evidence--PSI-25", verb: "Summarize", text: () => "One record: what varied, what stayed constant, a receipt on every row, and the curator's notes on the data." },
   { id: "map", to: "playbooks?habitat=lunar", verb: "Map", text: () => "Fire behaviours by phase, like an attack matrix. Switch the habitat: in lunar gravity not one behaviour has been measured." },
   { id: "control", to: "alarm--replay", verb: "Control", text: () => "A real fire hidden behind replayed readings. The frames fail their checks, and the alarm stands. Synthetic, and labelled so." },
-  { id: "ask", to: "ask?q=Has%20anything%20been%20burned%20in%20lunar%20gravity%3F", verb: "Ask", text: () => "An agent with typed tools: it counts with code, quotes with sources, and shows every step it took. No key, no network." },
+  { id: "ask", to: "ask?q=Has%20anything%20been%20burned%20in%20lunar%20gravity%3F", verb: "Ask", text: () => "Ask ISKRA in plain words. Numbers are computed, every sentence comes with its NASA source, and it works with no network." },
   { id: "trace", to: "ledger", verb: "Trace", text: (m) => `${n(m?.nasa?.files_in_ledger)} files fetched from NASA, hash-chained. Your browser recomputes the chain while you watch.` },
 ];
 export const DWELL = 8500;                                         // ms per stop: ten stops in under ninety seconds

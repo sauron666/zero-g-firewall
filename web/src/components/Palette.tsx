@@ -60,7 +60,7 @@ export function Palette({ open, onClose, ready }: { open: boolean; onClose: () =
   const askRow = (
     <li key="ask" role="option" id={`pal-${askAt}`} data-i={askAt} aria-selected={at === askAt} className="palette__item" onMouseEnter={() => setAt(askAt)} onClick={() => go(askAt)}>
       <span className="palette__icon"><IconAsk size={17} /></span>
-      <span className="palette__main"><b>Ask the evidence: “{q.trim()}”</b><span>The agent answers from NASA's tables and documents, with sources</span></span>
+      <span className="palette__main"><b>Ask ISKRA: “{q.trim()}”</b><span>Answered from NASA's tables and documents, with sources</span></span>
       <span className="palette__kind">Question</span>
     </li>
   );
@@ -83,7 +83,7 @@ export function Palette({ open, onClose, ready }: { open: boolean; onClose: () =
             </li>
           ); })}
           {asks && !askFirst && askRow}
-          {total === 0 && <li className="palette__none">Nothing matches. Type four letters or more to ask the evidence instead.</li>}
+          {total === 0 && <li className="palette__none">Nothing matches. Type a full question to ask ISKRA.</li>}
         </ul>
         <div className="palette__foot"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>Enter</kbd> open</span><span>{entries.length} places</span></div>
       </div>

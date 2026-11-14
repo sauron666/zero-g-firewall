@@ -9,7 +9,7 @@ import { PageProps, stub } from "./stubs";
 
 const Waiting = stub("/lessons");
 const PAGE_NAME: Record<string, string> = { "/evidence": "Investigations", "/envelope": "Atmosphere map", "/rank": "Rank for a mission", "/data": "Data and models", "/ledger": "Evidence ledger",
-  "/myths": "Myths and evidence", "/gaps": "Gaps and plans", "/falsify": "Try to refute it", "/ask": "Ask the evidence", "/lessons": "this page" };
+  "/myths": "Myths and evidence", "/gaps": "Gaps and plans", "/falsify": "Try to refute it", "/ask": "Ask ISKRA", "/lessons": "this page" };
 
 function Card({ c }: { c: LessonCard }) {
   return (

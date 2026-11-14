@@ -7,7 +7,8 @@ import { loadSettings, MODE_LABEL, onSettings } from "../lib/ai";
 import { IconClose, IconMenu, IconMoon, IconSearch, IconSun } from "../components/icons";
 import { NavIcon } from "../components/NavIcon";
 import { Palette } from "../components/Palette";
-import { IskraDock, useIskra } from "../mascot/Iskra";
+import { useIskra } from "../mascot/Iskra";
+import { IskraChat } from "../mascot/Chat";
 import { Tour } from "../mascot/Tour";
 import { Home } from "../pages/Home";
 import { Paradox } from "../pages/Paradox";
@@ -33,6 +34,15 @@ const PAGES: Record<string, (p: PageProps) => React.ReactNode> = {
   "/evidence": Evidence, "/rank": Rank, "/envelope": Envelope, "/gaps": Gaps, "/myths": Myths, "/lessons": Lessons,
   "/ledger": Ledger, "/data": DataModels, "/playbooks": Playbooks, "/alarm": Alarm, "/ask": Ask, "/falsify": Falsify,
 };
+
+const ENGINE: Record<string, string> = { offline: "built in, works offline", browser: "model in this browser", local: "local model", cloud: "cloud model", hybrid: "local and cloud" };
+
+/** Universal time, ticking: the one live reading on the bar. */
+function Clock() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => { const id = window.setInterval(() => setNow(new Date()), 1000); return () => clearInterval(id); }, []);
+  return <span className="clock" title="Coordinated Universal Time">UTC <b>{now.toISOString().slice(11, 19)}</b></span>;
+}
 
 type Theme = "dark" | "light";
 function readTheme(): Theme {
@@ -120,7 +130,7 @@ export function App() {
             </span>
           </a>
           {NAV.map((g) => (
-            <div className="nav-group" key={g.name}>
+            <div className={`nav-group ${g.technical ? "nav-group--tech" : ""}`} key={g.name}>
               <div className="nav-group__name">{g.name}</div>
               <ul>
                 {g.items.map((it) => (
@@ -139,7 +149,6 @@ export function App() {
             <br />
             Independent project, not endorsed by NASA.
           </div>
-                  <IskraDock state={iskra} name={mascot} onTour={startTour} />
         </nav>
         <div className="main-col">
           <header className="topbar">
@@ -153,11 +162,11 @@ export function App() {
               <span className={`dot ${nasa ? "dot--ok" : "dot--off"}`} />
               {nasa ? `NASA data synced ${fmtUtc(nasa.synced_at_utc)}` : "NASA data: waiting for sync"}
             </a>
-            <a className="chip chip--wide" href={href("/ask")} title="How answers are produced">
+            <a className="chip chip--wide" href={href("/ask")} title="How answers are written">
               <span className="dot dot--ok" />
-              Evidence engine: {MODE_LABEL[aiMode]}
+              {mascot}: {ENGINE[aiMode] ?? MODE_LABEL[aiMode]}
             </a>
-            <span className="topbar__iskra"><IskraDock state={iskra} name={mascot} onTour={startTour} compact /></span>
+            <Clock />
             <button className="icon-btn" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label={theme === "dark" ? "Switch to the light theme" : "Switch to the dark theme"}>
               {theme === "dark" ? <IconSun /> : <IconMoon />}
             </button>
@@ -167,6 +176,7 @@ export function App() {
       </div>
       <Palette open={search} onClose={() => setSearch(false)} ready={!!nasa} />
       {tour != null && <Tour at={tour} set={setTour} manifest={manifest.data} state={iskra} />}
+      <IskraChat state={iskra} name={mascot} top={top} ready={!!nasa} onTour={startTour} touring={tour != null} />
     </ReceiptProvider>
   );
 }

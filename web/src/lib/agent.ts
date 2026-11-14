@@ -249,7 +249,9 @@ export function runAgent(question: string, kit: Kit): AgentRun {
     return { ...stop(`The stored evidence has nothing on "${absent.join('", "')}".`), hits: found, refused: false };
   }
   const lead: Hit[] = [...computed, ...named].map((p) => ({ passage: p, score: 99, matched: [] }));
-  const rest = found.filter((h) => !lead.some((l) => l.passage.id === h.passage.id)).slice(0, Math.max(4, 8 - lead.length));
+  // Beside a computed fact, a passage is kept only if it speaks to most of the question: a shared number or one common word is not enough.
+  const need = computed.length ? Math.max(2, Math.ceil(asked.length * 0.6)) : 0;
+  const rest = found.filter((h) => !lead.some((l) => l.passage.id === h.passage.id) && h.matched.length >= need).slice(0, Math.max(4, 8 - lead.length));
   const hits = [...lead, ...rest];
 
   const answer = timed("compose_answer", "no sentence is written here: computed facts first, then sentences taken from the passages", { passages: hits.length }, (): Answer => {

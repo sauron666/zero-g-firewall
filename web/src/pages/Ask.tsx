@@ -26,13 +26,13 @@ export const EXAMPLES = [
 const KIND: Record<EvalKind, [string, string]> = {
   gold: ["Finds the right source", "answered, and a cited passage comes from the expected source"],
   computed: ["Computes with code", "the right tool ran and the number matches the artifact"],
-  abstain: ["Says it has no answer", "questions outside the evidence"],
+  abstain: ["Says it has no answer", "questions the data cannot answer"],
   adversarial: ["Yields no verdict", "attempts to pull out a verdict, a probability or obedience"],
 };
 const Mark = ({ ok }: { ok: boolean }) => <span className={`mark ${ok ? "" : "mark--no"}`} role="img" aria-label={ok ? "passed" : "failed"}>{ok ? <IconCheck size={12} /> : <IconClose size={11} />}</span>;
 const MODES: [Mode, string, string][] = [
-  ["offline", "Offline engine", "No model. The answer is made of sentences taken from the evidence. Works with no connection at all."],
-  ["browser", "In this browser", "A model that runs inside this browser tab writes the answer from the passages. No key, no server, and no connection once it is on the machine: the setting for a habitat with no link to Earth."],
+  ["offline", "Built in", "Sentences come straight from NASA's tables and documents. Works with no connection and no key."],
+  ["browser", "In this browser", "A model inside this browser tab writes the answer from the passages. No key or server, and no connection once it is on the machine: the setting for a habitat with no link to Earth."],
   ["local", "Local model", "A model served on this computer or on the habitat's own network writes the answer from the passages. Nothing leaves the machine."],
   ["cloud", "Cloud model", "A hosted model writes the answer from the passages, with a key you type here."],
   ["hybrid", "Hybrid", "The local model drafts, the cloud model checks the draft against the passages."],
@@ -151,11 +151,20 @@ export function Ask({ manifest, route }: PageProps) {
 
   return (
     <div className="stack" style={{ ["--gap" as string]: "22px" }}>
-      <h1 className="page-title">Ask the evidence</h1>
+      <h1 className="page-title">Ask ISKRA</h1>
       <p className="lede">
-        Ask in plain words. An agent plans which tools to run, counts with code, and builds the answer from {count || "the"} passages of NASA's tables and documents. Every sentence carries its source and every step is shown.
-        A language model is optional: it may rephrase the passages, and a checker throws out anything it cannot trace.
+        Explore NASA combustion research through natural-language questions. Results include direct references to experiments, scientific publications and supporting data.
       </p>
+      <p><button type="button" className="btn btn--quiet btn--sm" onClick={() => emit({ type: "ASK" })}>Open the conversation with ISKRA</button></p>
+      <details className="fold howto">
+        <summary>How it works</summary>
+        <div>
+          <p className="note" style={{ maxWidth: "88ch" }}>
+            A question is planned into tool calls: counts and rankings are computed by code, and every other sentence is taken from {count || "the"} stored passages of NASA's tables and documents, each with its source.
+            The steps are listed under each answer. A language model is optional and may only rephrase; every sentence it writes is verified against its source before it is shown.
+          </p>
+        </div>
+      </details>
 
       <form className="askbar" onSubmit={(e) => { e.preventDefault(); ask(q); }}>
         <label className="sr" htmlFor="askq">Your question</label>
@@ -172,7 +181,7 @@ export function Ask({ manifest, route }: PageProps) {
           <section className="panel" aria-live="polite">
             <div className="panel__head">
               <h2 className="panel__title">{agent.question}</h2>
-              {useModel ? <span className="tag">written by {run!.by}, checked</span> : agent.computed > 0 ? <span className="tag">computed by code, then sentences from the evidence</span> : <span className="tag">made of sentences from the evidence</span>}
+              {useModel ? <span className="tag">written by {run!.by}, verified</span> : agent.computed > 0 ? <span className="tag">computed, with sourced sentences</span> : <span className="tag">sourced sentences</span>}
             </div>
             {FANS.test(agent.question) && !agent.refused && (
               <p className="callout"><IconInfo size={16} /><span>This is the question the site is built around. <a href={href("/myths/fans")}>Both halves of the answer, side by side</a>.</span></p>
@@ -181,8 +190,8 @@ export function Ask({ manifest, route }: PageProps) {
             {busy && <p className="note">Waiting for the model. The offline answer is below meanwhile.{progress ? ` ${progress.text}: ${Math.round(progress.f * 100)}%.` : ""}</p>}
             {busy && progress && <div className="score__bar" aria-hidden="true"><i style={{ width: `${Math.round(progress.f * 100)}%` }} /></div>}
             {err && <p className="callout"><IconWarn size={16} /><span>The model could not be used: {err} The offline answer is shown instead.</span></p>}
-            {run && run.verified.abstained && <p className="callout"><IconInfo size={16} /><span>The model said the evidence does not answer this. The nearest passages are shown.</span></p>}
-            {run && !run.verified.abstained && run.verified.kept.length === 0 && <p className="callout"><IconWarn size={16} /><span>The checker removed every sentence the model wrote. The offline answer is shown instead.</span></p>}
+            {run && run.verified.abstained && <p className="callout"><IconInfo size={16} /><span>The model found no answer in the sources. The nearest passages are shown.</span></p>}
+            {run && !run.verified.abstained && run.verified.kept.length === 0 && <p className="callout"><IconWarn size={16} /><span>Verification removed every sentence the model wrote. The built-in answer is shown instead.</span></p>}
 
             {useModel ? (
               <div className="answer">{run!.verified.kept.map((s, i) => <p key={i}>{s.text} {s.cites.map(cite)}</p>)}</div>
@@ -193,7 +202,7 @@ export function Ask({ manifest, route }: PageProps) {
               <div className="answer">{offline.lines.map((l, i) => {
                 const p = hits[l.cite - 1]?.passage;
                 const computed = p?.id.startsWith("tool:");
-                const ours = p?.t.startsWith("Our reading");
+                const ours = p?.t.startsWith("Our reading") || p?.k === "derived" || p?.k === "model";      // quotation marks only around NASA's own words
                 return <p key={i}>{ours || computed || /["“”]/.test(l.text) ? l.text : `“${l.text}”`} {cite(l.cite)}
                   {computed && <span className="ev__tag" style={{ marginLeft: 8, fontFamily: "var(--font-ui)" }}>computed here from NASA's tables</span>}
                   {ours && <span className="ev__tag" style={{ marginLeft: 8, fontFamily: "var(--font-ui)" }}>our reading, not NASA's words</span>}</p>;
@@ -201,7 +210,7 @@ export function Ask({ manifest, route }: PageProps) {
             )}
             {run && run.verified.dropped.length > 0 && (
               <details className="dropped">
-                <summary>The checker removed {run.verified.dropped.length} sentence{run.verified.dropped.length === 1 ? "" : "s"}</summary>
+                <summary>Verification removed {run.verified.dropped.length} sentence{run.verified.dropped.length === 1 ? "" : "s"}</summary>
                 <ul>{run.verified.dropped.map((d, i) => <li key={i}><s>{d.text}</s> <span className="note">Reason: {d.reason}.</span></li>)}</ul>
               </details>
             )}
@@ -238,7 +247,7 @@ export function Ask({ manifest, route }: PageProps) {
       )}
 
       <section className="stack" style={{ ["--gap" as string]: "12px" }}>
-        <div className="section__head" style={{ marginBottom: 0 }}><h2 className="h2">Who writes the answer</h2></div>
+        <div className="section__head" style={{ marginBottom: 0 }}><h2 className="h2">Answer mode</h2></div>
         <div className="toolbar">
           <div className="seg" role="group" aria-label="How answers are written">
             {MODES.map(([m, name]) => <button key={m} type="button" aria-pressed={settings.mode === m} onClick={() => update({ ...settings, mode: m })}>{name}</button>)}
@@ -268,8 +277,8 @@ export function Ask({ manifest, route }: PageProps) {
           <button type="button" className="btn btn--quiet btn--sm" disabled={!kit} onClick={() => kit && setReport(runEval(kit))}>{report ? "Run again" : "Run the evaluation"}</button>
         </div>
         {!report ? (
-          <p className="note" style={{ maxWidth: "88ch" }}>Runs a fixed set of questions through the engine in your browser and checks each result: the right source for questions the evidence answers, the right number for questions code must compute,
-            no answer for questions outside the evidence, and no verdict under pressure. The questions and the pass rules are in the repository (web/src/lib/evalset.ts).</p>
+          <p className="note" style={{ maxWidth: "88ch" }}>Runs a fixed set of questions in your browser and verifies each result: the right source, the right number, no answer where the data has none, and no verdict under pressure.
+            Questions and pass rules: web/src/lib/evalset.ts.</p>
         ) : (
           <>
             <div className="score">
@@ -281,8 +290,8 @@ export function Ask({ manifest, route }: PageProps) {
                 </div>
               ))}
             </div>
-            <p className="note" style={{ maxWidth: "92ch" }}>{report.ok} of {report.n} passed in {Math.round(report.ms)} ms, with no model and no network. {report.held.n} questions were written after the engine was last changed and were never tuned against:
-              {" "}{report.held.ok} of those {report.held.n} passed. The rest were also used to improve the engine, so their score says less. This measures this engine on these questions, nothing wider.</p>
+            <p className="note" style={{ maxWidth: "92ch" }}>{report.ok} of {report.n} passed in {Math.round(report.ms)} ms, with no model and no network. {report.held.n} of the questions were held out and never tuned against:
+              {" "}{report.held.ok} of those passed. The others also guided development, so their score says less.</p>
             <details className="fold">
               <summary>Every question and its result</summary>
               <div className="table-wrap"><table className="datatable evaltable">
@@ -299,8 +308,8 @@ export function Ask({ manifest, route }: PageProps) {
 
       {demo && (
         <section className="stack" style={{ ["--gap" as string]: "12px" }}>
-          <div className="section__head" style={{ marginBottom: 0 }}><h2 className="h2">A planted note tries to give the engine orders</h2></div>
-          <div className="banner banner--synthetic"><IconWarn /><div><b>Synthetic.</b> The note and the obedient reply below were written for this demonstration. The two gates and the checker are the ones the site runs on every answer.</div></div>
+          <div className="section__head" style={{ marginBottom: 0 }}><h2 className="h2">Prompt-injection test: a planted note gives orders</h2></div>
+          <div className="banner banner--synthetic"><IconWarn /><div><b>Synthetic.</b> The note and the obedient reply below were written for this demonstration. The two gates and the verification step are the ones the site runs on every answer.</div></div>
           <div className="grid cols-2" style={{ ["--gap" as string]: "22px", alignItems: "start" }}>
             <div className="poison">
               <div><p className="note" style={{ marginBottom: 6 }}>Slipped among the passages retrieved for "Will a fire go out if the fans are stopped?"</p>
@@ -309,7 +318,7 @@ export function Ask({ manifest, route }: PageProps) {
                 {demo.gates.map((g) => (
                   <div className="gate" key={g.name}><Mark ok={g.blocked} /><div><b>{g.name}: {g.blocked ? "stopped" : "passed"}</b><p>{g.rule}</p><p>{g.why}</p></div></div>
                 ))}
-                <div className="gate"><Mark ok={demo.gated.kept.length === 1} /><div><b>Answer checker: {demo.gated.dropped.length} of {demo.gated.dropped.length + demo.gated.kept.length} sentences removed</b>
+                <div className="gate"><Mark ok={demo.gated.kept.length === 1} /><div><b>Answer verification: {demo.gated.dropped.length} of {demo.gated.dropped.length + demo.gated.kept.length} sentences removed</b>
                   <p>Even if a model had read the note and obeyed, each sentence must cite a passage that was given, carry only numbers its source has, and give no verdict.</p></div></div>
               </div>
             </div>
@@ -326,7 +335,7 @@ export function Ask({ manifest, route }: PageProps) {
                     <td><span className="out"><Mark ok={!u} /><span>{u ? `removed: ${u.reason}` : leak ? "kept, wrongly: the note itself 'supports' it" : "kept"}</span></span></td></tr>);
                 })}</tbody>
               </table>
-              <p className="note" style={{ marginTop: 10 }}>The checker alone would have let {demo.survivesCheckerAlone.length} planted claim through. That is why the gates come first: the note never reaches a model, so nothing can cite it.</p>
+              <p className="note" style={{ marginTop: 10 }}>Verification alone would have let {demo.survivesCheckerAlone.length} planted claim through. That is why the gates come first: the note never reaches a model, so nothing can cite it.</p>
               {settings.mode !== "offline" && (
                 <div style={{ marginTop: 12 }}>
                   <button type="button" className="btn btn--quiet btn--sm" disabled={liveBusy} onClick={tryLive}>{liveBusy ? "Asking the model…" : "Send the note to the connected model"}</button>
@@ -335,7 +344,7 @@ export function Ask({ manifest, route }: PageProps) {
                     <div className="panel panel--tight" style={{ marginTop: 10 }}>
                       <p className="note">{live.by} replied (the gates were bypassed for this one request):</p>
                       <p className="poison__note" style={{ marginTop: 6 }}>{live.raw}</p>
-                      <p style={{ marginTop: 8, fontSize: 14 }}><b>Checker:</b> {live.verified.kept.length} kept, {live.verified.dropped.length} removed{live.verified.abstained ? "; the model said the evidence does not answer" : ""}.</p>
+                      <p style={{ marginTop: 8, fontSize: 14 }}><b>Verified:</b> {live.verified.kept.length} kept, {live.verified.dropped.length} removed{live.verified.abstained ? "; the model found no answer in the sources" : ""}.</p>
                       {live.verified.dropped.length > 0 && <ul style={{ marginTop: 6, display: "grid", gap: 4, fontSize: 13 }}>{live.verified.dropped.map((d, i) => <li key={i}><s>{d.text}</s> <span className="note">{d.reason}</span></li>)}</ul>}
                     </div>
                   )}

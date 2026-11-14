@@ -3,6 +3,7 @@ import { Manifest, fmtInt, fmtUtc, useData } from "../lib/data";
 import { KLASS, Klass, KlassBadge } from "../lib/klass";
 import type { InvestigationsDoc, LessonsDoc } from "../lib/types";
 
+const REPO = "https://github.com/sauron666/zero-g-firewall";
 const TYPE: Record<string, string> = { data: "data", document: "document", page: "web page", video: "video", guide: "guide" };
 
 export function About({ manifest }: { manifest: Manifest | null }) {
@@ -17,13 +18,13 @@ export function About({ manifest }: { manifest: Manifest | null }) {
       <div className="stack">
         <h1 className="page-title">Method and limits</h1>
         <p className="lede">
-          This site reads NASA's public microgravity combustion evidence and shows what it supports, what it does not, and where it ends. It gives no safety rating and no probability.
+          Zero-G Firewall reads NASA's public microgravity combustion data, checks its models against NASA's own numbers and shows where the measurements end.
         </p>
       </div>
 
       <section className="panel">
-        <h2 className="h2">Eight kinds of content, never mixed</h2>
-        <p className="panel__sub">Each number and sentence belongs to one class. The class is drawn as a glyph and a border style, so it does not depend on colour.</p>
+        <h2 className="h2">Eight classes of content</h2>
+        <p className="panel__sub">Every number and sentence carries one class, drawn as a glyph and a border style.</p>
         <div className="table-wrap" style={{ marginTop: 16 }}>
           <table className="table">
             <thead><tr><th>Mark</th><th>Code</th><th>What it means</th></tr></thead>
@@ -38,13 +39,13 @@ export function About({ manifest }: { manifest: Manifest | null }) {
 
       <section className="grid cols-2">
         <div className="panel">
-          <h2 className="h2">What this site does not do</h2>
+          <h2 className="h2">Limits of the conclusions</h2>
           <ul className="prose" style={{ fontSize: "1.02rem", marginTop: 12, paddingLeft: 18, listStyle: "disc" }}>
-            <li>It does not predict whether a material burns on the Moon or Mars. PSI holds no partial-gravity data yet.</li>
-            <li>It does not say a cabin, a procedure or an atmosphere is safe.</li>
-            <li>It does not guess the cause of the Artemis II smoke alarm. The public source does not state it.</li>
-            <li>It does not fill a missing value. Missing stays missing.</li>
-            <li>It controls nothing. Every alarm and cyber scenario is simulated.</li>
+            <li>Lunar and Martian gravity are bounded, not predicted: PSI holds no partial-gravity data yet.</li>
+            <li>Results are observations and model bounds. No safety rating or probability is derived from them.</li>
+            <li>The cause of the Artemis II smoke alarm is not public, so the site leaves it open.</li>
+            <li>A missing value stays missing.</li>
+            <li>Alarm and cyber scenarios are synthetic and control nothing.</li>
           </ul>
         </div>
         <div className="panel">
@@ -109,12 +110,13 @@ export function About({ manifest }: { manifest: Manifest | null }) {
       )}
 
       <section className="panel">
-        <h2 className="h2">Use of AI</h2>
+        <h2 className="h2">Development and methodology</h2>
         <p className="prose" style={{ fontSize: "1.02rem", marginTop: 10 }}>
-          AI tools (Claude, by Anthropic) assisted with software development during 14 and 15 November 2026. The team reviewed and tested what they produced. Scientific observations come from the cited NASA sources. Numbers come from deterministic code; a language model may explain, but a sentence about data is shown only with a citation that resolves. The flame drawings are schematics made in code and are marked as illustrations. Nothing here uses NASA insignia.
+          Zero-G Firewall combines NASA experimental datasets, reproducible computational models and interactive visualizations. AI-assisted development tools were used during implementation.
+          Source data, derived results and simulated scenarios are identified separately.
         </p>
         <p className="note" style={{ marginTop: 10 }}>
-          Before the event the team prepared research notes, a written plan, a team emblem and one watermarked concept sketch that is not used here. All code, data processing and project assets were created inside the event window.
+          Full methodology and development notes are in the <a href={`${REPO}/tree/main/docs`} target="_blank" rel="noreferrer">repository</a>: design, data contracts, decisions, test status and <a href={`${REPO}/blob/main/docs/AI_USE.md`} target="_blank" rel="noreferrer">AI use</a>.
         </p>
       </section>
 

@@ -156,7 +156,7 @@ export function Physics() {
     <div className="stack" style={{ ["--gap" as string]: "30px" }}>
       <div className="stack" style={{ ["--gap" as string]: "12px" }}>
         <h1 className="page-title">Flame physics</h1>
-        <p className="lede">Four small models, each simple enough to check by hand. They bound what the evidence cannot yet measure. None of them is a prediction.</p>
+        <p className="lede">Four small models, each simple enough to check by hand. They bound what has not been measured yet.</p>
       </div>
 
       <section className="panel" data-klass="model">
