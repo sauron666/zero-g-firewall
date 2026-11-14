@@ -163,3 +163,15 @@ a.rec:hover { background: var(--raised); }
 .verdictbox--limited { border-style: dashed; }
 .verdictbox--untested { border-style: dotted; }
 .verdictbox__head { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: var(--t-14); }
+
+/* phone width: long badges and segmented controls wrap instead of pushing the page wider */
+@media (max-width: 760px) {
+  .klass { white-space: normal; height: auto; min-height: 24px; padding-top: 3px; padding-bottom: 3px; text-align: left; max-width: 100%; }
+  .seg { flex-wrap: wrap; max-width: 100%; }
+  .seg button { border-bottom: 1px solid var(--hairline); }
+  .claim--l, .myth__text { overflow-wrap: anywhere; }
+  .ev__quote, blockquote { margin-left: 0; margin-right: 0; }
+  .claimlist { grid-template-columns: minmax(0, 1fr); }
+  .askbar { grid-template-columns: minmax(0, 1fr); }
+  .toolbar > label, .toolbar .select { max-width: 100%; }
+}
