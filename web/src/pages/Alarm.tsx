@@ -124,6 +124,11 @@ function Measured({ rec, rep }: { rec: RecordedDoc | null; rep: ReportedDoc | nu
 export function Alarm({ route, manifest }: PageProps) {
   const [keys, setKeys] = useState<Keys | null>(null);
   const [sc, setSc] = useState<ScenarioId>((SCENARIOS.find((s) => s.id === route.segs[1])?.id ?? "replay") as ScenarioId);
+  // The lab plays, and the companion speaks about it, once the reader has asked for a scenario or touched a control.
+  // Until then the page belongs to the recording above it.
+  const [touched, setTouched] = useState(SCENARIOS.some((s) => s.id === route.segs[1]));
+  const touchedRef = useRef(touched);
+  touchedRef.current = touched;
   const [seed, setSeed] = useState(7);
   const [run, setRun] = useState<Run | null>(null);
   const [checked, setChecked] = useState<Checked[]>([]);
@@ -148,7 +153,7 @@ export function Alarm({ route, manifest }: PageProps) {
       const c = await checkFrames(r, keys);
       const t = timeline(c, r.fansOffAt);
       const l = await auditLog(t, c);
-      if (live) { setRun(r); setChecked(c); setTl(t); setLog(l); setAt(0); setPlaying(true); }
+      if (live) { setRun(r); setChecked(c); setTl(t); setLog(l); setAt(touchedRef.current ? 0 : DURATION); setPlaying(touchedRef.current); }
     })().catch((e) => live && setErr(String(e?.message ?? e)));
     return () => { live = false; };
   }, [keys, sc, seed]);
@@ -168,7 +173,7 @@ export function Alarm({ route, manifest }: PageProps) {
   const v = tl.length ? tl[Math.min(tl.length - 1, Math.floor(at / STEP))] : null;
   const accepted = checked.filter((f) => f.ok).length;
   const vState = v?.state, vAnomaly = v?.integrity.anomaly ?? false;
-  useEffect(() => { if (vState) emit({ type: "ALARM", state: vState, anomaly: vAnomaly }); }, [vState, vAnomaly]);   // the companion reacts to the verdict, never to raw readings
+  useEffect(() => { if (vState && touched) emit({ type: "ALARM", state: vState, anomaly: vAnomaly }); }, [vState, vAnomaly, touched]);   // the companion reacts to the verdict, never to raw readings
   const smoke = (inv.data?.items ?? []).filter((i) => ["PSI-101", "PSI-102", "PSI-47", "PSI-115"].includes(i.accession));
 
   return (
@@ -184,7 +189,7 @@ export function Alarm({ route, manifest }: PageProps) {
       <div className="soc">
         <aside className="soc__list" aria-label="Scenarios">
           {SCENARIOS.map((s) => (
-            <button key={s.id} type="button" className="scn" aria-pressed={s.id === sc} onClick={() => setSc(s.id)}>
+            <button key={s.id} type="button" className="scn" aria-pressed={s.id === sc} onClick={() => { setTouched(true); if (s.id === sc) { setAt(0); setPlaying(true); } else setSc(s.id); }}>
               <span className="scn__name">{s.name}</span>
               <span className="scn__tags"><span className="tag">truth: {s.truth}</span>{s.sparta && <span className="tag mono" title={s.sparta.name}>{s.sparta.id}</span>}</span>
             </button>
@@ -195,11 +200,11 @@ export function Alarm({ route, manifest }: PageProps) {
           <div className="panel panel--tight" data-klass="synthetic">
             <p style={{ maxWidth: "80ch" }}><b>{scenario.name}.</b> {scenario.about}{scenario.sparta ? ` Technique ${scenario.sparta.id}, ${scenario.sparta.name}.` : ""}</p>
             <div className="transport" style={{ marginTop: 12 }}>
-              <button className="btn btn--primary btn--sm" onClick={() => { if (at >= DURATION) setAt(0); setPlaying(!playing); }}>{playing ? <IconPause size={16} /> : <IconPlay size={16} />}{playing ? "Pause" : "Play"}</button>
-              <button className="btn btn--quiet btn--sm" onClick={() => { setAt(0); setPlaying(true); }}><IconReset size={16} />From the start</button>
-              <input className="scrub" type="range" min={0} max={DURATION} step={STEP} value={Math.round(at)} aria-label="Lab time, seconds" onChange={(e) => { setPlaying(false); setAt(+e.target.value); }} />
+              <button className="btn btn--primary btn--sm" onClick={() => { setTouched(true); if (at >= DURATION) setAt(0); setPlaying(!playing); }}>{playing ? <IconPause size={16} /> : <IconPlay size={16} />}{playing ? "Pause" : "Play"}</button>
+              <button className="btn btn--quiet btn--sm" onClick={() => { setTouched(true); setAt(0); setPlaying(true); }}><IconReset size={16} />From the start</button>
+              <input className="scrub" type="range" min={0} max={DURATION} step={STEP} value={Math.round(at)} aria-label="Lab time, seconds" onChange={(e) => { setTouched(true); setPlaying(false); setAt(+e.target.value); }} />
               <div className="transport__time">{Math.round(at)} s</div>
-              <label className="row" style={{ ["--gap" as string]: "6px", fontSize: 13 }}>seed <input type="number" min={1} max={9999} value={seed} onChange={(e) => setSeed(Math.max(1, +e.target.value || 1))} style={{ width: 70 }} className="select" /></label>
+              <label className="row" style={{ ["--gap" as string]: "6px", fontSize: 13 }}>seed <input type="number" min={1} max={9999} value={seed} onChange={(e) => { setTouched(true); setSeed(Math.max(1, +e.target.value || 1)); }} style={{ width: 70 }} className="select" /></label>
             </div>
           </div>
 

@@ -2,7 +2,7 @@
 /**
  * Records the 30-second demo video from the real site, frame by frame.
  *
- *   node tools/video/record.mjs web/dist out_dir            full render (900 frames in nine scenes, 1920x1080, 30 fps)
+ *   node tools/video/record.mjs web/dist out_dir            full render (900 frames in ten scenes, 1920x1080, 30 fps)
  *   node tools/video/record.mjs web/dist out_dir --preview  one still per scene, to check the framing first
  *
  * The page's clock is driven by this script (Playwright's clock), so every run films the same frames.
@@ -20,6 +20,8 @@ const { chromium } = createRequire(import.meta.url)("playwright");      // resol
 const DIST = path.resolve(process.argv[2] ?? "web/dist");
 const OUT = path.resolve(process.argv[3] ?? "video_out");
 const PREVIEW = process.argv.includes("--preview");
+// --only=3,6 renders those scenes again and keeps the files of the others: one changed scene does not cost a full render
+const ONLY = (() => { const a = process.argv.find((x) => x.startsWith("--only=")); return a ? new Set(a.slice(7).split(",").map(Number)) : null; })();
 const FPS = 30, W = 1280, H = 720, DSF = 1.5, MS = 1000 / FPS;
 const SITE = "sauron666.github.io/zero-g-firewall";
 fs.mkdirSync(OUT, { recursive: true });
@@ -47,6 +49,7 @@ await page.waitForTimeout(900);
 
 await page.addStyleTag({ content: `
   .fab { bottom: 150px !important; animation: none !important; } .fab__text { animation: none !important; }
+  .zgf-nofab .fab { visibility: hidden !important; }
   #zgf-cap { position: fixed; left: 236px; right: 0; bottom: 0; z-index: 60; padding: 54px 40px 22px; pointer-events: none; text-align: center;
     background: linear-gradient(to top, rgba(3,6,12,.97) 58%, rgba(3,6,12,0)); font-family: "STIX Two Text", Georgia, serif; font-size: 31px; line-height: 1.25; color: #fff; }
   #zgf-cap span { display: inline-block; max-width: 980px; }
@@ -71,11 +74,12 @@ await page.evaluate((site) => {
     <div class="t">Screen recording of the working site. Independent project, not endorsed by NASA.</div>`);
   window.__zgf = {
     cap(text) { cap.firstChild.textContent = text; },
+    fab(show) { document.documentElement.classList.toggle("zgf-nofab", !show); },
     capRight(px) { cap.style.right = px + "px"; },
     cur(x, y) { cur.style.transform = `translate(${x - 3}px, ${y - 2}px)`; },
     ring(x, y, u) { ring.style.left = x + "px"; ring.style.top = y + "px"; ring.style.opacity = String(u >= 1 ? 0 : 0.9 * (1 - u)); ring.style.transform = `scale(${0.3 + 0.95 * u})`; },   // every moving part is set per frame: no timers, no CSS clocks
     end(u) { end.style.opacity = String(u); cur.style.opacity = u > 0 ? "0" : "1"; },
-    scrub(v) { const i = document.querySelector(".transport input.scrub"); if (!i) return; Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set.call(i, String(v)); i.dispatchEvent(new Event("input", { bubbles: true })); },
+    scrub(v, sel = ".soc .transport input.scrub") { const i = document.querySelector(sel); if (!i) return; Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set.call(i, String(v)); i.dispatchEvent(new Event("input", { bubbles: true })); },
   };
 }, SITE);
 
@@ -90,6 +94,8 @@ const pct = (x) => String(Number((100 * x).toFixed(1)));
 const SOLID_TOP = pct(GAPS.kinds.find((k) => k.id === "solid").max);
 if (GAPS.regimes.find((r) => r.id === "partial").rows !== 0) throw new Error("the caption says no row was taken in lunar gravity; the data now says otherwise");
 const TAD = MANIFEST.nasa.validation_mean_abs_K.toFixed(1), TAD_N = MANIFEST.nasa.validation_rows;
+const REC = JSON.parse(fs.readFileSync(path.join(DIST, "data", "v1", "recorded.json"), "utf8"));
+const PLANNED = JSON.parse(fs.readFileSync(path.join(DIST, "data", "v1", "reported.json"), "utf8")).fm2.tests.length;
 
 /* ---------------------------------------------------------------- helpers */
 const ease = (u) => (u <= 0 ? 0 : u >= 1 ? 1 : u * u * (3 - 2 * u));
@@ -114,6 +120,12 @@ const files = [];
 async function scene(name, n, setup, per, stills = []) {
   sceneNo++;
   const id = `${String(sceneNo).padStart(2, "0")}_${name}`;
+  if (ONLY && !PREVIEW && !ONLY.has(sceneNo)) {
+    const kept = path.join(OUT, `scene_${id}.mp4`);
+    if (!fs.existsSync(kept)) throw new Error(`--only needs the earlier render of ${id} in ${OUT}`);
+    files.push(kept); total += n; console.log(`${id}: kept`);
+    return;
+  }
   const acts = (await setup()) ?? [];
   await pointer(mx, my);
   let ff = null, tmp = null, out = null;
@@ -134,43 +146,46 @@ async function scene(name, n, setup, per, stills = []) {
   console.log(`${id}: ${n} frames`);
 }
 
-/* ---------------------------------------------------------------- the film: 900 frames, nine scenes */
-// 1. the question (4.0 s)
-await scene("question", 120, async () => {
+/* ---------------------------------------------------------------- the film: 900 frames, ten scenes */
+// 1. the question (3.6 s)
+await scene("question", 108, async () => {
   await cap("In a NASA test, a flame went out two seconds after its airflow was cut.");
   const b = await boxOf(".fanswitch");
   if (b.y + b.height > 570) await scrollToY(b.y + b.height - 564);        // keep the switch clear of the caption
   const [x, y] = await centre(".fanswitch__track");
-  return [glide(x, y, 22, 48)];
+  return [glide(x, y, 20, 44)];
 }, async (i) => {
-  if (i === 52) await click();
-  if (i === 66) await cap("On the Moon, gravity is a fan nobody can switch off.");
-}, [40, 112]);
+  if (i === 48) await click();
+  if (i === 60) await cap("On the Moon, gravity is a fan nobody can switch off.");
+}, [38, 102]);
 
-// 2. the misconception (2.8 s)
-await scene("myth", 84, async () => {
+// 2. the misconception (2.4 s)
+await scene("myth", 72, async () => {
   await go("myths--fans", ".myth");
   await putAt(".myth[open]", 64);
   await cap("NASA's own guide calls the rule a misconception.");
   await pointer(1010, 300);
   const y0 = await scrollY();
-  return [glideScroll(y0 + 400, 30, 78)];
-}, async (i) => { if (i === 44) await cap(`${QUOTES} quotations, each checked against the stored NASA document.`); }, [20, 78]);
+  return [glideScroll(y0 + 400, 26, 66)];
+}, async (i) => { if (i === 38) await cap(`${QUOTES} quotations, each checked against the stored NASA document.`); }, [18, 66]);
 
 // 3. where the tests are, and where there are none (3.6 s)
 await scene("coverage", 108, async () => {
   await go("gaps", ".cov");
+  await page.evaluate(() => window.__zgf.fab(false));
   await putAt(".cov", 150);
   await cap("Every test row in NASA's tables, by oxygen.");
   await pointer(900, 220);
   const [x, y] = await centre(page.locator("button.cov__cell--4").first());
-  return [glide(x, y, 14, 40)];
+  const [x2, y2] = await centre(page.locator("button.cov__cell:has(.cov__lit--planned)").last());
+  return [glide(x, y, 14, 36), glide(x2, y2 + 4, 56, 80)];
 }, async (i) => {
-  if (i === 52) await cap(`Solid materials stop at ${SOLID_TOP}% oxygen. In lunar gravity: nothing.`);
+  if (i === 52) await cap(`Solid rows stop at ${SOLID_TOP}% oxygen. In lunar gravity: none yet. Diamonds: ${PLANNED} tests NASA plans on the Moon.`);
 }, [44, 100]);
 
 // 4. the matrix: station, then Moon (3.2 s)
 await scene("matrix", 96, async () => {
+  await page.evaluate(() => window.__zgf.fab(true));
   await go("playbooks", ".mx__grid");
   await putAt(".controls", 70);
   await cap(`${CELLS} fire behaviours, mapped like an attack. Measured in free fall: ${MEASURED}.`);
@@ -179,38 +194,54 @@ await scene("matrix", 96, async () => {
   return [glide(x, y, 22, 44)];
 }, async (i) => {
   if (i === 48) await click();
-  if (i === 54) await cap("Measured in lunar gravity: none.");
+  if (i === 54) await cap("Measured on the Moon: none.");
 }, [40, 90]);
 
-// 5. the models against NASA (3.2 s)
-await scene("model", 96, async () => {
+// 5. the models against NASA (2.8 s)
+await scene("model", 84, async () => {
   await go("physics", ".deck__strip--page");
   await page.waitForSelector("#droplets .plot svg");
   await putAt(page.locator("p.claim", { hasText: "the model lands within" }), 84);
   await cap(`Models checked against NASA's own numbers: within ${TAD} K over ${TAD_N} flame tests.`);
   await pointer(980, 300);
   const y = (await scrollY()) + (await boxOf("#droplets .plot")).y - 250;
-  return [glideScroll(y, 40, 62)];
+  return [glideScroll(y, 34, 54)];
 }, async (i) => {
-  if (i === 50) await cap(`The d² law gives NASA's burn time within 10% in ${DROPS.within["10"]} of ${DROPS.n_usable} droplet tests.`);
-}, [24, 90]);
+  if (i === 44) await cap(`The d² law gives NASA's burn time within 10% in ${DROPS.within["10"]} of ${DROPS.n_usable} droplet tests.`);
+}, [22, 78]);
 
-// 6. the alarm that must not be fooled (3.2 s)
-await scene("alarm", 96, async () => {
+// 6. a real fire, as the vehicle's own detector recorded it (2.8 s)
+await scene("recorded", 84, async () => {
+  await go("alarm", "#recorded .replay__plot svg");
+  await page.evaluate(() => window.__zgf.fab(false));
+  await putAt("#recorded .replay__bar", 66);
+  await cap("A real fire in a spacecraft, recorded by its own smoke detector.");
+  await page.evaluate((v) => window.__zgf.scrub(v, "#recorded input.scrub"), REC.window.from_t);
+  const [x, y] = await centre("#recorded .replay__plot");
+  await pointer(x - 250, y - 40);
+  return [glide(x + 120, y + 70, 20, 56)];
+}, async (i) => {
+  const t = Math.round(lerp(REC.window.from_t, REC.window.to_t, ease((i - 2) / 54)));
+  if (i >= 2 && i <= 58) await page.evaluate((v) => window.__zgf.scrub(v, "#recorded input.scrub"), t);
+  if (i === 44) await cap(`A smoke wire read ${REC.derived.scatter.wire.peak}. A burning sheet read ${REC.derived.scatter.fire.peak}. Time told them apart.`);
+}, [24, 78]);
+
+// 7. the alarm that must not be fooled (2.0 s)
+await scene("alarm", 60, async () => {
+  await page.evaluate(() => window.__zgf.fab(true));
   await go("alarm--replay", ".verdictcard");
   await putAt(".verdictcard", 96);
-  await cap("A real fire, hidden behind replayed \"all clear\" readings.");
+  await cap("In the lab: a fire hidden behind replayed \"all clear\" readings.");
   await page.evaluate(() => window.__zgf.scrub(0));
-  const [x, y] = await centre(".transport input.scrub");
-  await pointer(x - 200, y);
+  await pointer(1090, 500);
   return [];
 }, async (i) => {
-  const t = Math.round(lerp(0, 240, ease(i / 62)) / 2) * 2;
-  if (i <= 64) await page.evaluate((v) => window.__zgf.scrub(v), t);
-  if (i === 52) await cap("The sequence and clock checks catch it. The alarm stands.");
-}, [30, 90]);
+  const t = Math.round(lerp(0, 240, ease(i / 38)) / 2) * 2;
+  if (i <= 40) await page.evaluate((v) => window.__zgf.scrub(v), t);
+  if (i === 30) await cap("The sequence and clock checks catch it. The alarm stands.");
+}, [16, 56]);
 
-// 7. ISKRA answers on any page (5.2 s)
+// 8. ISKRA answers on any page (5.2 s)
 const QUESTION = "Was anything burned above 40% oxygen?";
 await scene("iskra", 156, async () => {
   await go("envelope", ".mapwrap svg");
@@ -234,8 +265,8 @@ await scene("iskra", 156, async () => {
   if (i === 100) { await page.waitForSelector(".chat .msg__meta"); await cap("It computes from NASA's tables and shows its sources. No key. Works offline."); }
 }, [20, 70, 150]);
 
-// 8. verify, and try to tamper (2.8 s)
-await scene("verify", 84, async () => {
+// 9. verify, and try to tamper (2.4 s)
+await scene("verify", 72, async () => {
   await page.evaluate(() => window.__zgf.capRight(0));
   await go("ledger", ".statline");
   await page.waitForSelector(".btn--primary:not([disabled])");
@@ -246,9 +277,9 @@ await scene("verify", 84, async () => {
   return [glide(x, y, 8, 28)];
 }, async (i) => {
   if (i === 32) { await click(); await page.waitForSelector("section.panel[data-klass=\"synthetic\"] .verdict-line", { timeout: 20000 }); await cap("Change one character, and the chain breaks."); }
-}, [26, 80]);
+}, [26, 68]);
 
-// 9. the end card (2.0 s)
+// 10. the end card (2.0 s)
 await scene("end", 60, async () => [], async (i) => { await page.evaluate((u) => window.__zgf.end(u), ease(i / 9)); }, [50]);
 
 await browser.close();

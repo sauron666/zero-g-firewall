@@ -16,7 +16,7 @@ import json
 import os
 
 from . import ledger as L
-from .claims import BASS2, GUIDE, LUCI, M2, MIR, NAMES, OLSON, SAFFIRE6, Resolver, data_items, model_items, q, reading
+from .claims import BASS2, GUIDE, LUCI, LUNAR, M2, MIR, NAMES, OLSON, SAFFIRE6, Resolver, data_items, model_items, q, reading
 from .falsify import fact
 from .lessons import A1, A13, S_DET
 from .literature import Library
@@ -76,6 +76,8 @@ def cells(out_dir: str) -> list[dict]:
         C("gravity-fed", "spread", "Spread fed by gravity", "na", "bounded", [
             {"kind": "model", "id": "lunar_buoyant_flow"},
             q(LUCI, "the burn lasts for over two and a half minutes", "Simulated lunar gravity"),
+            {"kind": "data", "id": "luci_rates"},
+            q(LUNAR, "the crucial mechanism of buoyant oxygen entrainment at the flame base is still present, but at a slower rate", "NASA in 2026, on a marginal material on the Moon"),
             {"kind": "data", "id": "partial_gravity_rows"}], ["/physics", "/gaps"]),
         C("cool-flame", "stealth", "A cool flame after the visible one", "evidence", "gap", [
             q(GUIDE, "This vaporization, we now know, is supported by a lower-temperature cool flame that forms after visible flame extinction", "Fuel droplets"),
@@ -83,10 +85,12 @@ def cells(out_dir: str) -> list[dict]:
         C("weak-flame", "stealth", "Flames almost too weak to see", "evidence", "gap", [
             q(GUIDE, "producing the weakest flames ever burned (approximately 1 Watt) and some burning for over 40 minutes before the experiment timed out", "Flame balls")], ["/myths/still-air"]),
         C("unseen-smoke", "stealth", "Smoke that never reaches the detector", "bounded", "bounded", [
-            reading("In this site's transport model, in free fall with the fans off, the duct detector stays below its alarm level for the whole ten-minute run. A model result: relative units, prescribed flow.")], ["/paradox"]),
+            reading("In this site's transport model, in free fall with the fans off, the duct detector stays below its alarm level for the whole ten-minute run. A model result: relative units, prescribed flow."),
+            {"kind": "data", "id": "recorded_delay"}], ["/paradox", "/alarm"]),
         C("gases", "products", "Toxic gases rise faster than heat", "evidence", "gap", [
             q(SAFFIRE6, "Overall, the temperature and pressure rise in the spacecraft were found to be less significant than the increase in carbon dioxide and carbon monoxide", "Saffire, a cargo vehicle"),
-            q(A1, "Air Force pathologists concluded the astronauts perished from asphyxia from carbon monoxide and other toxic gases resulting from the fire", "Apollo 1")], ["/lessons"]),
+            {"kind": "data", "id": "saffire_products"},
+            q(A1, "Air Force pathologists concluded the astronauts perished from asphyxia from carbon monoxide and other toxic gases resulting from the fire", "Apollo 1")], ["/lessons", "/alarm"]),
         C("particles", "products", "Smoke particles unlike those on Earth", "evidence", "gap", [
             q(GUIDE, "Fundamental research in microgravity highlighted the vastly different particulate size associated with flames in microgravity", ""),
             fact("Smoke-particle measurements in PSI: SAME, SAME-R and the dust test DAFT, all in free fall.", "observed", "/evidence")], ["/evidence/PSI-102", "/evidence/PSI-101", "/evidence/PSI-47"]),
@@ -94,7 +98,8 @@ def cells(out_dir: str) -> list[dict]:
             reading("Without buoyancy smoke does not rise; it follows the ventilation. The Two realities model shows the consequence for a detector in the return duct.")], ["/paradox"]),
         C("dust-alarm", "detection", "Dust that looks like smoke", "evidence", "gap", [
             q(S_DET, "can discriminate between combustion particles and extraneous matters such as dust", "A detector first flown on the Shuttle"),
-            reading("The alarm lab's dust scenario: two separated detectors at once, no combustion gas, no heat.")], ["/alarm/dust"]),
+            {"kind": "data", "id": "recorded_detector"},
+            reading("The alarm lab's dust scenario: two separated detectors at once, no combustion gas, no heat.")], ["/alarm/dust", "/alarm"]),
         C("quiet-detector", "detection", "A detector silenced by the response", "bounded", "bounded", [
             reading("Stopping the fans stops the air that carries smoke to a duct detector. In the alarm lab the alarm latches, and the quiet detector is reported as 'smoke no longer reaches it', never as 'fire out'.")], ["/alarm/fire_fans_off", "/paradox"]),
         C("bad-data", "detection", "Readings that cannot be trusted", "bounded", "bounded", [
@@ -110,7 +115,8 @@ def cells(out_dir: str) -> list[dict]:
             reading("That the canister supplied its own oxygen is our reading of what the device is.")], ["/lessons"]),
         C("lingering", "response", "Smoke and gases that stay after the flame", "evidence", "gap", [
             q(MIR, "Over the next several hours, the station’s life support system cleared the smoke and life returned to normal aboard Mir", "Mir, 1997"),
-            q(BRIEF, "Considerable clean-up will be required after all fire events, minor or major.", "NASA's technical brief")], ["/lessons"]),
+            {"kind": "data", "id": "recorded_linger"},
+            q(BRIEF, "Considerable clean-up will be required after all fire events, minor or major.", "NASA's technical brief")], ["/lessons", "/alarm"]),
     ]
 
 

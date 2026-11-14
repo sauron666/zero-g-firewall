@@ -252,6 +252,10 @@ def reported_items(out_dir: str) -> dict[str, dict]:
                                          "was half-way to its peak after %g s, and peaked after %g s. The radiometers were back at baseline %g s after ignition."
                                          % (sc["fire"]["first_above_before_s"], sc["fire"]["half_s"], sc["fire"]["peak_s"], rc["derived"]["flame"]["until_t"]),
                                  "ledger_seq": src["ledger_seq"], "sha256": src["sha256"]}
+        out["recorded_linger"] = {"klass": "derived", "accession": "PSI-100", "link": "/alarm",
+                                  "text": "In the Saffire-III recording the detector still read %g at the end of the file, %g s after the radiometers were back at baseline. Before the tests it had read %g or less."
+                                          % (sc["fire"]["last"], round(sc["fire"]["last_s"] - rc["derived"]["flame"]["until_t"]), sc["quiet"]["max"]),
+                                  "ledger_seq": src["ledger_seq"], "sha256": src["sha256"]}
     return out
 
 
