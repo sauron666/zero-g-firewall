@@ -221,8 +221,8 @@
    "klass": "literature"
   },
   "rank_features.json": {
-   "sha256": "3f940db501d0411588a66282aa4f0f90e80fc1686bf7415543ac74034756a137",
-   "bytes": 45261,
+   "sha256": "add5644d97289174c38d51ba5c6329010cd79f160f0ecca549d9fe29cda339c8",
+   "bytes": 46997,
    "klass": "derived"
   },
   "index.json": {
@@ -404,5 +404,5 @@
  "brand": "Zero-G Firewall",
  "team": "The Rule of Flame",
  "mascot": "ISKRA",
- "built_at_utc": "2026-11-14T14:06:18Z"
+ "built_at_utc": "2026-11-14T14:14:00Z"
 }

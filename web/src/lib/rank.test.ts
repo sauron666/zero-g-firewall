@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalise, rankAll, stability } from "./rank";
+import { comparability, normalise, rankAll, stability } from "./rank";
 import type { RankDoc, RankItem } from "./types";
 
 const item = (accession: string, a: number, b: number, lensA = 0): RankItem => ({
@@ -40,5 +40,24 @@ describe("ranking", () => {
     expect(a.get("PSI-3")!.top + a.get("PSI-4")!.top).toBeCloseTo(1, 12);      // they trade the third place
     expect(a.get("PSI-3")!.top).toBeGreaterThan(0.2);
     expect(a.get("PSI-3")!.top).toBeLessThan(0.8);
+  });
+});
+
+describe("comparability", () => {
+  const rec = (acronym: string, over: Partial<RankItem> = {}): RankItem => ({ ...item(acronym, 0, 0), acronym, family: "MSG", hardware: "Microgravity Science Glovebox", ...over });
+  const on = { pillars: [], oxygen: true, pressure: true, flow: true, outcome: true };
+  it("says nothing about one record and nothing alarming about two of a kind", () => {
+    expect(comparability([rec("A")])).toEqual([]);
+    const c = comparability([rec("A"), rec("B")]);
+    expect(c.filter((x) => x.level === "warn")).toEqual([]);
+    expect(c[0].text).toMatch(/^Same hardware family \(Microgravity Science Glovebox\)/);
+  });
+  it("names each difference that makes numbers incomparable", () => {
+    const c = comparability([rec("BASS-II", { facets: on }), rec("FLEX", { kind: "droplet", family: "CIR_MDCA" }), rec("Tower", { gravity: "ground", rows: 0, family: "GROUND" })]).map((x) => x.text);
+    expect(c[0]).toBe("Different things burn: BASS-II and Tower (solid materials); FLEX (liquid droplets). A value of one is not on the scale of the other.");
+    expect(c[1]).toMatch(/^Tower is ground work at 1 g; BASS-II and FLEX were taken in free fall\./);
+    expect(c).toContain("The table of FLEX and Tower does not state oxygen; BASS-II does.");
+    expect(c).toContain("Tower has no experimental table in PSI, so its factors rest on the record's text alone.");
+    expect(c[c.length - 1]).toMatch(/^Different hardware/);
   });
 });

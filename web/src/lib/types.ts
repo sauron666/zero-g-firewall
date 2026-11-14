@@ -336,6 +336,9 @@ export interface RankItem {
   title: string;
   gravity: "micro" | "ground" | "unknown";
   kind: string;
+  /** the hardware as NASA names it, and the family this site sorts it into */
+  hardware?: string;
+  family?: string;
   rows: number;
   /** what the record is about and what its table states, each by a written rule (facet_rules) */
   facets: RankFacets;

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { href } from "../app/router";
 import { useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
-import { normalise, rankAll, stability } from "../lib/rank";
+import { comparability, normalise, rankAll, stability } from "../lib/rank";
 import type { RankDoc } from "../lib/types";
 import { emit } from "../mascot/bus";
 import { PageProps, stub } from "./stubs";
@@ -74,7 +74,7 @@ export function Rank({ route, manifest }: PageProps) {
                   <span className="rank__bar" title={`${(100 * r.total).toFixed(1)} of 100`}><i style={{ width: pct(r.total) }} /><span className="num">{(100 * r.total).toFixed(0)}</span></span>
                   <span className="r num rec__sub" title={s ? `Rank between ${s.best} and ${s.worst} over ${DRAWS} draws` : ""}>{s ? (s.top > 0 ? share(s.top) : `${s.best} to ${s.worst}`) : ""}</span>
                   <span className="r"><input type="checkbox" aria-label={`Compare ${r.item.accession}`} checked={picked.includes(r.item.accession)}
-                    onChange={(e) => setPicked((p) => (e.target.checked ? [...p, r.item.accession].slice(-3) : p.filter((x) => x !== r.item.accession)))} /></span>
+                    onChange={(e) => setPicked((p) => (e.target.checked ? [...p, r.item.accession].slice(-4) : p.filter((x) => x !== r.item.accession)))} /></span>
                 </div>
                 {isOpen && (
                   <div className="rank__detail">
@@ -127,6 +127,9 @@ export function Rank({ route, manifest }: PageProps) {
       {cmp.length >= 2 && (
         <section>
           <div className="section__head"><h2 className="h2">Side by side</h2><button type="button" className="btn btn--quiet btn--sm" onClick={() => setPicked([])}>Clear</button></div>
+          <ul className="cautions" aria-label="Before comparing">
+            {comparability(cmp.map((r) => r.item)).map((c, i) => <li key={i} className={`caution caution--${c.level}`}><span className="tag">{c.level === "warn" ? "Mind this" : "Note"}</span><span>{c.text}</span></li>)}
+          </ul>
           <div className="table-wrap">
             <table className="table">
               <thead><tr><th>Factor</th>{cmp.map((r) => <th key={r.item.accession}><a href={href(`/evidence/${r.item.accession}`)}>{r.item.acronym || r.item.accession}</a> · rank {r.rank}</th>)}</tr></thead>

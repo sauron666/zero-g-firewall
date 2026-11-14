@@ -135,7 +135,7 @@ def build(out_dir: str) -> dict:
             by_lens[lens["id"]] = {"atmosphere": {"score": round(best, 3), "why": why}, "gravity": {"score": gs, "why": gw}}
         facets = {"pillars": pillars_of(i.get("title"), i.get("objective")),
                   "oxygen": bool(pts), "pressure": any(p["p"] is not None for p in pts), "flow": bool(flow_cols), "outcome": bool(out_cols)}
-        items.append({"accession": acc, "acronym": i.get("acronym") or "", "title": i["title"], "gravity": i["gravity"], "kind": kind, "rows": rows, "facets": facets, "shared": shared, "by_lens": by_lens})
+        items.append({"accession": acc, "acronym": i.get("acronym") or "", "title": i["title"], "gravity": i["gravity"], "kind": kind, "hardware": i.get("hardware") or "", "family": i.get("hardware_family") or "OTHER", "rows": rows, "facets": facets, "shared": shared, "by_lens": by_lens})
     facet_rules = {"pillars": {pid: why for pid, _, _, why in PILLARS}, "oxygen": "its table has a row on the atmosphere map", "pressure": "at least one of those rows states pressure",
                    "flow": "its table has a column for the ambient air flow", "outcome": "its table has a column that says what happened"}
     doc = {"klass": "derived", "facet_rules": facet_rules,

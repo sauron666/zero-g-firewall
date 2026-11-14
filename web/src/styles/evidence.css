@@ -233,3 +233,8 @@ button.cov__cell:hover, button.cov__cell:focus-visible { outline: 2px solid var(
   .cov__tick--wide { left: auto; right: 0; transform: none; }
 }
 
+/* Cautions above a side-by-side comparison: drawn with a solid or dotted bar, not coloured. */
+.cautions { display: grid; gap: 6px; margin: 0 0 14px; padding: 0; list-style: none; }
+.caution { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 10px; align-items: baseline; padding: 8px 12px; border: 1px solid var(--hairline); border-left: 3px solid var(--ink); border-radius: var(--radius); background: var(--surface); font-size: var(--t-13); line-height: 1.45; }
+.caution--note { border-left-style: dotted; color: var(--ink-2); }
+@media (max-width: 760px) { .caution { grid-template-columns: minmax(0, 1fr); gap: 4px; } }

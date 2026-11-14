@@ -68,3 +68,38 @@ export function stability(doc: RankDoc, lens: string, weights: Record<string, nu
   acc.forEach((s) => { s.top /= draws; });
   return acc;
 }
+
+export interface Caution { level: "warn" | "note"; text: string }
+const FORM: Record<string, string> = { solid: "solid materials", droplet: "liquid droplets", gas: "gas flames", smoke: "smoke particles", emulator: "a burner that stands in for a solid" };
+const name = (i: RankItem) => i.acronym || i.accession;
+const list = (xs: string[]) => (xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
+
+/**
+ * What a reader should know before setting records side by side: different things burned, flight against ground,
+ * a table that does not state what the other one states. Each caution is read from the records' own fields.
+ */
+export function comparability(items: RankItem[]): Caution[] {
+  const out: Caution[] = [];
+  if (items.length < 2) return out;
+  const forms = new Map<string, string[]>();
+  items.forEach((i) => forms.set(i.kind, [...(forms.get(i.kind) ?? []), name(i)]));
+  if (forms.size > 1) out.push({ level: "warn", text: `Different things burn: ${Array.from(forms.entries()).map(([k, v]) => `${list(v)} (${FORM[k] ?? k})`).join("; ")}. A value of one is not on the scale of the other.` });
+  const ground = items.filter((i) => i.gravity === "ground").map(name);
+  const flight = items.filter((i) => i.gravity === "micro").map(name);
+  if (ground.length && flight.length) out.push({ level: "warn", text: `${list(ground)} ${ground.length === 1 ? "is" : "are"} ground work at 1 g; ${list(flight)} ${flight.length === 1 ? "was" : "were"} taken in free fall. Buoyancy changes the flame, so the conditions do not carry over one to one.` });
+  for (const [key, word] of [["oxygen", "oxygen"], ["pressure", "pressure"], ["flow", "the air flow"], ["outcome", "what happened in each test"]] as const) {
+    const yes = items.filter((i) => i.facets[key]).map(name);
+    const no = items.filter((i) => !i.facets[key]).map(name);
+    if (yes.length && no.length) out.push({ level: "warn", text: `The table of ${list(no)} does not state ${word}; ${list(yes)} ${yes.length === 1 ? "does" : "do"}.` });
+  }
+  const none = items.filter((i) => i.rows === 0).map(name);
+  if (none.length) out.push({ level: "warn", text: `${list(none)} ${none.length === 1 ? "has" : "have"} no experimental table in PSI, so ${none.length === 1 ? "its" : "their"} factors rest on the record's text alone.` });
+  const fams = new Set(items.map((i) => i.family ?? "OTHER"));
+  if (fams.size === 1 && !fams.has("OTHER") && !fams.has("GROUND")) {
+    const hw = Array.from(new Set(items.map((i) => i.hardware).filter(Boolean)));
+    out.push({ level: "note", text: `Same hardware family${hw.length ? ` (${hw.slice(0, 2).join("; ")})` : ""}: chamber, diagnostics and procedure are close, which makes a comparison fairer.` });
+  } else if (fams.size > 1) {
+    out.push({ level: "note", text: "Different hardware: chamber size, ignition and diagnostics differ between these records." });
+  }
+  return out;
+}

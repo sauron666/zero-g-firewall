@@ -1,14 +1,14 @@
 # Coverage of the plan, feature by feature
 
-Checked on 14 November 2026 at 16:09 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
+Checked on 14 November 2026 at 16:15 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
 
 | Priority | Features | Done | Partial | Not built |
 |---|---|---|---|---|
-| P0 | 28 | 26 | 2 | 0 |
+| P0 | 28 | 28 | 0 | 0 |
 | P1 | 59 | 35 | 8 | 16 |
 | P2 | 38 | 2 | 9 | 27 |
 | P3 | 5 | 0 | 0 | 5 |
-| All | 130 | 63 | 19 | 48 |
+| All | 130 | 65 | 17 | 48 |
 
 ## Definition of done (specification, section 0)
 
@@ -59,7 +59,7 @@ Checked on 14 November 2026 at 16:09 Sofia time against the 130 features of the 
 | B02 | P0 | done | "What varied / what stayed constant" per investigation, computed from the real table |  |
 | B03 | P0 | done | Explorer with search and facets (pillar, fuel phase, hardware family, platform, gravity regime, oxygen, pressure, flow, data richness) | search, scope, flight or ground, hardware, and facets for pillar (three written rules), what burns, and what the table states (oxygen, pressure, air flow, outcome); the rules are shown under the facets; data richness is a sort order, not a facet |
 | B04 | P0 | done | Ranking engine, deterministic and transparent | ten factors, five missions, weights, stability |
-| B05 | P0 | **partial** | Compare two to four investigations | up to three records compared factor by factor; no shared-hardware or comparability warnings |
+| B05 | P0 | done | Compare two to four investigations | up to four records side by side, factor by factor, under cautions read from the records: different things burning, flight against ground, a table that does not state what another states, no table, same or different hardware |
 | B06 | P0 | done | Atmosphere Envelope Map (oxygen fraction against pressure) |  |
 | B07 | P0 | done | Gap Explorer | six measured gaps with plans, and a coverage chart of fuel form by oxygen for free fall and for lunar and Martian gravity (empty), with a table view, receipts and a count of the rows that cannot be placed |
 | B08 | P0 | done | Mission lens | five missions re-rank; choosing one (or arriving from the ranking page) marks its atmosphere on the map with the window that counts as near; a spacecraft in transit is read under the station or the rover and lander lens |
@@ -140,7 +140,7 @@ Checked on 14 November 2026 at 16:09 Sofia time against the 130 features of the 
 | H09 | P2 | **not built** | Orbital motion extras and live ISS air as flame context |  |
 | H10 | P2 | **not built** | Lines in English and Bulgarian |  |
 | I01 | P0 | done | Mission Overview with real counts only |  |
-| I02 | P0 | **partial** | About, Methods, Limitations, Scope, AI disclosure and Sources pages | Method and limits page with classes, limits and AI use; sources are on the Incidents page; no separate scope page |
+| I02 | P0 | done | About, Methods, Limitations, Scope, AI disclosure and Sources pages | Method and limits page with the eight classes, limits, in scope and out of scope, the ten official sources with ledger entries and the pages that use them, AI use and the build |
 | I03 | P0 | done | Downloads with a data dictionary | Downloads on the Data page: 22 tidy tables, long file, conditions file, data dictionary, column map |
 | I04 | P0 | done | Offline mode | a service worker keeps the shell, the loaded scripts and fonts and every data file; tested by a second visit with the server stopped (home, an answer, a record) |
 | I05 | P1 | **not built** | English first |  |
