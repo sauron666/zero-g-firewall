@@ -1,6 +1,6 @@
 # Implementation status
 
-Updated: 14 November 2026, 13:31 Sofia time. Kept truthful: nothing is listed as working without a passing test or a visible result.
+Updated: 14 November 2026, 13:37 Sofia time. Kept truthful: nothing is listed as working without a passing test or a visible result.
 
 ## Working
 
@@ -15,6 +15,7 @@ Updated: 14 November 2026, 13:31 Sofia time. Kept truthful: nothing is listed as
 | Evidence ledger page | Lists all 1,219 entries; re-computes the hash chain in the browser from the raw ledger (tested against the real ledger) and checks every data file against the manifest. |
 | Literature layer and quotation check (`pipeline/zgf/literature.py`, `claims.py`) | Text of the stored NASA documents by page or section; every quotation the site shows is searched in the stored text at build time. 25 of 25 found. |
 | Myths and evidence | NASA's three misconceptions (Researcher's Guide, p. 35), each against NASA's documents and PSI tables: where it held, where it may fail, what is open. Readings of our own are labelled. |
+| Rank for a mission | Five missions; ten factors per record computed by stated rules (`pipeline/zgf/rank.py`); weights the reader can change; score breakdown with the reason for each factor; stability over 500 seeded weight changes; side-by-side comparison. 5 tests. A score orders reading; it is not a probability. |
 | Data and models page | Report for the PSI curators, the model check with a parity plot, and the list of data files with hashes. |
 | Closed-form physics and equilibrium thermochemistry | 16 Python tests reproduce the check values (LUCI spin, buoyant flow ranges, Coriolis fractions, normoxic curve, cabin bounds, methane flame temperatures). |
 | Tracer-transport solver, browser and Python | The TypeScript solver matches the Python reference on three golden cases to 1e-9; mass balance, positivity, walls and open ends are tested. 20 TypeScript tests. |
@@ -27,7 +28,7 @@ Updated: 14 November 2026, 13:31 Sofia time. Kept truthful: nothing is listed as
 
 ## Data is in, pages not built yet (nothing is shown in their place)
 
-Ranking with stability, compare, gaps and plans, Official Resources Coverage (4 of 10 resources are used so far), incident timeline, Earth applications, sensor inventory, tidy CSV exports.
+Gaps and plans, Official Resources Coverage (4 of 10 resources are used so far), incident timeline, Earth applications, sensor inventory, tidy CSV exports.
 
 ## Next in the build order
 

@@ -103,3 +103,24 @@ a.rec:hover { background: var(--raised); }
 .ev--data { font-size: var(--t-14); color: var(--ink); }
 .ev--reading { font-size: var(--t-13); color: var(--ink-2); max-width: 70ch; }
 .ev__tag { display: inline-block; margin-right: 8px; padding: 1px 7px; border: 1px dotted var(--ink-3); border-radius: var(--radius); font-size: var(--t-12); color: var(--ink-2); }
+
+/* Ranking */
+.rankgrid { display: grid; grid-template-columns: minmax(0, 2.3fr) minmax(260px, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 1080px) { .rankgrid { grid-template-columns: minmax(0, 1fr); } }
+.rankrow { display: grid; grid-template-columns: 34px minmax(0, 2.4fr) minmax(110px, 1fr) 96px 64px; gap: 6px 14px; align-items: center; padding: 10px 4px; }
+.rankrow--head { font-size: var(--t-12); color: var(--ink-3); border-bottom: 1px solid var(--axis); padding: 6px 4px; }
+.rankrow .r { text-align: right; }
+.rankitem { border-bottom: 1px solid var(--hairline); }
+.rankitem--cut { border-bottom: 2px solid var(--ink-2); }
+.rank__no { color: var(--ink-3); }
+.rank__name { display: grid; grid-template-columns: 12px minmax(0, 1fr); gap: 10px; align-items: baseline; text-align: left; background: none; border: 0; padding: 4px 0; color: var(--ink); font: inherit; cursor: pointer; min-height: 24px; }
+.rank__name:hover b { text-decoration: underline; text-underline-offset: 3px; }
+.rank__bar { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 30px; align-items: center; gap: 8px; }
+.rank__bar::before { content: ""; grid-column: 1; grid-row: 1; height: 8px; border-radius: 4px; background: var(--sunken); }
+.rank__bar > i { grid-column: 1; grid-row: 1; height: 8px; border-radius: 4px; background: var(--ink-2); }
+.rank__bar > .num { text-align: right; font-weight: 700; }
+.rank__detail { padding: 4px 4px 16px 48px; }
+@media (max-width: 760px) { .rankrow { grid-template-columns: 26px minmax(0, 1fr) 84px; } .rankrow > :nth-child(4), .rankrow > :nth-child(5) { display: none; } .rank__detail { padding-left: 4px; } }
+.wslider { display: grid; grid-template-columns: minmax(0, 1fr) 42px; gap: 2px 8px; align-items: center; font-size: var(--t-13); padding: 5px 0; }
+.wslider .num { text-align: right; color: var(--ink-2); }
+.wslider input { grid-column: 1 / -1; width: 100%; accent-color: var(--ink-2); height: 18px; }

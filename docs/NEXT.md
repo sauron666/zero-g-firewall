@@ -10,7 +10,7 @@ Acceptance rows (Q01 to Q35) are in `docs/pack/04_TESTS_SUBMISSION_PLAYBOOK.md`;
 2. Myth card 2: "a fire will self-extinguish if ventilation is shut off": where it held, where NASA's sources say it may not, what is open. *(done: Myths and evidence)*
 3. The same question in the evidence Q&A, every sentence cited to a row or a page.
 4. Atmosphere map: real test points, the lunar-habitat region, the empty partial-gravity cell, the Apollo 1 historical point, the ISS point live when the feed is up. *(done, except the live point)*
-5. Ranking for a lunar habitat with the breakdown and the stability figure.
+5. Ranking for a lunar habitat with the breakdown and the stability figure. *(done)*
 6. What varied in one investigation, and the sensor inventory. *(what varied: done on every record card)*
 7. Parity plot of the flame model against NASA's own `Tad` column, with N and error. *(done: 587 rows, 2.1 K mean)*
 8. "A fan you cannot switch off". *(done: Flame physics page)*
@@ -40,7 +40,7 @@ The raw cache is not in the repository. To re-derive, put the team's core archiv
 
 ## Gate 2: what is left of the challenge core
 
-1. **Ranking for a mission** (page Rank): lenses ISS, lunar habitat, Mars habitat, rover, suit. Factors computed from artifacts that exist: rows near the lens atmosphere (`envelope.json`), kind of fuel (solid, liquid, gas), whether flow or ventilation varied (`profiles.json`), whether outcomes are recorded, detection relevance, data held, curator cautions. Show the breakdown, sliders for weights, and stability under seeded weight perturbations. Compare two or three records side by side. Never a probability (Q08, Q09, Q32).
+1. ~~Ranking for a mission~~ done (`pipeline/zgf/rank.py`, `web/src/lib/rank.ts`, page Rank). Still open there: a nearest-evidence finder at row level.
 2. **Gaps and plans** (page Gaps): no partial-gravity rows; no solid material with pressure; rows near each crew atmosphere; then the planned experiments from the Glenn pages in the ledger (FM2, FLARE, SoFIE) with checked quotations, and LUCI from its NTRS abstract.
 3. **Official Resources Coverage and Incidents and Earth uses** (page Lessons): Apollo 1, Apollo 13, Mir, the three Spinoff articles and the ScienceCast, each with checked sentences; this takes the counter from 4 to 10 of 10. Content spec: `docs/pack/10_OFFICIAL_RESOURCES_MAP.md` section 4. Add each use to `USES` in `pipeline/zgf/claims.py`.
 4. **Evidence Q&A, deterministic first** (page Ask): chunks from record texts, guide pages, abstracts, findings and myth items into `index.json`; BM25 in the browser; extractive answers with citations; abstention; the three misconceptions answered from `myths.json` (Q12, Q13).

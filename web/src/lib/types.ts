@@ -316,3 +316,32 @@ export interface MythsDoc {
   quotes_verified: number;
   items: MythCard[];
 }
+
+/** rank_features.json: factors per record, lenses with default weights. The browser combines them. */
+export interface RankFactor { score: number; why: string }
+export interface RankLens {
+  id: string;
+  name: string;
+  gravity: "micro" | "partial" | "any";
+  about: string;
+  atmospheres: [string, number, number][];
+  weights: Record<string, number>;
+}
+export interface RankItem {
+  accession: string;
+  acronym: string;
+  title: string;
+  gravity: "micro" | "ground" | "unknown";
+  kind: string;
+  rows: number;
+  shared: Record<string, RankFactor>;
+  by_lens: Record<string, Record<string, RankFactor>>;
+}
+export interface RankDoc {
+  klass: Klass;
+  note: string;
+  near_rule: string;
+  factors: { id: string; label: string; rule: string }[];
+  lenses: RankLens[];
+  items: RankItem[];
+}
