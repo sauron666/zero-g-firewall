@@ -20,7 +20,8 @@
   "validation_mean_abs_K": 2.12,
   "quotes": 25,
   "quotes_verified": 25,
-  "files_read": 60
+  "files_read": 75,
+  "passages": 464
  },
  "artifacts": {
   "model/atmospheres.json": {
@@ -209,8 +210,8 @@
    "klass": "observed"
   },
   "ledger_index.json": {
-   "sha256": "e3f43989c7e59f5993e2b6c02942df3d6b0d7c83fd23adb0a32d508acecb9d15",
-   "bytes": 1276,
+   "sha256": "6ccf067213b86a38972e26c2116c4b4d6b5d58f65c198ac16e64b067636c038c",
+   "bytes": 1351,
    "klass": "observed"
   },
   "myths.json": {
@@ -222,10 +223,15 @@
    "sha256": "a3a47e17c24c1253a81d6bbd67d77fca3aa392edffba5e344fabde48a0c9a519",
    "bytes": 42402,
    "klass": "derived"
+  },
+  "index.json": {
+   "sha256": "eace3799cee5a7bc268a67a73cb0ffbab557e997710729ea3d25ff960a42ea9b",
+   "bytes": 397410,
+   "klass": "derived"
   }
  },
  "brand": "Zero-G Firewall",
  "team": "The Rule of Flame",
  "mascot": "ISKRA",
- "built_at_utc": "2026-11-14T11:37:26Z"
+ "built_at_utc": "2026-11-14T11:44:41Z"
 }

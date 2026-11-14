@@ -8,7 +8,7 @@ Acceptance rows (Q01 to Q35) are in `docs/pack/04_TESTS_SUBMISSION_PLAYBOOK.md`;
 
 1. Overview with real counts and the "fetched from NASA" time. *(done)*
 2. Myth card 2: "a fire will self-extinguish if ventilation is shut off": where it held, where NASA's sources say it may not, what is open. *(done: Myths and evidence)*
-3. The same question in the evidence Q&A, every sentence cited to a row or a page.
+3. The same question in the evidence Q&A, every sentence cited to a row or a page. *(done: Ask the evidence)*
 4. Atmosphere map: real test points, the lunar-habitat region, the empty partial-gravity cell, the Apollo 1 historical point, the ISS point live when the feed is up. *(done, except the live point)*
 5. Ranking for a lunar habitat with the breakdown and the stability figure. *(done)*
 6. What varied in one investigation, and the sensor inventory. *(what varied: done on every record card)*
@@ -43,7 +43,7 @@ The raw cache is not in the repository. To re-derive, put the team's core archiv
 1. ~~Ranking for a mission~~ done (`pipeline/zgf/rank.py`, `web/src/lib/rank.ts`, page Rank). Still open there: a nearest-evidence finder at row level.
 2. **Gaps and plans** (page Gaps): no partial-gravity rows; no solid material with pressure; rows near each crew atmosphere; then the planned experiments from the Glenn pages in the ledger (FM2, FLARE, SoFIE) with checked quotations, and LUCI from its NTRS abstract.
 3. **Official Resources Coverage and Incidents and Earth uses** (page Lessons): Apollo 1, Apollo 13, Mir, the three Spinoff articles and the ScienceCast, each with checked sentences; this takes the counter from 4 to 10 of 10. Content spec: `docs/pack/10_OFFICIAL_RESOURCES_MAP.md` section 4. Add each use to `USES` in `pipeline/zgf/claims.py`.
-4. **Evidence Q&A, deterministic first** (page Ask): chunks from record texts, guide pages, abstracts, findings and myth items into `index.json`; BM25 in the browser; extractive answers with citations; abstention; the three misconceptions answered from `myths.json` (Q12, Q13).
+4. ~~Evidence Q&A~~ done (`pipeline/zgf/index.py`, `web/src/lib/search.ts`, `lib/ai.ts`, page Ask): offline engine, checker, connectors for local and cloud models, hybrid. Still open: try the connectors against live services (a local Ollama and one cloud key), an evaluation scorecard (gold, adversarial, abstention sets) shown on the page, and an in-browser model if time allows.
 5. Tidy CSV exports with a data dictionary; sensor and hardware inventory from metadata and the guide's appendix.
 
 ## Gate 3: differentiators

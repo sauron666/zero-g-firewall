@@ -3,6 +3,7 @@ import { NAV, ALL_ITEMS } from "./nav";
 import { href, useRoute } from "./router";
 import { Manifest, fmtUtc, useData } from "../lib/data";
 import { ReceiptProvider } from "../components/Receipt";
+import { loadSettings, MODE_LABEL, onSettings } from "../lib/ai";
 import { IconClose, IconMenu, IconMoon, IconSun } from "../components/icons";
 import { Home } from "../pages/Home";
 import { Paradox } from "../pages/Paradox";
@@ -58,6 +59,8 @@ export function App() {
   const manifest = useData<Manifest>("manifest.json");
   const [theme, setTheme] = useState<Theme>(readTheme);
   const [open, setOpen] = useState(false);
+  const [aiMode, setAiMode] = useState(() => loadSettings().mode);
+  useEffect(() => onSettings(() => setAiMode(loadSettings().mode)), []);
   const nasa = manifest.data?.nasa ?? null;
   const brand = manifest.data?.brand ?? "Zero-G Firewall";
   const team = manifest.data?.team ?? "The Rule of Flame";
@@ -128,7 +131,7 @@ export function App() {
             </a>
             <a className="chip chip--wide" href={href("/ask")} title="How answers are produced">
               <span className="dot dot--ok" />
-              Evidence engine: offline
+              Evidence engine: {MODE_LABEL[aiMode]}
             </a>
             <button className="icon-btn" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label={theme === "dark" ? "Switch to the light theme" : "Switch to the dark theme"}>
               {theme === "dark" ? <IconSun /> : <IconMoon />}

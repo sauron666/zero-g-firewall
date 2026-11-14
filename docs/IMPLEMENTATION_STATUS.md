@@ -1,6 +1,6 @@
 # Implementation status
 
-Updated: 14 November 2026, 13:37 Sofia time. Kept truthful: nothing is listed as working without a passing test or a visible result.
+Updated: 14 November 2026, 13:44 Sofia time. Kept truthful: nothing is listed as working without a passing test or a visible result.
 
 ## Working
 
@@ -16,6 +16,8 @@ Updated: 14 November 2026, 13:37 Sofia time. Kept truthful: nothing is listed as
 | Literature layer and quotation check (`pipeline/zgf/literature.py`, `claims.py`) | Text of the stored NASA documents by page or section; every quotation the site shows is searched in the stored text at build time. 25 of 25 found. |
 | Myths and evidence | NASA's three misconceptions (Researcher's Guide, p. 35), each against NASA's documents and PSI tables: where it held, where it may fail, what is open. Readings of our own are labelled. |
 | Rank for a mission | Five missions; ten factors per record computed by stated rules (`pipeline/zgf/rank.py`); weights the reader can change; score breakdown with the reason for each factor; stability over 500 seeded weight changes; side-by-side comparison. 5 tests. A score orders reading; it is not a probability. |
+| Ask the evidence, offline engine | 464 passages from records, table profiles, curator notes, the guide, NASA pages and report abstracts (`pipeline/zgf/index.py`); BM25 in the browser; answers made only of sentences taken from the passages, each with its source; abstains on questions the evidence does not cover. Tested. |
+| Answer checker for language models | Every model sentence must cite a passage that was given, its numbers must be in that passage, and it may give no verdict or probability; anything else is removed and shown as removed. Tested, including a poisoned passage. |
 | Data and models page | Report for the PSI curators, the model check with a parity plot, and the list of data files with hashes. |
 | Closed-form physics and equilibrium thermochemistry | 16 Python tests reproduce the check values (LUCI spin, buoyant flow ranges, Coriolis fractions, normoxic curve, cabin bounds, methane flame temperatures). |
 | Tracer-transport solver, browser and Python | The TypeScript solver matches the Python reference on three golden cases to 1e-9; mass balance, positivity, walls and open ends are tested. 20 TypeScript tests. |
@@ -26,13 +28,19 @@ Updated: 14 November 2026, 13:37 Sofia time. Kept truthful: nothing is listed as
 | Flame physics page | Atmospheres chart with table view, "a fan you cannot switch off", spinning-platform calculator, cabin bounds. |
 | Method and limits page | Classes, limits, AI use. |
 
+## Prototype (built, tested against formats, not against live services)
+
+| Part | State |
+|---|---|
+| Local, cloud and hybrid model modes of Ask the evidence | Connectors for Anthropic, OpenAI, Google Gemini and any OpenAI-compatible endpoint (which covers local servers such as Ollama, LM Studio and llama.cpp). Request and reply formats are unit-tested with a stand-in for the network; the hybrid path (local drafts, cloud checks, verifier judges) is tested the same way. **No live model was called from the build environment**: it has no keys and no route to those services. An in-browser model (WebGPU) is not built. |
+
 ## Data is in, pages not built yet (nothing is shown in their place)
 
 Gaps and plans, Official Resources Coverage (4 of 10 resources are used so far), incident timeline, Earth applications, sensor inventory, tidy CSV exports.
 
 ## Next in the build order
 
-Alarm trust lab (synthetic, signed telemetry; triage of smoke, dust, sensor fault, tampering), evidence Q&A (offline engine; local and cloud models; cross-checking), the falsification engine, the companion, ISS live telemetry, matrix and playbooks, judge tour.
+Alarm trust lab (synthetic, signed telemetry; triage of smoke, dust, sensor fault, tampering), the falsification engine, an evaluation scorecard for the evidence engine (gold, adversarial and abstention sets), the companion, ISS live telemetry, matrix and playbooks, judge tour.
 
 ## Simulated or illustrative by design
 

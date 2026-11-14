@@ -345,3 +345,15 @@ export interface RankDoc {
   lenses: RankLens[];
   items: RankItem[];
 }
+
+/** index.json: passages for retrieval, each with its evidence class, a link into the site and a receipt. */
+export interface Passage {
+  id: string;
+  k: Klass;
+  t: string;      // where it is from
+  x: string;      // the text
+  l?: string;     // a page of this site
+  r?: { ledger_seq: number; sha256: string; url: string };
+  loc?: string;
+}
+export interface IndexDoc { klass: Klass; note: string; count: number; chunks: Passage[] }
