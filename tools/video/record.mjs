@@ -156,7 +156,7 @@ async function scene(name, n, setup, per, stills = []) {
 await scene("question", 108, async () => {
   await cap("In a NASA test, a flame went out two seconds after its airflow was cut.");
   const b = await boxOf(".fanswitch");
-  if (b.y + b.height > 570) await scrollToY(b.y + b.height - 564);        // keep the switch clear of the caption
+  if (b.y + b.height > 600) await scrollToY(b.y + b.height - 596);        // keep the switch clear of the caption, and as much of the title as the page allows
   const [x, y] = await centre(".fanswitch__track");
   return [glide(x, y, 20, 44)];
 }, async (i) => {
