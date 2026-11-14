@@ -2,9 +2,18 @@
 
 **Live site:** https://sauron666.github.io/zero-g-firewall/ (built from `main` by GitHub Actions; works offline once loaded, needs no key and no server)
 
-**Kill the fans?** Stop the air and a fire in free fall should starve: when NASA cut the airflow under a flame in the BASS-II experiment, it went out within two seconds. NASA's own guide still lists "A fire will self-extinguish if ventilation is shut off" as a misconception, and on the Moon gravity keeps the air moving.
+**Kill the fans?** In NASA's BASS-II experiment a flame went out within two seconds once its airflow was cut. NASA's own guide still lists "A fire will self-extinguish if ventilation is shut off" as a misconception, and on the Moon gravity is a fan nobody can switch off.
 
-Zero-G Firewall makes NASA's microgravity combustion evidence findable, ranked and checkable, and asks the next question: can you trust the alarm that shuts off your air?
+Zero-G Firewall makes NASA's microgravity combustion data findable, ranked and checkable, shows where the measurements end, and asks the next question: can you trust the alarm that shuts off your air?
+
+## What it does (build of 14 November 2026)
+
+- **Mission control.** The opening page: six readings, two flame windows with one fan switch, and a panel for each result. Every number is read from the build's data files.
+- **Explore.** 24 combustion investigations from NASA's PSI repository with their tables, a receipt on every row and curator notes; an atmosphere map of 887 test rows by oxygen and pressure; the nearest real tests to a design point, as a CSV; a coverage chart showing that solid-material rows stop at 22.2% oxygen, that no row states more than 40%, and that none was taken in lunar or Martian gravity; six measured gaps beside the experiments NASA plans.
+- **Compare.** A ranking for five missions from ten stated factors, with a check of its stability and a brief for the chosen mission; NASA's three misconceptions with both sides; a fire behaviour matrix (22 behaviours, 17 measured in free fall, none in lunar gravity), the controls each record informs, and a response playbook taken from NASA documents.
+- **Simulate.** A flame-temperature model checked against NASA's own column (587 rows, mean gap 2.1 K); the d² law checked against four columns of the FLEX table (152 of 195 tests within 10%, nothing fitted); a transport model of one cabin with the fans on and off; an alarm trust lab with nine synthetic situations and signed readings.
+- **Search.** ISKRA, the companion, answers questions in plain words on every page: numbers are computed from NASA's tables and every sentence carries its source. No key, no network. A public scorecard reports 35 of 36 questions passed.
+- **Verify.** 1,219 files fetched from NASA in a hash-chained ledger that the browser recomputes; a tamper test; a page that attacks the site's own conclusions with NASA's evidence.
 
 NASA Space Apps Challenge 2026, Sofia. Challenge: *Flame in Freefall: SI-Powered Fire Safety Insights from Microgravity Combustion Data*. Team: The Rule of Flame.
 
