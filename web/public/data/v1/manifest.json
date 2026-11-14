@@ -24,29 +24,29 @@
   "files_read": 88,
   "quotes": 139,
   "quotes_verified": 139,
-  "reported_values_checked": 14,
+  "reported_values_checked": 20,
   "droplet_rows_checked": 195,
   "droplet_rows_within_10pct": 152,
   "passages": 577
  },
  "artifacts": {
   "model/atmospheres.json": {
-   "sha256": "80335bf8207ef33b044a2881b38fad981e12f6739165ed634ba8f7ff9a6cd926",
-   "bytes": 7731,
+   "sha256": "9b1d17e670c15c634b7d382764cd0360b05e0d0dac29f4246ca694e3a86b2775",
+   "bytes": 7113,
    "klass": "model"
   },
   "model/scaling.json": {
-   "sha256": "2d1154b679a9b994954072693d41f9bc46d23ab7d42e51981e78b83f3cddc5b5",
+   "sha256": "61b998bdd96c84611bfd817bba3c324cd6e860ef542629cce3a8cc2d855977c5",
    "bytes": 1594,
    "klass": "model"
   },
   "model/platform.json": {
-   "sha256": "77c751f41272766758a0e50f4a076c2a4280965773aaa651292678cb071afe74",
+   "sha256": "8cf344026cf96476e51db519f098cf10c000b8f7dced1eaf4695fd65d4322e0f",
    "bytes": 1015,
    "klass": "model"
   },
   "model/cabin.json": {
-   "sha256": "dfb1e25cb8b048e26896ace999ffde0d2dc00b51553d0d3a816cc8200ee69a2c",
+   "sha256": "60529b8f68476b45d7b4747acd4fc49d4d7492fddd62bd81de2d981914a8b232",
    "bytes": 1231,
    "klass": "model"
   },
@@ -231,8 +231,8 @@
    "klass": "derived"
   },
   "index.json": {
-   "sha256": "5d43c2cd7153915ef8b67901c34e0bfe493eb2465d1cc871dde0ef7b4eae6372",
-   "bytes": 470827,
+   "sha256": "bc3915ae6e4e2a87e7ec0e224b2d256ee8c7070e3bdcd1a42840b46bbab45757",
+   "bytes": 470821,
    "klass": "derived"
   },
   "falsify.json": {
@@ -241,8 +241,8 @@
    "klass": "derived"
   },
   "gaps.json": {
-   "sha256": "748ae932153cd2de6a618d3c0bd014b516b7fa71e395d38fd393c4e0d7498ec3",
-   "bytes": 27821,
+   "sha256": "b5d615a86ad1310bf0b6dc9efab8f3c1e1dc2ac787d22699c7d180f22d5cb666",
+   "bytes": 27832,
    "klass": "derived"
   },
   "lessons.json": {
@@ -416,8 +416,8 @@
    "klass": "observed"
   },
   "reported.json": {
-   "sha256": "a1bac3dbd5eaf208ef5698dcc6f4a2233db61d13262f6384f128b03c36d85400",
-   "bytes": 22221,
+   "sha256": "45bc248013a392de97f42a9274f2d2a460b80e1934a72f42740c0d0ad5296ef3",
+   "bytes": 27589,
    "klass": "literature"
   },
   "inventory.json": {
@@ -429,5 +429,5 @@
  "brand": "Zero-G Firewall",
  "team": "The Rule of Flame",
  "mascot": "ISKRA",
- "built_at_utc": "2026-11-14T17:43:33Z"
+ "built_at_utc": "2026-11-14T18:01:44Z"
 }

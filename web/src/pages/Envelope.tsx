@@ -10,6 +10,9 @@ import { DesignPoint, nearestCsv, nearestRows } from "../lib/nearest";
 import { useReceipt } from "../components/Receipt";
 import { Scatter, ScatterGroup, ScatterLegend, ScatterMark, ScatterPoint, Shape, shapePath } from "../viz/Scatter";
 import { PageProps, stub } from "./stubs";
+import { useWidth } from "../lib/hooks";
+import { AtmBtn } from "../viz/Reported";
+import { PSI_TO_KPA } from "../physics/scaling";
 
 const Waiting = stub("/envelope");
 const SHAPE: Record<string, Shape> = { "FLEX droplets": "circle", "CFI droplets": "diamond", "CFI-G gas flames": "square", "Flame Design gas flames": "triangle", "BASS-II solids": "cross", "Saffire solids": "circle" };
@@ -23,9 +26,7 @@ const SHORT: Record<string, { label: string; place: ScatterMark["place"] }> = {
   challenge_limit: { label: "30% at 10.2 psia", place: "left" },
   exploration: { label: "34% at 8.2 psia", place: "left" },
   suit: { label: "Suit, 4.3 psia", place: "below" },
-  apollo_pad: { label: "Apollo 1 pad test, 16.7 psi", place: "right" },
-  apollo_test_6040: { label: "Apollo tests, 60% at 16.2 psi", place: "right" },
-  apollo_test_62: { label: "Apollo tests, 6.2 psi", place: "above" },
+  apollo_pad: { label: "16.7 psi, before Apollo 1", place: "right" },
 };
 interface Atm { id: string; name: string; kind: string; p_kpa: number; x_o2: number; source: string; note: string }
 interface AtmDoc { presets: Atm[]; historical: Atm[]; normoxic_curve: { p_kpa: number; x_o2: number }[] }
@@ -33,25 +34,44 @@ const H = 440;
 const KIND: Record<string, string> = { droplet: "liquid droplets", gas: "gas flames", solid: "solid materials" };
 
 function Strip({ points, groups, yDomain, onPick }: { points: EnvelopePoint[]; groups: ScatterGroup[]; yDomain: [number, number]; onPick: (p: EnvelopePoint) => void }) {
+  const [ref, width] = useWidth<HTMLDivElement>(150);
+  const flat = width > 220;                                       // on a phone the strip lies under the map: oxygen runs across, and the marks keep their shape
+  const HF = 132;
   const sy = scaleLinear().domain(yDomain).range([H - 40, 30]);
+  const sx = scaleLinear().domain(yDomain).range([30, width - 14]);
   const g = new Map(groups.map((x) => [x.id, x]));
+  const shown = points.filter((p) => p.x >= yDomain[0] && p.x <= yDomain[1]);
+  const jit = (p: EnvelopePoint) => ((p.r * 37 + p.a.length * 13) % 100) / 100;
   return (
-    <svg className="strip" width="100%" height={H} viewBox={`0 0 150 ${H}`} preserveAspectRatio="none" role="img"
-         aria-label="Rows that state oxygen but no pressure, placed by oxygen fraction only">
-      <text x={75} y={14} textAnchor="middle" style={{ fill: "var(--ink-2)", fontSize: 12 }}>pressure not</text>
-      <text x={75} y={27} textAnchor="middle" style={{ fill: "var(--ink-2)", fontSize: 12 }}>in the table</text>
-      {points.filter((p) => p.x >= yDomain[0] && p.x <= yDomain[1]).map((p, i) => {
-        const grp = g.get(p.s);
-        if (!grp) return null;
-        const x = 18 + (((p.r * 37 + p.a.length * 13) % 100) / 100) * 114;
-        return (
-          <path key={i} d={shapePath(grp.shape, 38)} transform={`translate(${x},${sy(p.x)})`} fill={grp.hollow ? "var(--surface)" : grp.color} fillOpacity={0.8}
-                stroke={grp.hollow ? grp.color : "var(--surface)"} strokeWidth={grp.hollow ? 1.5 : 0.6} style={{ cursor: "pointer" }} onClick={() => onPick(p)}>
-            <title>{`${p.s}, ${p.a} row ${p.r + 1}: oxygen ${(p.x * 100).toFixed(1)}%, ${p.f}`}</title>
-          </path>
-        );
-      })}
-    </svg>
+    <div ref={ref} className="mapstrip plot">
+      <svg width={width} height={flat ? HF : H} role="img" aria-label="Rows that state oxygen but no pressure, placed by oxygen fraction only" style={{ display: "block" }}>
+        {flat ? (
+          <>
+            <text x={0} y={14} style={{ fill: "var(--ink-2)", fontSize: 12 }}>pressure not in the table: placed by oxygen only</text>
+            <g className="axis">
+              <line x1={30} x2={width - 14} y1={HF - 24} y2={HF - 24} />
+              {sx.ticks(5).map((t) => <text key={t} x={sx(t)} y={HF - 8} textAnchor="middle" className="num">{+t.toFixed(2)}</text>)}
+            </g>
+          </>
+        ) : (
+          <>
+            <text x={width / 2} y={14} textAnchor="middle" style={{ fill: "var(--ink-2)", fontSize: 12 }}>pressure not</text>
+            <text x={width / 2} y={27} textAnchor="middle" style={{ fill: "var(--ink-2)", fontSize: 12 }}>in the table</text>
+          </>
+        )}
+        {shown.map((p, i) => {
+          const grp = g.get(p.s);
+          if (!grp) return null;
+          const at = flat ? `translate(${sx(p.x)},${30 + jit(p) * (HF - 66)})` : `translate(${18 + jit(p) * (width - 36)},${sy(p.x)})`;
+          return (
+            <path key={i} d={shapePath(grp.shape, 38)} transform={at} fill={grp.hollow ? "var(--surface)" : grp.color} fillOpacity={0.8}
+                  stroke={grp.hollow ? grp.color : "var(--surface)"} strokeWidth={grp.hollow ? 1.5 : 0.6} style={{ cursor: "pointer" }} onClick={() => onPick(p)}>
+              <title>{`${p.s}, ${p.a} row ${p.r + 1}: oxygen ${(p.x * 100).toFixed(1)}%, ${p.f}`}</title>
+            </path>
+          );
+        })}
+      </svg>
+    </div>
   );
 }
 
@@ -241,6 +261,9 @@ export function Envelope({ route, manifest }: PageProps) {
   const counts: Record<string, number> = { ...Object.fromEntries(d.series.map((s) => [s.id, s.n])), ...(rep.data ? { [LIT[0].id]: rep.data.saffire.rows.length, [LIT[1].id]: rep.data.fm2.tests.length } : {}) };
   const allGroups = rep.data ? [...groups, ...LIT] : groups;
   const near = (id: string) => d.near_presets.find((n) => n.id === id);
+  const stated = rep.data?.atmospheres?.items.filter((x) => x.ref && x.words) ?? [];      // the NASA sentence behind each marked atmosphere
+  const pcWhole = (x: number) => `${+(100 * x).toFixed(1)}%`;
+  const psia = (kpa: number) => +(kpa / PSI_TO_KPA).toFixed(1);
   const solidsBoth = d.series.filter((s) => s.kind === "solid").reduce((a, s) => a + s.n_with_pressure, 0);
   const toggle = (id: string) => setHidden((h) => { const n = new Set(h); if (n.has(id)) n.delete(id); else n.add(id); return n; });
 
@@ -250,8 +273,8 @@ export function Envelope({ route, manifest }: PageProps) {
       <Readings>
         <Tile label="Rows with oxygen" value={d.points.length} sub="test rows of NASA's tables" />
         <Tile label="With pressure too" value={nBoth} sub="placed on the map" />
-        <Tile label="Near 30% oxygen" value={near("challenge_limit")?.n_near ?? 0} sub="at 10.2 psia, the lunar limit" />
-        <Tile label="Near 34% oxygen" value={near("exploration")?.n_near ?? 0} sub="at 8.2 psia, exploration" />
+        {near("challenge_limit") && <Tile label={`Near ${pcWhole(near("challenge_limit")!.x_o2)} oxygen`} value={near("challenge_limit")!.n_near} sub={`at ${psia(near("challenge_limit")!.p_kpa)} psia, before a spacewalk`} />}
+        {near("exploration") && <Tile label={`Near ${pcWhole(near("exploration")!.x_o2)} oxygen`} value={near("exploration")!.n_near} sub={`at ${psia(near("exploration")!.p_kpa)} psia, lunar habitat`} />}
         <Tile label="Solids with pressure" value={solidsBoth} sub="solid-material rows" tone="flame" />
         <Tile label="In partial gravity" value={d.gravity_counts.partial} sub="lunar or Martian" tone="partial" />
       </Readings>
@@ -304,7 +327,9 @@ export function Envelope({ route, manifest }: PageProps) {
           <Strip points={only} groups={groups} yDomain={yDomain} onPick={pick} />
         </div>
         <p className="note" style={{ marginTop: 10 }}>
-          {d.note} Crew atmospheres and the dashed curve come from the model page; historical points come from NASA documents and are drawn with a dashed outline.
+          {d.note} {stated.length > 0
+            ? <>Each marked atmosphere is a pair of numbers that a NASA document states: <span className="rcpts">{stated.map((x) => <AtmBtn key={x.id} a={x} label={SHORT[x.id]?.label ?? x.label} />)}</span> The dashed curve keeps the oxygen partial pressure of sea-level air.</>
+            : <>Crew atmospheres and the dashed curve come from the model page; the historical point comes from a NASA document and is drawn with a dashed outline.</>}{" "}
           Rows left out: {d.series.map((s) => `${s.id} ${s.no_oxygen + s.pressure_not_usable}`).join(", ")} (no oxygen value, or a pressure of 0).
           {rep.data && <> Hollow squares are the Saffire IV to VI tests as NASA's paper lists them, and green diamonds the four tests NASA plans on the Moon; neither is a row of a PSI table, and no count on this page includes them.</>}
         </p>
@@ -316,14 +341,15 @@ export function Envelope({ route, manifest }: PageProps) {
         <div className="section__head"><h2 className="h2">How much evidence sits near each crew atmosphere</h2><KlassBadge k="derived" note={`near means ${d.near_rule}`} /></div>
         <div className="table-wrap">
           <table className="table">
-            <thead><tr><th>Atmosphere</th><th className="r">Oxygen</th><th className="r">Pressure, kPa</th><th className="r">Rows near it</th><th style={{ paddingLeft: 18 }}>Of which</th><th className="r">Solid materials</th><th className="r">Partial gravity</th></tr></thead>
+            <thead><tr><th>Atmosphere</th><th className="r">Oxygen</th><th className="r">Pressure, kPa</th><th className="r">Rows near it</th><th style={{ paddingLeft: 18 }}>Of which</th><th className="r">Solid materials</th><th className="r">Partial gravity</th><th style={{ paddingLeft: 22 }}>Stated by NASA</th></tr></thead>
             <tbody>
               {d.near_presets.map((n) => (
                 <tr key={n.id} style={lensNear.some((x) => x.n?.id === n.id) ? { background: "var(--raised)", boxShadow: "inset 3px 0 0 var(--ink)" } : undefined}>
-                  <td className="strong">{n.label}</td><td className="r num">{(n.x_o2 * 100).toFixed(1)}%</td><td className="r num">{n.p_kpa.toFixed(1)}</td>
+                  <td className="strong">{n.label}</td><td className="r num">{+(n.x_o2 * 100).toFixed(2)}%</td><td className="r num">{n.p_kpa.toFixed(1)}</td>
                   <td className="r num strong">{fmtInt(n.n_near)}</td>
                   <td style={{ paddingLeft: 18 }}>{Object.entries(n.by_kind).map(([k, v]) => `${v} ${KIND[k] ?? k}`).join(", ") || "none"}</td>
-                  <td className="r num">{n.by_kind.solid ?? 0}</td><td className="r num">0</td>
+                  <td className="r num">{n.by_kind.solid ?? 0}</td><td className="r num">{d.gravity_counts.partial === 0 ? 0 : "see the map"}</td>
+                  <td style={{ paddingLeft: 22 }}>{stated.find((x) => x.id === n.id) && <AtmBtn a={stated.find((x) => x.id === n.id)!} />}</td>
                 </tr>
               ))}
             </tbody>
@@ -338,14 +364,14 @@ export function Envelope({ route, manifest }: PageProps) {
         <div className="section__head"><h2 className="h2">Where each series comes from</h2></div>
         <div className="table-wrap">
           <table className="table">
-            <thead><tr><th>Series</th><th>Records</th><th className="r">Rows</th><th className="r">With pressure</th><th>Oxygen read from</th><th>Pressure read from</th></tr></thead>
+            <thead><tr><th>Series</th><th>Records</th><th className="r">Rows</th><th className="r">With pressure</th><th style={{ paddingLeft: 22 }}>Oxygen read from</th><th>Pressure read from</th></tr></thead>
             <tbody>
               {d.series.map((s) => (
                 <tr key={s.id}>
                   <td className="strong">{s.id}</td>
                   <td>{s.accessions.map((a, i) => <span key={a}>{i ? ", " : ""}<a href={href(`/evidence/${a}`)}>{a}</a></span>)}</td>
                   <td className="r num">{fmtInt(s.n)}</td><td className="r num">{fmtInt(s.n_with_pressure)}</td>
-                  <td className="note">"{s.oxygen_from}"{s.oxygen_factor !== 1 ? ` × ${s.oxygen_factor}` : ""}</td>
+                  <td className="note" style={{ paddingLeft: 22 }}>"{s.oxygen_from}"{s.oxygen_factor !== 1 ? ` × ${s.oxygen_factor}` : ""}</td>
                   <td className="note">{s.pressure_from ? `"${s.pressure_from}" × ${s.pressure_factor}` : "not in the table"}</td>
                 </tr>
               ))}

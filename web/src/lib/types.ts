@@ -453,9 +453,15 @@ export interface ReportedCheck { what: string; ok: boolean }
 export interface SaffireRow { id: string; material: string; direction: string; length_cm: number; flow_cm_s: number; p_kpa: number; o2_pct: number; volume_m3: number;
   t_outlet_c: number; t_far_c: number; co2_ppm: number; co2_mmhg: number; co_ppm: number }
 export interface LuciRow { id: string; sample: string; measure: string; lunar: number; earth: number; ratio: number; unit: string; as_stated?: string; ref: DocRef }
+/** A cabin atmosphere the site marks: the pair of numbers, and the sentence of a stored NASA document that states it. */
+export interface ReportedAtmosphere {
+  id: string; kind: "habitat" | "historical"; name: string; label: string; o2_pct: number; p_psia: number; p_kpa: number; note: string;
+  words: string | null; ref: DocRef | null; also_words?: string;
+}
 export interface ReportedDoc {
   klass: Klass;
   note: string;
+  atmospheres?: { items: ReportedAtmosphere[]; checks: ReportedCheck[]; note: string };
   saffire: {
     title: string; rows: SaffireRow[]; columns: Record<string, string>;
     limits: { co_1h_ppm: number; co_24h_ppm: number; co2_1h_mmhg: number };

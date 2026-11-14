@@ -11,6 +11,8 @@ import json
 import os
 
 from . import physics as ph
+from .atmospheres import ATMOSPHERES
+from .atmospheres import p_kpa as kpa_of
 from . import transport
 
 FUELS = ["CH4", "C2H4", "C3H8"]
@@ -30,25 +32,13 @@ def _atm(id_, name, p_psia, x_o2, source, note="", kind="habitat"):
 
 def atmospheres() -> dict:
     import cantera as ct
-    presets = [
-        _atm("iss", "Sea level and ISS cabin", 14.696, 0.2095, "OCHMO-TB-003 (NASA habitable-atmosphere brief)"),
-        _atm("challenge_limit", "Lunar habitat, limit named in the challenge", 10.2, 0.30,
-             "Challenge text: 30% oxygen or more at 10.2 psi or less", "On the normoxic curve."),
-        _atm("exploration", "Exploration atmosphere", 8.2, 0.34,
-             "Ferkul et al. 2026, NTRS 20260001966", "Nominal for landers and rovers; band up to 37% oxygen."),
-        _atm("suit", "Spacesuit", 4.3, 1.0, "Challenge text; OCHMO-TB-003"),
-    ]
-    historical = [
-        _atm("apollo_pad", "Apollo 1 pad test: pure oxygen at 16.7 psi", 16.7, 1.0,
-             "Apollo 204 Review Board summary (nasa.gov)", "Pressure from the Review Board page, not from the SMA case study.", "historical"),
-        _atm("apollo_test_6040", "Apollo flammability tests: 60% O2, 40% N2 at 16.2 psi", 16.2, 0.60,
-             "NASA history: Apollo flammability tests", "", "historical"),
-        _atm("apollo_test_62", "Apollo flammability tests: pure oxygen at 6.2 psi", 6.2, 1.0,
-             "NASA history: Apollo flammability tests", "", "historical"),
-    ]
+    # the list is written once, in atmospheres.py; the derivation checks each pair against the sentence of a stored NASA document
+    made = [_atm(a["id"], a["name"], a["p_psia"], a["x_o2"], a["short"], a["note"], a["kind"]) for a in ATMOSPHERES]
+    presets = [m for m in made if m["kind"] == "habitat"]
+    historical = [m for m in made if m["kind"] == "historical"]
     xs = [round(0.12 + 0.02 * i, 2) for i in range(45)]
     sweep = []
-    for p_kpa, label in [(101.325, "101.3 kPa (14.7 psia)"), (56.54, "56.5 kPa (8.2 psia)"), (29.65, "29.6 kPa (4.3 psia)")]:
+    for p_kpa, label in [(kpa_of(a), "%.1f kPa (%.1f psia)" % (kpa_of(a), a["p_psia"])) for a in ATMOSPHERES if a["id"] in ("iss", "exploration", "suit")]:
         sweep.append({"fuel": "CH4", "p_kpa": p_kpa, "label": label,
                       "T_K": [round(ph.adiabatic_T("CH4", x, p_kpa), 1) for x in xs]})
     limit = [{"fuel": f, **{d: round(100 * ph.limit_o2_fraction(f, d), 1) for d in ("N2", "CO2", "AR")}} for f in FUELS]
@@ -62,7 +52,7 @@ def atmospheres() -> dict:
         "assumptions": [
             "Gaseous fuel, perfectly mixed at stoichiometric proportion, no heat loss.",
             "A thermodynamic upper bound. It says nothing about ignition, spread rate or solid materials.",
-            "Atmosphere values are published numbers; each row names its source.",
+            "Each atmosphere is a pair of numbers stated in a NASA document; the build checks the pair against the stored sentence and the page shows its receipt.",
         ],
         "presets": presets, "historical": historical,
         "sweep": {"x_o2": xs, "series": sweep},

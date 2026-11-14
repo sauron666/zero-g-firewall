@@ -17,6 +17,8 @@ import os
 import re
 import statistics
 
+from .atmospheres import habitat as habitat_atmospheres
+
 MISSING = {"", "-", "–", "—", "n/a", "na", "none"}
 DASHES = {"-", "–", "—"}
 O2_FAR = 5.0          # percentage points between the oxygen read before a test and after it, beyond which the pair is flagged
@@ -309,8 +311,7 @@ ENVELOPE = [
     {"acc": "PSI-98", "series": "Saffire solids", "kind": "solid", "x": ("Percent O2", 0.01), "p": None, "fuel": "Material", "approx": True},
     {"acc": "PSI-99", "series": "Saffire solids", "kind": "solid", "x": ("Percent O2 (Note 1)", 0.01), "p": None, "fuel": "Material", "approx": True},
 ]
-PRESETS = [("iss", "ISS cabin", 0.2095, 101.325), ("challenge_limit", "30% oxygen at 10.2 psia", 0.30, 70.33),
-           ("exploration", "34% oxygen at 8.2 psia", 0.34, 56.54), ("suit", "Suit, pure oxygen at 4.3 psia", 1.0, 29.65)]
+PRESETS = habitat_atmospheres()                                  # (id, label, oxygen fraction, kPa): written once in atmospheres.py and checked there against NASA's sentences
 NEAR = (0.03, 0.15)
 
 

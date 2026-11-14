@@ -18,6 +18,7 @@ import math
 import os
 import re
 
+from . import atmospheres as A
 from . import ledger as L
 from .claims import LUCI_SLIDES as LUCI
 from .claims import LUNAR, LUNAR_SLIDES, NAMES, Resolver, q
@@ -205,6 +206,33 @@ def fm2(lib: Library) -> dict:
                                              "ok": len({x["p_psia"] for x in tests}) == 1 and [x["o2_pct"] for x in tests] == sorted((x["o2_pct"] for x in tests), reverse=True)}]}
 
 
+def atmospheres(lib: Library, by_key: dict) -> dict:
+    """The cabin atmospheres the site marks, each with the sentence of a stored NASA document that states it."""
+    NAMES.setdefault(A.BOARD, "NASA: Apollo 204 Review Board summary")
+    pages = lambda key: [(u, flat(u["text"])) for u in lib.units(key) or []] if key in by_key else []
+    items, checks = [], []
+    for a in A.ATMOSPHERES:
+        pair = "%g%% oxygen at %g psia" % (100 * a["x_o2"], a["p_psia"])
+        item = {"id": a["id"], "kind": a["kind"], "name": a["name"], "label": a["label"], "o2_pct": round(100 * a["x_o2"], 2), "p_psia": a["p_psia"], "p_kpa": A.p_kpa(a),
+                "note": a["note"], "words": None, "ref": None}
+        if a["doc"] in by_key:
+            st = A.stated(a, pages(a["doc"]), pages(a["also"][0]) if a.get("also") else None)
+            checks.append({"what": ("%s: %s is the pair NASA's sentence gives (“%s”)" % (a["name"], pair, st["words"])) if st["ok"]
+                                   else "%s: %s is written in the list of atmospheres, but %s" % (a["name"], pair, st["why"]), "ok": st["ok"]})
+            if st["ok"]:
+                item["words"] = st["words"]
+                item["ref"] = where(lib, a["doc"], st["unit"], "the sentence that states this atmosphere")
+                if st.get("band_pct") is not None:
+                    item["note"] = (item["note"] + " NASA expects control bands that allow up to %g%% oxygen." % st["band_pct"]).strip()
+                if "also_ok" in st and a["also"][0] in by_key:
+                    checks.append({"what": "%s: a second NASA document gives the same pair (“%s”)" % (a["name"], st["also_words"]), "ok": bool(st["also_ok"])})
+                    if st["also_ok"]:
+                        item["also_words"] = st["also_words"]
+        items.append(item)
+    return {"items": items, "checks": checks,
+            "note": "The pair of numbers of each atmosphere is an input of the models and of the counts of tests near it. Each is checked at every build against the sentence of the NASA document shown in its receipt."}
+
+
 QUOTES = {
     "saffire": [
         q(SAFFIRE, "Selecting 1 mg/m3 as a relatively tight alarm threshold, the FFD detector reached that threshold at 981 seconds. By this point, much of the hazardous gas release had occurred.", "The two-sided acrylic sample of Saffire VI"),
@@ -245,7 +273,7 @@ def build(raw_dir: str, out_dir: str) -> dict:
         return {"written": False, "why": "not in this ledger: %s" % "; ".join(absent)}
     lib = Library(raw_dir, by_key)
     resolve = Resolver(lib, by_key, {}, {})
-    sets = {"saffire": saffire(lib), "luci": luci(lib), "fm2": fm2(lib)}
+    sets = {"saffire": saffire(lib), "luci": luci(lib), "fm2": fm2(lib), "atmospheres": atmospheres(lib, by_key)}
     failed = [c["what"] for s in sets.values() for c in s["checks"] if not c["ok"]]
     if failed:
         raise ReportedError("a reported number no longer agrees with its own document: %s" % "; ".join(failed))

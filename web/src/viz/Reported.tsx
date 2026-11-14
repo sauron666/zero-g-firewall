@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { scaleLinear } from "d3-scale";
 import { useWidth } from "../lib/hooks";
-import type { DocRef, ReportedDoc, SaffireRow } from "../lib/types";
+import type { DocRef, ReportedAtmosphere, ReportedDoc, SaffireRow } from "../lib/types";
 import { SourceBtn } from "../components/Source";
 
 const g = (v: number) => String(+v.toFixed(2));
@@ -9,6 +9,14 @@ const g = (v: number) => String(+v.toFixed(2));
 /** A receipt for a number read from a NASA document: the document, the page, and where on it. */
 export function DocBtn({ r, title, label = "receipt", extra = [] }: { r: DocRef; title: string; label?: string; extra?: [string, React.ReactNode][] }) {
   return <SourceBtn title={title} sref={{ ...r, page: r.loc }} klass="literature" label={label} extra={[["document", r.source], ["where", r.what], ...extra]} />;
+}
+
+/** The receipt of a cabin atmosphere: the sentence of the NASA document that states its oxygen and pressure. */
+export function AtmBtn({ a, label }: { a: ReportedAtmosphere; label?: string }) {
+  if (!a.ref || !a.words) return null;
+  return <DocBtn r={a.ref} title={`${a.name}: ${g(a.o2_pct)}% oxygen at ${g(a.p_psia)} psia`} label={label ?? "NASA's words"}
+                 extra={[["NASA's words", `“${a.words}”`], ...(a.also_words ? [["a second NASA document", `“${a.also_words}”`] as [string, React.ReactNode]] : []),
+                         ["used here as", `${g(a.o2_pct)}% oxygen at ${g(a.p_kpa)} kPa`], ...(a.note ? [["note", a.note] as [string, React.ReactNode]] : [])]} />;
 }
 
 interface Bar { id: string; label: string; value: number; low?: number }

@@ -71,9 +71,9 @@ a.rec:hover { background: var(--raised); }
 .finding__how { font-size: var(--t-13); color: var(--ink-2); margin-top: 4px; max-width: 80ch; }
 .finding__meta { font-size: var(--t-12); color: var(--ink-3); margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; }
 
-.strip { border-left: 1px solid var(--axis); }
+.mapstrip { border-left: 1px solid var(--axis); min-width: 0; }
 .mapwrap { display: grid; grid-template-columns: minmax(0, 1fr) 150px; gap: 0; align-items: start; }
-@media (max-width: 760px) { .mapwrap { grid-template-columns: minmax(0, 1fr); } .strip { border-left: 0; border-top: 1px solid var(--axis); } }
+@media (max-width: 760px) { .mapwrap { grid-template-columns: minmax(0, 1fr); } .mapstrip { border-left: 0; border-top: 1px solid var(--axis); margin-top: 10px; padding-top: 8px; } }
 
 .hash { font-family: var(--font-data); font-size: 0.86em; overflow-wrap: anywhere; }
 .progress { height: 6px; border-radius: 3px; background: var(--sunken); overflow: hidden; }

@@ -23,6 +23,9 @@ export interface ScatterPoint {
   ref?: unknown;
   size?: number;        // symbol area in px²; use it to show how many rows share a position
 }
+/** Width of a chart label at the 12 px instrument face, close enough to keep it inside the frame. */
+const textW = (t: string) => t.length * 6.5;
+
 export interface ScatterMark {
   x: number;
   y: number;
@@ -125,7 +128,7 @@ export function Scatter(p: ScatterProps) {
             <g key={i}>
               <polyline points={pts.map(([x, y]) => `${sx(x)},${sy(y)}`).join(" ")} fill="none" stroke="var(--ink-2)" strokeWidth={1.5} strokeDasharray={c.dash ?? "5 4"} />
               {c.labelAt
-                ? <text x={sx(c.labelAt[0])} y={sy(c.labelAt[1])} className="t-2" style={{ paintOrder: "stroke", stroke: "var(--surface)", strokeWidth: 4, strokeLinejoin: "round" }}>{c.label}</text>
+                ? <text x={Math.max(4, Math.min(sx(c.labelAt[0]), width - 4 - textW(c.label)))} y={sy(c.labelAt[1])} className="t-2" style={{ paintOrder: "stroke", stroke: "var(--surface)", strokeWidth: 4, strokeLinejoin: "round" }}>{c.label}</text>
                 : <text x={sx(last[0]) - 4} y={sy(last[1]) - 7} textAnchor="end" className="t-2">{c.label}</text>}
             </g>
           );
@@ -147,8 +150,12 @@ export function Scatter(p: ScatterProps) {
         {(p.marks ?? []).filter((k) => k.x >= p.xDomain[0] && k.x <= p.xDomain[1] && k.y >= p.yDomain[0] && k.y <= p.yDomain[1]).map((k, i) => {
           const X = sx(k.x);
           const Y = sy(k.y);
-          const pl = k.place ?? "right";
-          const tx = pl === "left" ? X - 12 : pl === "right" ? X + 12 : X;
+          // a label keeps its side while it fits; on a narrow chart it moves to the other side, and a long one goes above its mark, pulled inside the frame
+          const w = textW(k.label);
+          const want = k.place ?? "right";
+          const fits = (side: string) => (side === "right" ? X + 12 + w <= width - 2 : side === "left" ? X - 12 - w >= 2 : true);
+          const pl = fits(want) ? want : want === "right" && fits("left") ? "left" : want === "left" && fits("right") ? "right" : "above";
+          const tx = pl === "left" ? X - 12 : pl === "right" ? X + 12 : Math.max(w / 2 + 2, Math.min(X, width - w / 2 - 2));
           const ty = pl === "above" ? Y - 13 : pl === "below" ? Y + 22 : Y + 4;
           return (
             <g key={"m" + i}>

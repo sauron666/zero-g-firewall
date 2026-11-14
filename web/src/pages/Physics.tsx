@@ -1,6 +1,7 @@
 import { Readings, Tile } from "../dash/widgets";
-import type { DropletDoc, ReportedDoc, ValidationDoc } from "../lib/types";
-import { DocBtn } from "../viz/Reported";
+import type { DropletDoc, MythItem, MythsDoc, ReportedDoc, ValidationDoc } from "../lib/types";
+import { SourceBtn } from "../components/Source";
+import { AtmBtn, DocBtn } from "../viz/Reported";
 import { useEffect, useState } from "react";
 import { scaleLinear } from "d3-scale";
 import { line as d3line } from "d3-shape";
@@ -38,7 +39,11 @@ function AtmosphereChart({ m }: { m: AtmModel }) {
   const path = d3line<number>().x((_, i) => sx(m.sweep.x_o2[i] * 100)).y((v) => sy(v))(base.T_K) ?? "";
   const pts = [...m.presets, ...m.historical];
   // direct labels only for the four habitat presets; the rest are in the tooltip and the table
-  const labelOf: Record<string, [number, number, "start" | "end"]> = { iss: [10, 16, "start"], challenge_limit: [10, 18, "start"], exploration: [-10, -12, "end"], suit: [-12, 18, "end"] };
+  const narrow = width < 560;
+  const labelOf: Record<string, [number, number, "start" | "end"]> = narrow
+    ? { iss: [10, 16, "start"], challenge_limit: [10, 30, "start"], exploration: [12, 13, "start"], suit: [-12, 18, "end"] }
+    : { iss: [10, 16, "start"], challenge_limit: [10, 18, "start"], exploration: [-10, -12, "end"], suit: [-12, 18, "end"] };
+  const brief = (a: Atm) => (narrow ? a.name.split(",")[0] : a.name);                // on a phone "Lunar habitat, lander and rover" is "Lunar habitat"; the tooltip and the table keep the whole name
   return (
     <div className="plot" ref={ref}>
       <svg width={width} height={H} role="img" aria-label="Equilibrium flame temperature of methane against oxygen fraction, with cabin atmospheres marked">
@@ -46,12 +51,12 @@ function AtmosphereChart({ m }: { m: AtmModel }) {
         <g className="axis">
           <line x1={mg.l} x2={width - mg.r} y1={H - mg.b} y2={H - mg.b} />
           {sy.ticks(5).map((t) => <text key={t} x={mg.l - 8} y={sy(t)} dy="0.32em" textAnchor="end" className="num">{t.toLocaleString("en-US")}</text>)}
-          {[21, 30, 40, 60, 80, 100].map((t) => <text key={t} x={sx(t)} y={H - mg.b + 17} textAnchor="middle" className="num">{t}%</text>)}
+          {(narrow ? [21, 40, 60, 80, 100] : [21, 30, 40, 60, 80, 100]).map((t) => <text key={t} x={sx(t)} y={H - mg.b + 17} textAnchor="middle" className="num">{t}%</text>)}
           <text x={width - mg.r} y={H - 4} textAnchor="end">oxygen in the atmosphere, by volume</text>
           <text x={mg.l - 46} y={mg.t - 2} className="t-2">flame temperature, K</text>
         </g>
         <path d={path} fill="none" stroke="var(--ink-2)" strokeWidth={2} strokeLinecap="round" />
-        <text x={sx(86)} y={sy(base.T_K[base.T_K.length - 8]) + 20} textAnchor="middle" className="t-2">methane at 1 atm</text>
+        {!narrow && <text x={sx(86)} y={sy(base.T_K[base.T_K.length - 8]) + 20} textAnchor="middle" className="t-2">methane at 1 atm</text>}
         {pts.map((a) => {
           const x = sx(a.x_o2 * 100), y = sy(a.Tad_K.CH4);
           const hist = a.kind === "historical";
@@ -61,7 +66,7 @@ function AtmosphereChart({ m }: { m: AtmModel }) {
               {hist
                 ? <rect x={x - 5} y={y - 5} width={10} height={10} fill="var(--surface)" stroke="var(--ink)" strokeWidth={2} transform={`rotate(45 ${x} ${y})`} />
                 : <circle cx={x} cy={y} r={6} fill="var(--ink)" stroke="var(--surface)" strokeWidth={2} />}
-              {lab && <text x={x + lab[0]} y={y + lab[1]} textAnchor={lab[2]} className="t-ink">{a.name.replace(", limit named in the challenge", "")}</text>}
+              {lab && <text x={x + lab[0]} y={y + lab[1]} textAnchor={lab[2]} className="t-ink">{brief(a)}</text>}
               <circle cx={x} cy={y} r={14} fill="transparent" tabIndex={0} aria-label={`${a.name}: ${a.Tad_K.CH4} K`}
                 onPointerEnter={() => setTip({ a, x, y })} onPointerLeave={() => setTip(null)} onFocus={() => setTip({ a, x, y })} onBlur={() => setTip(null)} />
             </g>
@@ -89,8 +94,9 @@ function AtmosphereChart({ m }: { m: AtmModel }) {
 function FanChart({ m }: { m: ScalingModel }) {
   const [ref, width] = useWidth<HTMLDivElement>(760);
   const rows = m.bodies;
-  const mg = { l: 124, r: 150, t: 34, b: 36 };
-  const rowH = 44, H = mg.t + rows.length * rowH + mg.b;
+  const narrow = width < 560;                                    // on a phone the range of each body stands above its bar, and the plot keeps the width
+  const mg = narrow ? { l: 92, r: 10, t: 52, b: 36 } : { l: 124, r: 150, t: 34, b: 36 };
+  const rowH = narrow ? 50 : 44, H = mg.t + rows.length * rowH + mg.b;
   const sx = scaleLinear().domain([0, 22]).range([mg.l, width - mg.r]);
   const hue = (g: number) => (g === 0 ? "var(--g-micro)" : g === 1 ? "var(--g-earth)" : "var(--g-partial)");
   return (
@@ -103,10 +109,12 @@ function FanChart({ m }: { m: ScalingModel }) {
           <text x={width - mg.r} y={H - 4} textAnchor="end">air speed at the flame base, cm/s</text>
         </g>
         {/* the literature reference: a line, not a data point */}
-        <line x1={sx(m.reference.value_cm_s)} x2={sx(m.reference.value_cm_s)} y1={mg.t - 12} y2={H - mg.b} stroke="var(--ink)" strokeWidth={1.5} />
-        <text x={sx(m.reference.value_cm_s) + 6} y={mg.t - 16} className="t-ink">most flammable forced flow, about 10 cm/s</text>
+        <line x1={sx(m.reference.value_cm_s)} x2={sx(m.reference.value_cm_s)} y1={mg.t - (narrow ? 8 : 12)} y2={H - mg.b} stroke="var(--ink)" strokeWidth={1.5} />
+        {narrow
+          ? <text x={sx(m.reference.value_cm_s)} y={mg.t - 34} textAnchor="middle" className="t-ink"><tspan x={sx(m.reference.value_cm_s)}>most flammable forced flow,</tspan><tspan x={sx(m.reference.value_cm_s)} dy="1.25em">about {m.reference.value_cm_s} cm/s</tspan></text>
+          : <text x={sx(m.reference.value_cm_s) + 6} y={mg.t - 16} className="t-ink">most flammable forced flow, about {m.reference.value_cm_s} cm/s</text>}
         {rows.map((b, i) => {
-          const y = mg.t + i * rowH + rowH / 2;
+          const y = mg.t + i * rowH + rowH / 2 + (narrow ? 6 : 0);
           const [lo, hi] = b.buoyant_cm_s;
           return (
             <g key={b.id}>
@@ -119,7 +127,9 @@ function FanChart({ m }: { m: ScalingModel }) {
               ) : (
                 <circle cx={sx(0)} cy={y} r={6} fill={hue(0)} stroke="var(--surface)" strokeWidth={2}><title>No buoyant flow in free fall</title></circle>
               )}
-              <text x={width - mg.r + 10} y={y} dy="0.32em" className="t-ink num">{b.g > 0 ? `${lo} to ${hi} cm/s` : "0: the fans decide"}</text>
+              {narrow
+                ? <text x={width - mg.r} y={y - 15} textAnchor="end" className="t-ink num" style={{ paintOrder: "stroke", stroke: "var(--surface)", strokeWidth: 4 }}>{b.g > 0 ? `${lo} to ${hi} cm/s` : "0: the fans decide"}</text>
+                : <text x={width - mg.r + 10} y={y} dy="0.32em" className="t-ink num">{b.g > 0 ? `${lo} to ${hi} cm/s` : "0: the fans decide"}</text>}
             </g>
           );
         })}
@@ -154,6 +164,11 @@ export function Physics() {
   const [q, setQ] = useState(3.2);
   const [dur, setDur] = useState(60);
   const [vol, setVol] = useState(18);
+  const myths = useData<MythsDoc>("myths.json");                                // the guide's own sentence about the flow at which solids burn most readily
+  const flowQuote = myths.data?.items.find((c) => c.id === "fans")?.groups.filter((gr) => gr.branch === "buoyant").flatMap((gr) => gr.items)
+    .find((it): it is Extract<MythItem, { kind: "quote" }> => it.kind === "quote" && it.quote_verified && scl.data != null && it.quote.includes(`${scl.data.reference.value_cm_s} cm/s`));
+  const minimum = reported.data?.quotes.lunar.find((it) => it.kind === "quote" && it.quote.includes("minimum value in the vicinity"));
+  const stated = (id: string) => reported.data?.atmospheres?.items.find((x) => x.id === id);
   const spin = reported.data?.luci.spin;
   const scale = reported.data?.saffire.scale;
   // the controls open on NASA's own numbers once they are loaded: the LUCI spin, and the largest Saffire fire in the middle of the stated free volumes
@@ -185,7 +200,7 @@ export function Physics() {
             <h2 className="claim claim--l">The crew breathes the same oxygen. The flame does not.</h2>
             <p className="prose" style={{ marginTop: 10, fontSize: "1.05rem" }}>
               Lower cabin pressure with more oxygen keeps the oxygen partial pressure the lungs need.
-              {iss && expl && <> But with less nitrogen to soak up heat, the equilibrium flame temperature of methane rises from {Math.round(iss.Tad_K.CH4).toLocaleString("en-US")} K in station air to {Math.round(expl.Tad_K.CH4).toLocaleString("en-US")} K in the exploration atmosphere, although its oxygen partial pressure is slightly lower ({expl.ppo2_kpa} against {iss.ppo2_kpa} kPa).</>}
+              {iss && expl && <> But with less nitrogen to soak up heat, the equilibrium flame temperature of methane rises from {Math.round(iss.Tad_K.CH4).toLocaleString("en-US")} K in station air to {Math.round(expl.Tad_K.CH4).toLocaleString("en-US")} K at {+(expl.x_o2 * 100).toFixed(1)}% oxygen and {expl.p_psia} psia, the atmosphere NASA names for lunar habitats, landers and rovers, although its oxygen partial pressure is slightly lower ({expl.ppo2_kpa} against {iss.ppo2_kpa} kPa).</>}
             </p>
           </div>
           <KlassBadge k="model" note="equilibrium bound" onClick={() => atm.data && openReceipt({
@@ -200,11 +215,12 @@ export function Physics() {
             <summary>Show the atmospheres as a table</summary>
             <div className="table-wrap">
               <table className="table">
-                <thead><tr><th>Atmosphere</th><th className="r">Pressure, kPa</th><th className="r">Oxygen</th><th className="r">ppO2, kPa</th><th className="r">ppO2 vs sea level</th><th className="r">CH4, K</th><th className="r">C2H4, K</th><th className="r">C3H8, K</th><th>Source of the atmosphere</th></tr></thead>
+                <thead><tr><th>Atmosphere</th><th className="r">Pressure, kPa</th><th className="r">Oxygen</th><th className="r">ppO2, kPa</th><th className="r">ppO2 vs sea level</th><th className="r">CH4, K</th><th className="r">C2H4, K</th><th className="r">C3H8, K</th><th style={{ paddingLeft: 22 }}>Stated by NASA in</th></tr></thead>
                 <tbody>
                   {[...atm.data.presets, ...atm.data.historical].map((p) => (
-                    <tr key={p.id}><td>{p.name}</td><td className="r">{p.p_kpa}</td><td className="r">{(p.x_o2 * 100).toFixed(1)}%</td><td className="r">{p.ppo2_kpa}</td><td className="r">{p.ppo2_vs_sea_level.toFixed(2)}</td>
-                      <td className="r">{Math.round(p.Tad_K.CH4)}</td><td className="r">{Math.round(p.Tad_K.C2H4)}</td><td className="r">{Math.round(p.Tad_K.C3H8)}</td><td>{p.source}</td></tr>
+                    <tr key={p.id}><td>{p.name}</td><td className="r">{p.p_kpa}</td><td className="r">{+(p.x_o2 * 100).toFixed(2)}%</td><td className="r">{p.ppo2_kpa}</td><td className="r">{p.ppo2_vs_sea_level.toFixed(2)}</td>
+                      <td className="r">{Math.round(p.Tad_K.CH4)}</td><td className="r">{Math.round(p.Tad_K.C2H4)}</td><td className="r">{Math.round(p.Tad_K.C3H8)}</td>
+                      <td style={{ paddingLeft: 22 }}>{p.source} {stated(p.id) && <AtmBtn a={stated(p.id)!} />}</td></tr>
                   ))}
                 </tbody>
               </table>
@@ -220,7 +236,7 @@ export function Physics() {
             <h2 className="claim claim--l">On the Moon, gravity is a fan you cannot switch off.</h2>
             <p className="prose" style={{ marginTop: 10, fontSize: "1.05rem" }}>
               Buoyancy moves air past a flame at a speed that scales with the cube root of gravity. Simple scaling puts that speed on the Moon at about
-              {scl.data ? ` ${scl.data.bodies.find((b) => b.id === "moon")!.buoyant_cm_s.join(" to ")} cm/s` : " 6 to 11 cm/s"}. NASA's guide places the most flammable forced flow in microgravity tests at about 10 cm/s.
+              {scl.data ? ` ${scl.data.bodies.find((b) => b.id === "moon")!.buoyant_cm_s.join(" to ")} cm/s` : " the range drawn below"}.{scl.data && <> NASA's guide places the most flammable forced flow in microgravity tests at about {scl.data.reference.value_cm_s} cm/s.</>}
             </p>
           </div>
           <div className="row">
@@ -229,15 +245,16 @@ export function Physics() {
               rows: [["formula", scl.data.formula], ["artifact", "data/v1/model/scaling.json"], ["built", fmtUtc(scl.data.built_at_utc)], ["code", "pipeline/zgf/physics.py, buoyant_speed(); web/src/physics/scaling.ts"]],
               notes: scl.data.assumptions,
             })} />
-            <KlassBadge k="literature" note="the 10 cm/s reference" onClick={() => scl.data && openReceipt({
-              title: "Most flammable forced flow", klass: "literature",
-              rows: [["statement", scl.data.reference.statement], ["document", "A Researcher's Guide to: Combustion Science (NP-2015-10-034-JSC)"], ["where", scl.data.reference.locator], ["ledger", "added when the NASA sync is derived"]],
-            })} />
+            {flowQuote && <SourceBtn title={`Quotation from ${flowQuote.source}`} sref={{ ...flowQuote.ref, page: flowQuote.ref.loc }} klass="literature" label={`NASA's guide${flowQuote.ref.loc ? ", " + flowQuote.ref.loc : ""}`}
+                                     extra={[["quotation", `“${flowQuote.quote}”`], ["checked", `found word for word in the stored document, at ${flowQuote.ref.loc ?? "the page text"}`]]} />}
           </div>
         </div>
         {scl.data ? <FanChart m={scl.data} /> : <div className="empty">{scl.error ?? "Loading the model output"}</div>}
         <p className="note" style={{ marginTop: 12, maxWidth: "78ch" }}>
-          The coefficient of the scale is uncertain; the dependence on gravity is the robust part. This is a comparison of orders of magnitude, in line with published statements that lunar gravity is near the most flammable condition. FM2 is designed to measure the real behaviour on the Moon.
+          The coefficient of the scale is uncertain; the dependence on gravity is the robust part.
+          {minimum && minimum.kind === "quote" && minimum.quote_verified && <> NASA, 2026: “{minimum.quote}” <SourceBtn title={`Quotation from ${minimum.source}`} sref={{ ...minimum.ref, page: minimum.ref.loc }} klass="literature" label="receipt"
+            extra={[["quotation", `“${minimum.quote}”`], ["checked", `found word for word in the stored document, at ${minimum.ref.loc ?? "the page text"}`]]} /></>}
+          {" "}FM2 is designed to measure the real behaviour on the Moon.
         </p>
       </section>
 

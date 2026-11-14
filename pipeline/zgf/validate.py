@@ -76,6 +76,8 @@ def check(out_dir: str) -> dict:
         n += reported(load("reported.json"), ledger)
     if os.path.exists(os.path.join(out_dir, "inventory.json")):
         n += inventory(load("inventory.json"), ledger, load)
+    if os.path.exists(os.path.join(out_dir, "model", "atmospheres.json")):
+        n += model_atmospheres(load("model/atmospheres.json"), load("reported.json") if os.path.exists(os.path.join(out_dir, "reported.json")) else None)
     return {"checks": n, "ok": True}
 
 
@@ -165,8 +167,8 @@ def reported(d: dict, ledger: dict) -> int:
         if ledger.get(r.get("ledger_seq")) != r.get("sha256") or not r.get("loc"):
             raise IntegrityError("a reported number has no document and page behind it")
         n += 1
-    for name in ("saffire", "luci", "fm2"):
-        for c in d[name]["checks"]:
+    for name in ("saffire", "luci", "fm2", "atmospheres"):
+        for c in d.get(name, {}).get("checks", []):
             if not c["ok"]:
                 raise IntegrityError("reported: %s" % c["what"])
             n += 1
@@ -176,7 +178,30 @@ def reported(d: dict, ledger: dict) -> int:
     for r in d["luci"]["rows"]:
         if abs(r["lunar"] / r["earth"] - r["ratio"]) > 0.011:
             raise IntegrityError("reported: the ratio of %s does not follow from its two rates" % r["id"])
+    for at in d.get("atmospheres", {}).get("items", []):
+        r = at.get("ref")
+        if r and (ledger.get(r.get("ledger_seq")) != r.get("sha256") or not at.get("words")):
+            raise IntegrityError("the atmosphere %s has a receipt that leads to no stored sentence" % at["id"])
+        n += 1
     return n + len(d["saffire"]["rows"]) + len(d["luci"]["rows"])
+
+
+def model_atmospheres(m: dict, d: dict | None) -> int:
+    """The flame-temperature model may only be run at the atmospheres on the checked list, with the same numbers."""
+    from .atmospheres import ATMOSPHERES, p_kpa
+    built = {a["id"]: a for a in m["presets"] + m["historical"]}
+    if set(built) != {a["id"] for a in ATMOSPHERES}:
+        raise IntegrityError("the model was built for other atmospheres than the checked list: %s" % ", ".join(sorted(set(built) ^ {a["id"] for a in ATMOSPHERES})))
+    for a in ATMOSPHERES:
+        b = built[a["id"]]
+        if abs(b["x_o2"] - a["x_o2"]) > 1e-9 or abs(b["p_psia"] - a["p_psia"]) > 1e-9 or abs(b["p_kpa"] - round(p_kpa(a), 2)) > 0.006:
+            raise IntegrityError("the model's atmosphere %s differs from the checked list" % a["id"])
+    if d:
+        for at in d.get("atmospheres", {}).get("items", []):
+            b = built.get(at["id"])
+            if not b or abs(100 * b["x_o2"] - at["o2_pct"]) > 1e-6 or abs(b["p_psia"] - at["p_psia"]) > 1e-9:
+                raise IntegrityError("the model's atmosphere %s differs from the one NASA's sentence states" % at["id"])
+    return len(ATMOSPHERES)
 
 
 def cover(c: dict, env: dict, rows_in_all_tables: int) -> int:

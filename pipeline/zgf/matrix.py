@@ -20,6 +20,7 @@ from .claims import BASS2, GUIDE, LUCI, LUNAR, M2, MIR, NAMES, OLSON, SAFFIRE6, 
 from .falsify import fact
 from .lessons import A1, A13, S_DET
 from .literature import Library
+from . import atmospheres as ATM
 
 # Fetched by sync 1.2.0. Until a document is in the ledger its quotations are simply left out, and the build says so.
 BRIEF = "doc:std3001_fire_protection_brief"
@@ -53,13 +54,13 @@ def cells(out_dir: str) -> list[dict]:
     return [
         C("rich-air", "preconditions", "Oxygen-rich air at reduced pressure", "evidence", "gap", [
             q(GUIDE, "In the low-flow conditions of microgravity or partial gravity, some materials are flammable at lower oxygen concentrations than in normal gravity", ""),
-            fact("%d test rows lie near 30%% oxygen at 10.2 psia and %d near 34%% at 8.2 psia; none is a solid material and none was taken in partial gravity." % (near["challenge_limit"], near["exploration"]), link="/envelope")], ["/envelope", "/gaps"]),
+            fact("%d test rows lie near %s and %d near %s; none is a solid material and none was taken in partial gravity." % (near["challenge_limit"], ATM.words("challenge_limit"), near["exploration"], ATM.short("exploration")), link="/envelope")], ["/envelope", "/gaps"]),
         C("earth-pass", "preconditions", "Materials that pass the test on Earth", "evidence", "bounded", [
             q(GUIDE, "is not conservative, and materials can burn at lower oxygen levels in microgravity than on Earth", "The guide, on BASS results"),
             q(OLSON, "the 1g flammability limits are generally not conservative for these materials as evidenced by the negative ∆O2%, by up to -5.75% oxygen", "Martian gravity, drop tower")], ["/myths/one-g-tests"]),
         C("pure-oxygen", "preconditions", "Pure oxygen, combustibles uncontrolled", "evidence", "gap", [
             q(A1, "Because of the pure oxygen atmosphere, the fire spread quickly, causing a rapid rise in temperature and pressure that led to the rupture of the Command Module pressure vessel", "Apollo 1, on the ground"),
-            fact("No PSI test row lies near pure oxygen at 4.3 psia, today's suit atmosphere: %d rows." % near["suit"], link="/envelope")], ["/lessons"]),
+            fact("No PSI test row lies near %s, today's suit atmosphere: %d rows." % (ATM.words("suit"), near["suit"]), link="/envelope")], ["/lessons"]),
         C("arcing", "ignition", "Electrical arcing", "evidence", "gap", [
             q(A1, "Although they couldn’t determine a specific source of ignition, investigators found evidence of arcing in several wires in the spacecraft near the environment control system", "Apollo 1")], ["/lessons"]),
         C("overheat", "ignition", "Overheated insulation", "evidence", "gap", [

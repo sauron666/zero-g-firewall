@@ -440,6 +440,56 @@ class Reported(unittest.TestCase):
             P.fm2(self.Lib({P.LUNAR_SLIDES: [page.replace("Test 4: 8.2 psia (+/- 0.3 psi), 25% O2", "Test 4: to be decided")]}))
 
 
+class Atmospheres(unittest.TestCase):
+    OLSON = ("the International Space Station (ISS) have operated at normal sea-level conditions (air, 21% oxygen and 79% nitrogen by volume at 14.7 psia total pressure) except for brief pre-EVA activities. "
+             "Materials are tested in the environment expected in the spacecraft (e.g. currently 30% oxygen at 10.2 psia which is the pre-breath environment on the ISS for spacewalks).")
+    SLIDES = ("Very frequent EVAs are required to meet mission goals. 100% O2, 4.3 psia (to bend fingers, arms). HLS, Lunar habitat and pressurized rover will nominally use 8.2 psia / 34% O2, 66% N2. "
+              "Control bands are expected to allow up to 37% O2. This has historically been 30% O2, 10.2 psia (shuttle pre-EVA atm)")
+    BOARD = "NASA’s long history of successes in testing and launching space vehicles with pure oxygen environments at 16.7 p.s.i. and lower pressures led to overconfidence and complacency"
+
+    def pages(self, A, key, slides=None):
+        return [({"loc": "p. 1"}, {A.OLSON: self.OLSON, A.SLIDES: slides or self.SLIDES, A.BOARD: self.BOARD}[key])]
+
+    def test_every_marked_atmosphere_is_stated_by_a_sentence_of_its_document(self):
+        from zgf import atmospheres as A
+        for a in A.ATMOSPHERES:
+            st = A.stated(a, self.pages(A, a["doc"]), self.pages(A, a["also"][0]) if a.get("also") else None)
+            self.assertTrue(st["ok"], a["id"])
+            self.assertIn(st["words"], {A.OLSON: self.OLSON, A.SLIDES: self.SLIDES, A.BOARD: self.BOARD}[a["doc"]])     # the words shown in the receipt are the document's own
+        st = A.stated(A.BY_ID["challenge_limit"], self.pages(A, A.OLSON), self.pages(A, A.SLIDES))
+        self.assertTrue(st["also_ok"])                                                                                 # a second document gives the same pair
+        self.assertEqual(A.stated(A.BY_ID["exploration"], self.pages(A, A.SLIDES))["band_pct"], 37.0)
+
+    def test_a_sentence_with_other_numbers_or_no_sentence_fails(self):
+        from zgf import atmospheres as A
+        a = A.BY_ID["exploration"]
+        st = A.stated(a, self.pages(A, A.SLIDES, self.SLIDES.replace("8.2 psia / 34% O2", "8.2 psia / 36% O2")))
+        self.assertFalse(st["ok"])
+        self.assertIn("36% O2", st["why"])
+        self.assertFalse(A.stated(a, [({"loc": "p. 1"}, "a page about something else")])["ok"])
+        self.assertFalse(A.stated(A.BY_ID["apollo_pad"], [({"loc": "p. 1"}, self.BOARD.replace("16.7", "14.7"))])["ok"])
+
+    def test_the_numbers_every_module_reads(self):
+        from zgf import atmospheres as A, claims as C, lessons
+        self.assertEqual(A.habitat(), [("iss", "ISS cabin", 0.2095, 101.325), ("challenge_limit", "30% oxygen at 10.2 psia", 0.30, 70.33),
+                                       ("exploration", "34% oxygen at 8.2 psia", 0.34, 56.54), ("suit", "Suit, pure oxygen at 4.3 psia", 1.0, 29.65)])
+        self.assertEqual((A.words("challenge_limit"), A.short("exploration"), A.words("suit"), A.pct("exploration")), ("30% oxygen at 10.2 psia", "34% at 8.2 psia", "pure oxygen at 4.3 psia", "34%"))
+        self.assertEqual((A.OLSON, A.SLIDES, A.BOARD), (C.OLSON, C.LUNAR_SLIDES, lessons.RB))                          # the same ledger keys the quotations use
+
+    def test_the_model_may_not_be_run_at_an_atmosphere_off_the_list(self):
+        from zgf import atmospheres as A, validate as V
+        mk = lambda a: {"id": a["id"], "x_o2": a["x_o2"], "p_psia": a["p_psia"], "p_kpa": round(A.p_kpa(a), 2)}
+        built = {"presets": [mk(a) for a in A.ATMOSPHERES if a["kind"] == "habitat"], "historical": [mk(a) for a in A.ATMOSPHERES if a["kind"] == "historical"]}
+        self.assertEqual(V.model_atmospheres(built, None), len(A.ATMOSPHERES))
+        with self.assertRaises(V.IntegrityError):                                                                       # a point with no stored sentence behind it
+            V.model_atmospheres({**built, "historical": built["historical"] + [{"id": "apollo_test_62", "x_o2": 1.0, "p_psia": 6.2, "p_kpa": 42.75}]}, None)
+        with self.assertRaises(V.IntegrityError):                                                                       # the same name with another number
+            V.model_atmospheres({**built, "presets": [{**p, "x_o2": 0.36} if p["id"] == "exploration" else p for p in built["presets"]]}, None)
+        stated = {"atmospheres": {"items": [{"id": "suit", "o2_pct": 100.0, "p_psia": 4.1}]}}
+        with self.assertRaises(V.IntegrityError):                                                                       # the sentence the receipt shows gives another pressure
+            V.model_atmospheres(built, stated)
+
+
 class Holdings(unittest.TestCase):
     def test_folders_and_documents_of_a_record(self):
         from zgf import derive_core as C

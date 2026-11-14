@@ -16,6 +16,7 @@ import os
 from . import ledger as L
 from .claims import (BASS2, FM2, GLENN, GUIDE, LUCI, LUNAR, MIR, OLSON, SAFFIRE6, SAFFIRE6_TEXT, M2, M3, Resolver, data_items, model_items, q, reading)
 from .literature import Library
+from . import atmospheres as ATM
 
 SPINOFF_DET = "doc:spinoff_fire_detector"
 VERDICTS = {"holds": "Holds within the tested scope", "limited": "Limited: true only under conditions", "contradicted": "Contradicted by NASA's evidence", "untested": "Untested"}
@@ -85,17 +86,17 @@ def claims(out_dir: str) -> list[dict]:
              q(OLSON, "the 1g flammability limits are generally not conservative for these materials as evidenced by the negative ∆O2%, by up to -5.75% oxygen", "Martian gravity, three materials"),
              q(GLENN, "which some researchers believe is not conservative in low-g", "NASA Glenn"),
              q(FM2, "This means that some things that are not flammable on Earth, may be flammable in potential habitats on the Moon and other places with reduced gravity", "")]}],
-         "untested": [UNTESTED_G, fact("%d rows lie near 30%% oxygen at 10.2 psia and %d near 34%% at 8.2 psia; none of them is a solid material." % (near["challenge_limit"]["n_near"], near["exploration"]["n_near"]), link="/envelope")],
+         "untested": [UNTESTED_G, fact("%d rows lie near %s and %d near %s; none of them is a solid material." % (near["challenge_limit"]["n_near"], ATM.words("challenge_limit"), near["exploration"]["n_near"], ATM.short("exploration")), link="/envelope")],
          "next": [q(OLSON, "If proven for more materials, this may indicate the need to include a factor of safety on 1g flammability limits", "What the authors propose")]},
         {"id": "coverage", "origin": "/envelope", "verdict": "contradicted",
          "claim": "NASA's microgravity combustion data cover the atmospheres planned for lunar and Martian habitats.",
          "summary": "They touch those atmospheres with a handful of gas and droplet rows. For solid materials and for partial gravity there is nothing to cover with.",
          "scope": ["the 24 combustion records of PSI, as fetched for this site"],
          "holds": [fact("%d of %d test rows state both oxygen and pressure; %d lie near the cabin air of the space station." % (both, len(env["points"]), near["iss"]["n_near"]), link="/envelope"),
-                   fact("%d rows lie near 30%% oxygen at 10.2 psia and %d near 34%% at 8.2 psia (near means %s)." % (near["challenge_limit"]["n_near"], near["exploration"]["n_near"], env["near_rule"]), link="/envelope")],
+                   fact("%d rows lie near %s and %d near %s (near means %s)." % (near["challenge_limit"]["n_near"], ATM.words("challenge_limit"), near["exploration"]["n_near"], ATM.short("exploration"), env["near_rule"]), link="/envelope")],
          "fails": [{"title": "What the counts leave out", "items": [
              fact("Solid-material rows that state pressure: %d. The BASS-II and Saffire tables give oxygen only." % solids_p, link="/envelope"),
-             fact("Rows near a suit atmosphere (pure oxygen at 4.3 psia): %d." % near["suit"]["n_near"], link="/envelope"),
+             fact("Rows near a suit atmosphere (%s): %d." % (ATM.words("suit"), near["suit"]["n_near"]), link="/envelope"),
              UNTESTED_G]}],
          "untested": [fact("Whether the raw files of these records hold pressures that the experimental tables omit. The site reads the tables, a few summaries and one raw data file (the Saffire-III recording), not the other raw data.")],
          "next": [q(FM2, "Conduct the first-ever observations and measurements of flame spread on the Moon", "FM2, planned")]},

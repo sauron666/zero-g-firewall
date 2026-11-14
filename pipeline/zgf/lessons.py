@@ -20,6 +20,7 @@ from . import ledger as L
 from .claims import FM2, GLENN, GUIDE, LUCI, LUCI_SLIDES, LUNAR, LUNAR_SLIDES, MIR, NAMES, OLSON, SAFFIRE6, SAFFIRE6_TEXT, Resolver, data_items, model_items, q, reading
 from .falsify import fact
 from .literature import Library
+from . import atmospheres as ATM
 
 A1, A13, RB = "doc:apollo_1", "doc:apollo_13", "doc:apollo_204_review_board_summary"
 SOFIE = "doc:glenn_child:solid-fuel-ignition-and-extinction-sofie"
@@ -146,7 +147,7 @@ def gaps(out_dir: str, searches: dict[str, int]) -> list[dict]:
                        fact(in_psi("SoFIE"))]}]},
         {"id": "solids-oxygen", "title": "No solid-material row states more than %s%% oxygen" % pc(solid_top),
          "measure": "%s%%" % pc(solid_top), "unit": "is the most oxygen any of the %d solid-material rows states" % n_solid,
-         "why": "The two exploration atmospheres on this site's map hold 30%% and 34%% oxygen, and a suit holds pure oxygen. The solid-fuel rows in PSI run from %s%% to %s%%." % (pc(solid_low), pc(solid_top)),
+         "why": "The two oxygen-rich cabin atmospheres on this site's map hold %s and %s oxygen, and a suit holds pure oxygen. The solid-fuel rows in PSI run from %s%% to %s%%." % (ATM.pct("challenge_limit"), ATM.pct("exploration"), pc(solid_low), pc(solid_top)),
          "evidence": [fact("Of %d rows that state oxygen, %d are solid materials; their oxygen runs from %s%% to %s%%. Droplet rows reach %s%% and gas-flame rows %s%%. No row of any kind states more than %s%%."
                            % (len(env["points"]), n_solid, pc(solid_low), pc(solid_top), pc(top["droplet"]), pc(top["gas"]), pc(max(top.values()))), link="/gaps"),
                       q(GUIDE, "The glovebox is normally limited to ISS “air,” nominally 21 percent oxygen by volume and one atmospheric pressure", "Why the station's solid-fuel tests stayed near air"),
@@ -156,11 +157,11 @@ def gaps(out_dir: str, searches: dict[str, int]) -> list[dict]:
                        q(SOFIE, "The atmosphere will be a mix of oxygen and nitrogen, with the oxygen percentage ranging from atmospheric up to 85%", ""),
                        fact(in_psi("SoFIE"))]},
                    {"name": "Saffire IV to VI", "state": "flown; in a paper, not in PSI", "items": [{"kind": "data", "id": "saffire_conditions"}]}]},
-        {"id": "exploration-atmosphere", "title": "Few tests sit near the atmospheres planned for exploration", "measure": "%d and %d" % (near["challenge_limit"]["n_near"], near["exploration"]["n_near"]),
-         "unit": "of %d rows lie near 30%% oxygen at 10.2 psia and 34%% at 8.2 psia" % both,
-         "why": "Those rows are liquid droplets and gas flames. Near a suit atmosphere, pure oxygen at 4.3 psia, there are %d." % near["suit"]["n_near"],
-         "evidence": [fact("%d rows lie near the cabin air of the space station; the count falls to %d and %d at the two exploration atmospheres (near means %s)."
-                           % (near["iss"]["n_near"], near["challenge_limit"]["n_near"], near["exploration"]["n_near"], env["near_rule"]), link="/envelope")],
+        {"id": "exploration-atmosphere", "title": "Few tests sit near the oxygen-rich cabin atmospheres", "measure": "%d and %d" % (near["challenge_limit"]["n_near"], near["exploration"]["n_near"]),
+         "unit": "of %d rows lie near %s and %s" % (both, ATM.words("challenge_limit"), ATM.short("exploration")),
+         "why": "Those rows are liquid droplets and gas flames. Near a suit atmosphere, %s, there are %d." % (ATM.words("suit"), near["suit"]["n_near"]),
+         "evidence": [fact("%d rows lie near the cabin air of the space station; the count falls to %d at %s and %d at %s (near means %s)."
+                           % (near["iss"]["n_near"], near["challenge_limit"]["n_near"], ATM.words("challenge_limit"), near["exploration"]["n_near"], ATM.short("exploration"), env["near_rule"]), link="/envelope")],
          "plans": [{"name": "FLARE, Flammability Limits at Reduced-g Experiment", "state": "led by JAXA", "items": [
                        q(FLARE, "a new fire safety standard test method for screening spacecraft materials will be proposed that addresses the shortcomings of existing standard test method such as NASA STD 6001B", ""),
                        q(OLSON, "If proven for more materials, this may indicate the need to include a factor of safety on 1g flammability limits", "Olson and Ferkul, on why the standard needs a second look")]}]},

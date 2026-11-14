@@ -36,6 +36,12 @@ describe("the branches of the fans model", () => {
     expect(receipts(undefined, "starved")).toEqual([]);
   });
 
+  it("draw the most flammable flow where the guide's own sentence puts it", () => {
+    const ref = load<{ reference: { value_cm_s: number; locator: string } }>("model/scaling.json").reference;
+    const said = receipts(fans, "buoyant").find((r) => r.quotes.some((q) => q.includes(`on the order of ${ref.value_cm_s} cm/s`)));
+    expect(said?.label).toBe(`Researcher's Guide, ${ref.locator}`);
+  });
+
   it("take the count of partial-gravity rows from the data", () => {
     const item = fans.groups.flatMap((g) => g.items).find((it) => it.kind === "data" && it.id === "partial_gravity_rows");
     const n = load<EnvelopeDoc>("envelope.json").gravity_counts.partial;

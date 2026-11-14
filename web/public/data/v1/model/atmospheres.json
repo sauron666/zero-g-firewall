@@ -6,7 +6,7 @@
  "assumptions": [
   "Gaseous fuel, perfectly mixed at stoichiometric proportion, no heat loss.",
   "A thermodynamic upper bound. It says nothing about ignition, spread rate or solid materials.",
-  "Atmosphere values are published numbers; each row names its source."
+  "Each atmosphere is a pair of numbers stated in a NASA document; the build checks the pair against the stored sentence and the page shows its receipt."
  ],
  "presets": [
   {
@@ -20,8 +20,8 @@
    "ppo2_vs_sea_level": 1.0,
    "o2_fraction_vs_air": 1.0,
    "normoxic_x_o2_at_this_pressure": 0.2092,
-   "source": "OCHMO-TB-003 (NASA habitable-atmosphere brief)",
-   "note": "",
+   "source": "Olson and Ferkul, NTRS 20130010991",
+   "note": "Standard sea-level air, 20.95% oxygen at 14.696 psia. NASA's sentence gives it as 21% at 14.7 psia.",
    "Tad_K": {
     "CH4": 2221.9,
     "C2H4": 2366.1,
@@ -30,7 +30,7 @@
   },
   {
    "id": "challenge_limit",
-   "name": "Lunar habitat, limit named in the challenge",
+   "name": "Before a spacewalk",
    "kind": "habitat",
    "p_psia": 10.2,
    "p_kpa": 70.33,
@@ -39,8 +39,8 @@
    "ppo2_vs_sea_level": 0.994,
    "o2_fraction_vs_air": 1.432,
    "normoxic_x_o2_at_this_pressure": 0.3015,
-   "source": "Challenge text: 30% oxygen or more at 10.2 psi or less",
-   "note": "On the normoxic curve.",
+   "source": "Olson and Ferkul, NTRS 20130010991",
+   "note": "On the normoxic curve, and the worst case NASA's flammability test has been run at. The challenge statement names 30% oxygen or more at 10.2 psi or less for lunar habitats.",
    "Tad_K": {
     "CH4": 2504.6,
     "C2H4": 2624.2,
@@ -49,7 +49,7 @@
   },
   {
    "id": "exploration",
-   "name": "Exploration atmosphere",
+   "name": "Lunar habitat, lander and rover",
    "kind": "habitat",
    "p_psia": 8.2,
    "p_kpa": 56.54,
@@ -58,8 +58,8 @@
    "ppo2_vs_sea_level": 0.906,
    "o2_fraction_vs_air": 1.623,
    "normoxic_x_o2_at_this_pressure": 0.375,
-   "source": "Ferkul et al. 2026, NTRS 20260001966",
-   "note": "Nominal for landers and rovers; band up to 37% oxygen.",
+   "source": "Ferkul et al., slides, NTRS 20260001966",
+   "note": "Nominal value.",
    "Tad_K": {
     "CH4": 2570.4,
     "C2H4": 2683.2,
@@ -77,7 +77,7 @@
    "ppo2_vs_sea_level": 1.397,
    "o2_fraction_vs_air": 4.773,
    "normoxic_x_o2_at_this_pressure": 0.7151,
-   "source": "Challenge text; OCHMO-TB-003",
+   "source": "Ferkul et al., slides, NTRS 20260001966",
    "note": "",
    "Tad_K": {
     "CH4": 2903.5,
@@ -89,7 +89,7 @@
  "historical": [
   {
    "id": "apollo_pad",
-   "name": "Apollo 1 pad test: pure oxygen at 16.7 psi",
+   "name": "Pure oxygen at 16.7 psi, as NASA tested spacecraft before the Apollo 1 fire",
    "kind": "historical",
    "p_psia": 16.7,
    "p_kpa": 115.14,
@@ -98,50 +98,12 @@
    "ppo2_vs_sea_level": 5.424,
    "o2_fraction_vs_air": 4.773,
    "normoxic_x_o2_at_this_pressure": 0.1841,
-   "source": "Apollo 204 Review Board summary (nasa.gov)",
-   "note": "Pressure from the Review Board page, not from the SMA case study.",
+   "source": "Apollo 204 Review Board summary",
+   "note": "The pressure is quoted from the Review Board page, the only stored page that states it.",
    "Tad_K": {
     "CH4": 3068.1,
     "C2H4": 3191.3,
     "C3H8": 3109.9
-   }
-  },
-  {
-   "id": "apollo_test_6040",
-   "name": "Apollo flammability tests: 60% O2, 40% N2 at 16.2 psi",
-   "kind": "historical",
-   "p_psia": 16.2,
-   "p_kpa": 111.7,
-   "x_o2": 0.6,
-   "ppo2_kpa": 67.02,
-   "ppo2_vs_sea_level": 3.157,
-   "o2_fraction_vs_air": 2.864,
-   "normoxic_x_o2_at_this_pressure": 0.1898,
-   "source": "NASA history: Apollo flammability tests",
-   "note": "",
-   "Tad_K": {
-    "CH4": 2897.1,
-    "C2H4": 3014.4,
-    "C3H8": 2934.0
-   }
-  },
-  {
-   "id": "apollo_test_62",
-   "name": "Apollo flammability tests: pure oxygen at 6.2 psi",
-   "kind": "historical",
-   "p_psia": 6.2,
-   "p_kpa": 42.75,
-   "x_o2": 1.0,
-   "ppo2_kpa": 42.75,
-   "ppo2_vs_sea_level": 2.014,
-   "o2_fraction_vs_air": 4.773,
-   "normoxic_x_o2_at_this_pressure": 0.4959,
-   "source": "NASA history: Apollo flammability tests",
-   "note": "",
-   "Tad_K": {
-    "CH4": 2946.7,
-    "C2H4": 3056.4,
-    "C3H8": 2984.1
    }
   }
  ],
@@ -453,5 +415,5 @@
   ],
   "note": "Oxygen percentage at which the stoichiometric flame temperature falls to 1600 K at 1 atm. An ordering tool for diluents, not a flammability-limit predictor."
  },
- "built_at_utc": "2026-11-14T09:50:46Z"
+ "built_at_utc": "2026-11-14T17:55:58Z"
 }

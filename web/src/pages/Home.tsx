@@ -164,7 +164,7 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
           {cover ? <MiniCover c={cover} /> : <p className="note">Appears after the NASA sync.</p>}
           {cover && solid && (
             <p className="dpanel__say">
-              Solid materials stop at <b>{pc(solid.max)}</b> oxygen{far.length > 0 && <>; exploration atmospheres hold {far.join(" and ")}</>}. No row above <b>{pc(cover.top)}</b>, and none in lunar gravity.
+              Solid materials stop at <b>{pc(solid.max)}</b> oxygen{far.length > 0 && <>; oxygen-rich cabins hold {far.join(" and ")}</>}. No row above <b>{pc(cover.top)}</b>, and none in lunar gravity.
             </p>
           )}
         </section>

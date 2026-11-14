@@ -28,10 +28,11 @@ export function Gaps({ route, manifest }: PageProps) {
       {d.data.coverage && (() => {
         const c = d.data.coverage;
         const solid = c.kinds.find((k) => k.id === "solid");
+        const rich = c.atmospheres.filter((x) => x.pct > 22 && x.pct < 100).map((x) => `${x.pct}%`);       // the marked cabin atmospheres between air and pure oxygen
         return (
           <Readings>
             <Tile label="Rows placed by oxygen" value={c.placed} of={`of ${c.total.toLocaleString("en-US")}`} sub="test rows of NASA's tables" />
-            <Tile label="Solids, most oxygen" value={solid?.max != null ? 100 * solid.max : null} decimals={1} unit="%" sub="exploration plans 30% and 34%" tone="flame" />
+            <Tile label="Solids, most oxygen" value={solid?.max != null ? 100 * solid.max : null} decimals={1} unit="%" sub={rich.length ? `oxygen-rich cabins hold ${rich.join(" and ")}` : "of the rows that state oxygen"} tone="flame" />
             <Tile label="Any fuel, most oxygen" value={100 * c.top} unit="%" sub="a suit holds pure oxygen" tone="flame" />
             <Tile label="In partial gravity" value={c.regimes.find((r) => r.id === "partial")?.rows ?? 0} sub="rows in PSI's tables" tone="partial" />
             {rep.data

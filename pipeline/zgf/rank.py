@@ -12,6 +12,9 @@ import math
 import os
 import re
 
+from .atmospheres import BY_ID as ATM
+from .atmospheres import lens as lens_atm
+
 NEAR_X, NEAR_P = 0.03, 0.15
 FACTORS = [
     ("atmosphere", "Tested near this atmosphere", "Rows of its tables near the oxygen and pressure of the mission. Ten or more rows score 1. Rows that state oxygen but no pressure count half."),
@@ -28,19 +31,19 @@ FACTORS = [
 W = lambda **k: k
 LENSES = [
     {"id": "iss", "name": "Space station cabin", "gravity": "micro", "about": "Free fall, sea-level air, air moved by fans.",
-     "atmospheres": [["ISS cabin", 0.2095, 101.325]],
+     "atmospheres": [lens_atm("iss")],
      "weights": W(atmosphere=0.18, material=0.16, gravity=0.10, flow=0.16, outcome=0.10, detection=0.10, depth=0.08, data=0.04, reliability=0.05, literature=0.03)},
     {"id": "lunar", "name": "Lunar habitat", "gravity": "partial", "about": "One sixth of Earth's gravity; less pressure and more oxygen than on the station.",
-     "atmospheres": [["30% oxygen at 10.2 psia", 0.30, 70.33], ["34% oxygen at 8.2 psia", 0.34, 56.54]],
+     "atmospheres": [lens_atm("challenge_limit"), lens_atm("exploration")],
      "weights": W(atmosphere=0.24, material=0.20, gravity=0.14, flow=0.10, outcome=0.10, detection=0.06, depth=0.06, data=0.03, reliability=0.05, literature=0.02)},
     {"id": "mars", "name": "Mars habitat", "gravity": "partial", "about": "Three eighths of Earth's gravity; the same candidate atmospheres as for the Moon.",
-     "atmospheres": [["30% oxygen at 10.2 psia", 0.30, 70.33], ["34% oxygen at 8.2 psia", 0.34, 56.54]],
+     "atmospheres": [lens_atm("challenge_limit"), lens_atm("exploration")],
      "weights": W(atmosphere=0.24, material=0.20, gravity=0.14, flow=0.10, outcome=0.10, detection=0.06, depth=0.06, data=0.03, reliability=0.05, literature=0.02)},
-    {"id": "rover", "name": "Pressurised rover or lander", "gravity": "partial", "about": "A small cabin at 8.2 psia and 34% oxygen, where smoke fills the volume fast.",
-     "atmospheres": [["34% oxygen at 8.2 psia", 0.34, 56.54]],
+    {"id": "rover", "name": "Pressurised rover or lander", "gravity": "partial", "about": "A small cabin at %g psia and %g%% oxygen, where smoke fills the volume fast." % (ATM["exploration"]["p_psia"], 100 * ATM["exploration"]["x_o2"]),
+     "atmospheres": [lens_atm("exploration")],
      "weights": W(atmosphere=0.24, material=0.18, gravity=0.12, flow=0.08, outcome=0.10, detection=0.12, depth=0.06, data=0.03, reliability=0.05, literature=0.02)},
-    {"id": "suit", "name": "Spacesuit", "gravity": "any", "about": "Pure oxygen at 4.3 psia, used in free fall and on a surface.",
-     "atmospheres": [["pure oxygen at 4.3 psia", 1.0, 29.65]],
+    {"id": "suit", "name": "Spacesuit", "gravity": "any", "about": "Pure oxygen at %g psia, used in free fall and on a surface." % ATM["suit"]["p_psia"],
+     "atmospheres": [lens_atm("suit", "pure oxygen at %g psia" % ATM["suit"]["p_psia"])],
      "weights": W(atmosphere=0.34, material=0.24, gravity=0.06, flow=0.06, outcome=0.12, detection=0.02, depth=0.06, data=0.03, reliability=0.05, literature=0.02)},
 ]
 KINDS = [
