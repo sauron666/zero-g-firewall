@@ -1,6 +1,6 @@
 # Implementation status
 
-Updated: 14 November 2026, 14:14 Sofia time. Kept truthful: nothing is listed as working without a passing test or a visible result.
+Updated: 14 November 2026, 14:38 Sofia time. Kept truthful: nothing is listed as working without a passing test or a visible result.
 
 ## Working
 
@@ -22,6 +22,8 @@ Updated: 14 November 2026, 14:14 Sofia time. Kept truthful: nothing is listed as
 | Gaps and plans | Five gaps, each counted from NASA's tables (no partial-gravity row among 2,009; no solid-material row with pressure; 8 and 11 rows near the exploration atmospheres; outcome columns in 10 of 20 tables; 3 of 6 Saffire flights in PSI), each beside the planned or flown experiment in NASA's words (`pipeline/zgf/lessons.py`). |
 | Incidents and Earth uses, resource coverage | Apollo 1, Apollo 13 and Mir, and three Spinoff articles, in checked sentences, each tied to a page of the site; a table of the challenge's ten resources with receipt and uses. **10 of 10 resources are in the ledger and used.** 79 of 79 quotations on the site are found word for word in the stored documents. |
 | Public site | https://sauron666.github.io/zero-g-firewall/ is deployed from `main` by GitHub Actions. The served manifest was checked after deployment; the live pages were not viewed from the build environment (no route to github.io). |
+| Alarm trust lab (synthetic) | Nine scenarios with declared truth, generated from the site's transport model: quiet cabin, fire, fire with the fans stopped, overheated wire, dust, stuck detector, injected readings, replayed 'all clear' frames over a real fire, a shifted sensor clock over a real fire. Every reading is signed in the browser (Ed25519); signature, sequence and clock are checked; triage weighs five explanations without probabilities; a fire alarm latches and no integrity anomaly can lower it; audit log chained by hash; scorecard over 72 seeded runs. 9 tests. Controls nothing and reads no real sensor. |
+| Tidy exports and build check | One CSV per table, a long file, conditions of 887 tests, data dictionary, column map; the build stops if anything can no longer be traced to a NASA file (tests with planted rows). |
 | Data and models page | Report for the PSI curators, the model check with a parity plot, and the list of data files with hashes. |
 | Closed-form physics and equilibrium thermochemistry | 16 Python tests reproduce the check values (LUCI spin, buoyant flow ranges, Coriolis fractions, normoxic curve, cabin bounds, methane flame temperatures). |
 | Tracer-transport solver, browser and Python | The TypeScript solver matches the Python reference on three golden cases to 1e-9; mass balance, positivity, walls and open ends are tested. 20 TypeScript tests. |
@@ -44,7 +46,7 @@ Matrix and playbooks, sensor inventory, tidy CSV exports, a nearest-evidence fin
 
 ## Next in the build order
 
-Alarm trust lab (synthetic, signed telemetry; triage of smoke, dust, sensor fault, tampering), an evaluation scorecard for the evidence engine (gold, adversarial and abstention sets), the companion, ISS live telemetry, matrix and playbooks, judge tour.
+Matrix and playbooks, an evaluation scorecard for the evidence engine (gold, adversarial and abstention sets), the companion, ISS live telemetry, matrix and playbooks, judge tour.
 
 ## Simulated or illustrative by design
 

@@ -1,14 +1,14 @@
 # Coverage of the plan, feature by feature
 
-Checked on 14 November 2026 at 14:26 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
+Checked on 14 November 2026 at 14:38 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
 
 | Priority | Features | Done | Partial | Not built |
 |---|---|---|---|---|
-| P0 | 28 | 15 | 11 | 2 |
-| P1 | 59 | 14 | 9 | 36 |
+| P0 | 28 | 22 | 6 | 0 |
+| P1 | 59 | 21 | 12 | 26 |
 | P2 | 38 | 1 | 8 | 29 |
 | P3 | 5 | 0 | 0 | 5 |
-| All | 130 | 30 | 28 | 72 |
+| All | 130 | 44 | 26 | 60 |
 
 ## Definition of done (specification, section 0)
 
@@ -19,7 +19,7 @@ Checked on 14 November 2026 at 14:26 Sofia time against the 130 features of the 
 | Search, facets, ranking, comparison, what varied, atmosphere map, gap explorer, with no language model | done, with fewer facets and a simpler comparison than specified |
 | Evidence Q&A with citations, abstention, deterministic fallback | done |
 | One physics result validated against NASA's numbers | done |
-| **Alarm Trust Lab with at least three scenarios** | **not built** |
+| Alarm Trust Lab with at least three scenarios | done: nine scenarios, signatures, freshness, plausibility, triage, audit log, scorecard |
 | North-star question answered in under 60 seconds | done (opening page, Myths and evidence) |
 | Official Resources Coverage | done |
 | Myth vs Evidence card for the fans | done |
@@ -41,15 +41,15 @@ Checked on 14 November 2026 at 14:26 Sofia time against the 130 features of the 
 | ID | Priority | State | Feature | What is there, what is missing |
 |---|---|---|---|---|
 | A01 | P0 | done | Official Resources verification | all ten resources are in the ledger and used; table on the Incidents page |
-| A02 | P0 | **partial** | PSI search sync through the public API | search synced, 2 off-topic hits shown with reasons; not yet reconciled with NASA's research-area page (the page is in the ledger) |
+| A02 | P0 | done | PSI search sync through the public API | search synced; 2 off-topic hits shown with reasons; NASA's research-area page lists 19 combustion investigations and all 19 match records |
 | A03 | P0 | done | Investigation metadata sync for every in-scope accession |  |
 | A04 | P0 | done | Experimental-table download for every investigation that has one |  |
-| A05 | P0 | **partial** | Per-table column map (original header → canonical name, unit, type, note), kept as reviewable config | column maps exist only for oxygen, pressure, fuel and outcome of 7 tables (pipeline/zgf/derive_evidence.py); no full canonical map |
-| A06 | P0 | **partial** | Unit normalisation in the derived layer (mmHg, atm, bar → kPa | mmHg, atm, bar to kPa and percent to fraction, tested, but only inside the atmosphere map |
+| A05 | P0 | done | Per-table column map (original header → canonical name, unit, type, note), kept as reviewable config | column map for every table (exports/column_map.json), overrides in pipeline/zgf/canonical.py |
+| A06 | P0 | done | Unit normalisation in the derived layer (mmHg, atm, bar → kPa | mmHg, atm, bar to kPa and percent to fraction, tested; in the exports and on the map |
 | A07 | P0 | done | Row identity and provenance pointers on every row | row number plus the table's ledger entry on every row |
 | A08 | P0 | done | Data-quality profile per table | profiles.json and the curator report |
 | A09 | P0 | done | Static artifacts and manifest (section 8.2) |  |
-| A10 | P0 | **partial** | "Synced from NASA at <UTC>" status and PSI version-drift detection | sync time shown everywhere; PSI versions recorded; no drift detection between two syncs |
+| A10 | P0 | done | "Synced from NASA at <UTC>" status and PSI version-drift detection | sync time shown; drift between fetches is computed (one fetch so far, so nothing to compare) |
 | A11 | P1 | **partial** | Publications index per investigation (DOIs from PSI metadata) plus NTRS anchor documents with abstracts and PDF links | publications on each card; NTRS abstracts searchable in Ask; no index page |
 | A12 | P1 | **not built** | Attachment ingestion for key workbooks (SAME-R combined results, DAFT summary, CFI data summary, SPICE smoke point) into tidy tables with sheet and ce | CFI, DAFT and SPICE workbooks are fetched, none is parsed; the SAME-R workbook was not fetched |
 | A13 | P2 | **not built** | Selective raw media |  |
@@ -98,22 +98,22 @@ Checked on 14 November 2026 at 14:26 Sofia time against the 130 features of the 
 | D04 | P2 | **partial** | Legend separating observation, model and synthetic layers | class badges and receipts on every panel |
 | D05 | P2 | **partial** | Gravity explainer (0 g, lunar, Martian, 1 g), conceptual |  |
 | D06 | P3 | **not built** | XR |  |
-| E01 | P1 | **not built** | Detector evidence cards from SAME, SAME-R, DAFT/DAFT-2 and PSI-115 |  |
-| E02 | P1 | **not built** | Synthetic telemetry generated by the transport solver plus noise |  |
-| E03 | P1 | **not built** | Signed telemetry envelope (Ed25519 from a vetted library), key IDs, canonical encoding |  |
-| E04 | P1 | **not built** | Freshness checks |  |
-| E05 | P1 | **not built** | Physics plausibility |  |
-| E06 | P1 | **not built** | Hypothesis triage |  |
-| E07 | P1 | **not built** | Scenario set mapped to SPARTA technique IDs |  |
-| E08 | P1 | **not built** | Alert timeline and hash-chained audit log with export |  |
-| E09 | P1 | **not built** | Cost-of-action panel |  |
-| E10 | P1 | **not built** | Detection scorecard |  |
+| E01 | P1 | **partial** | Detector evidence cards from SAME, SAME-R, DAFT/DAFT-2 and PSI-115 | the four smoke records are listed with links; no evidence cards of their own |
+| E02 | P1 | done | Synthetic telemetry generated by the transport solver plus noise | generated from the site's transport model plus seeded noise; truth declared |
+| E03 | P1 | done | Signed telemetry envelope (Ed25519 from a vetted library), key IDs, canonical encoding | Ed25519 through WebCrypto (ECDSA P-256 where a browser lacks it), one key per sensor, fixed byte encoding |
+| E04 | P1 | done | Freshness checks | sequence, duplicates, clock skew, silence |
+| E05 | P1 | done | Physics plausibility | rate of rise, two separated detectors at once, frozen value, combustion gas and heat as corroboration |
+| E06 | P1 | done | Hypothesis triage | five explanations with signs for and against; inconclusive is a result |
+| E07 | P1 | done | Scenario set mapped to SPARTA technique IDs | EX-0014.03, EX-0001.02, EX-0014.01 on the three tampering scenarios |
+| E08 | P1 | **partial** | Alert timeline and hash-chained audit log with export | hash-chained audit log of every run; no export button |
+| E09 | P1 | **partial** | Cost-of-action panel | a short panel linked to Two realities; no costed comparison |
+| E10 | P1 | done | Detection scorecard | 72 seeded runs in the browser; counts per scenario; tampering never lowered a fire alarm |
 | E11 | P2 | **not built** | Detection rules as readable, versioned files with unit tests |  |
 | E12 | P2 | **not built** | Coordinated multi-sensor attack |  |
 | E13 | P2 | **not built** | Live ISS telemetry integrity monitor (feed health on real data) |  |
 | E14 | P3 | **not built** | Threat model and trust-zone diagram |  |
 | E15 | P1 | **not built** | Detector lineage |  |
-| F01 | P0 | **partial** | Build-time card generation with validators | every quotation is searched in the stored document and numbers come from code; no test with a planted unsourced row yet |
+| F01 | P0 | done | Build-time card generation with validators | build check with planted-row tests (pipeline/zgf/validate.py); every quotation searched in the stored text |
 | F02 | P0 | done | Deterministic fallback with no key and no network |  |
 | F03 | P1 | **not built** | Orchestrator with typed tools (search, card, compare, envelope, thermo, transport, triage) |  |
 | F04 | P1 | **partial** | Validation agent | the checker covers citations, numbers and verdicts |
@@ -141,7 +141,7 @@ Checked on 14 November 2026 at 14:26 Sofia time against the 130 features of the 
 | H10 | P2 | **not built** | Lines in English and Bulgarian |  |
 | I01 | P0 | done | Mission Overview with real counts only |  |
 | I02 | P0 | **partial** | About, Methods, Limitations, Scope, AI disclosure and Sources pages | Method and limits page with classes, limits and AI use; sources are on the Incidents page; no separate scope page |
-| I03 | P0 | **not built** | Downloads with a data dictionary | the Data page lists the JSON files; no tidy CSV and no data dictionary |
+| I03 | P0 | done | Downloads with a data dictionary | Downloads on the Data page: 22 tidy tables, long file, conditions file, data dictionary, column map |
 | I04 | P0 | **partial** | Offline mode | runs with no key and no server; no offline cache for a second visit |
 | I05 | P1 | **not built** | English first |  |
 | I06 | P1 | **not built** | Demo mode with separately labelled real-data and synthetic flows |  |
@@ -158,7 +158,7 @@ Checked on 14 November 2026 at 14:26 Sofia time against the 130 features of the 
 | K04 | P1 | done | Provenance receipt on every chart and answer | receipts on map points, table rows, quotations, passages, model rows |
 | K05 | P2 | **partial** | Tamper demonstration | tested in code (a changed byte, a removed entry); no button on the page |
 | K06 | P2 | **partial** | Reproducibility manifest (code version, parameters, model versions) | manifest with hashes, engine and species lists |
-| L01 | P0 | **not built** | Tidy, unit-normalised, ML-ready exports with dictionary and provenance |  |
+| L01 | P0 | done | Tidy, unit-normalised, ML-ready exports with dictionary and provenance | tidy CSV per table, long format, conditions of 887 tests, dictionary, provenance on every row |
 | L02 | P1 | **not built** | Scenario → FDS input template (gravity vector, ambient oxygen, pressure, ventilation), labelled untested unless run |  |
 | L03 | P1 | **not built** | Scenario → thermochemistry conditions file |  |
 | L04 | P2 | **not built** | Analysis notebook generated during the event |  |

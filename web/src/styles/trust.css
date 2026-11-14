@@ -1,0 +1,20 @@
+/* Alarm trust lab: a console. Status colours appear only here and always with an icon and a word. */
+.soc { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 1000px) { .soc { grid-template-columns: minmax(0, 1fr); } .soc__list { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); } }
+.soc__list { display: grid; gap: 6px; }
+.scn { display: grid; gap: 6px; text-align: left; padding: 10px 12px; border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface); color: var(--ink); font: inherit; font-size: var(--t-13); cursor: pointer; min-width: 0; }
+.scn:hover { border-color: var(--ink-2); }
+.scn[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 3px 0 0 var(--ink); }
+.scn__name { font-weight: 700; line-height: 1.25; }
+.scn__tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.scn .tag { height: 20px; font-size: 11px; padding: 0 6px; }
+.verdictcard { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 18px; align-items: center; padding: 16px 18px; border: 2px solid var(--axis); border-radius: var(--radius); background: var(--surface); }
+.verdictcard__state { display: grid; justify-items: center; gap: 6px; padding: 14px 8px; border-radius: var(--radius); font-weight: 700; letter-spacing: 0.04em; text-align: center; color: #0a0f1a; }
+.verdictcard--fire { border-color: var(--critical); } .verdictcard--fire .verdictcard__state { background: var(--critical); color: #fff; }
+.verdictcard--check { border-color: var(--warn); } .verdictcard--check .verdictcard__state { background: var(--warn); }
+.verdictcard--clear { border-color: var(--ok); } .verdictcard--clear .verdictcard__state { background: var(--ok); color: #fff; }
+@media (max-width: 640px) { .verdictcard { grid-template-columns: minmax(0, 1fr); } }
+.strip { border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface); padding: 4px 4px 0; min-width: 0; }
+.checks { margin-top: 8px; display: grid; gap: 5px; font-size: var(--t-13); color: var(--ink-3); }
+.checks li { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 6px; }
+.checks li.is-on { color: var(--ink); font-weight: 700; }
