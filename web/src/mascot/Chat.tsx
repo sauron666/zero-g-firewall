@@ -3,6 +3,8 @@ import { ALL_ITEMS } from "../app/nav";
 import { go, href } from "../app/router";
 import { useKit } from "../ai/kit";
 import { AgentRun, runAgent } from "../lib/agent";
+import { askModel, loadSettings, Sentence, Settings } from "../lib/ai";
+import { smallTalk, Talk } from "../lib/smalltalk";
 import { IconClose, IconTour } from "../components/icons";
 import { KLASS } from "../lib/klass";
 import { emit, on } from "./bus";
@@ -29,11 +31,22 @@ export const SUGGEST: Record<string, string[]> = {
   "/about": ["Has anything been burned in lunar gravity?", "What is the oxygen range of the tests?", "What did BASS-II study?"],
 };
 
+/** What a connected model added to an answer: sentences that passed the check, or why none is shown. */
+type ModelNote = { by: string; kept: Sentence[]; dropped: number; found: boolean } | { error: string };
 type Msg =
   | { who: "you"; text: string }
   | { who: "iskra"; kind: "hello"; page: string }
   | { who: "iskra"; kind: "went"; label: string }
-  | { who: "iskra"; kind: "answer"; run: AgentRun };
+  | { who: "iskra"; kind: "talk"; talk: Talk }
+  | { who: "iskra"; kind: "answer"; run: AgentRun; model?: ModelNote };
+
+/** The model that would write the answer, as the visitor named it; null when answers are built in. */
+export function connected(s: Settings): string | null {
+  if (s.mode === "offline") return null;
+  if (s.mode === "browser") return "the model in this browser";
+  if (s.mode === "hybrid") return `${s.local.model || "a local model"} with ${s.cloud.model || "a cloud model"}`;
+  return (s.mode === "local" ? s.local.model : s.cloud.model) || "no model name yet";
+}
 
 /** "open the atmosphere map", "go to gaps": a request to move, answered by moving. */
 export function placeIn(text: string): { path: string; label: string } | null {
@@ -44,10 +57,25 @@ export function placeIn(text: string): { path: string; label: string } | null {
   return hit ? { path: hit.path, label: hit.label } : null;
 }
 
-function Answer({ run }: { run: AgentRun }) {
+function Answer({ run, model }: { run: AgentRun; model?: ModelNote }) {
   const computed = run.steps.some((s) => ["count_tests_near", "oxygen_range", "rank_for_mission", "matrix_coverage"].includes(s.tool));
+  if (model && "kept" in model && model.kept.length > 0) {                      // a connected model wrote it, and every sentence shown passed the check against its sources
+    return (
+      <div className="msg msg--iskra">
+        {model.kept.slice(0, 6).map((k, i) => (
+          <p key={i} className="msg__line">{k.text} {k.cites.map((c) => { const p = run.hits[c - 1]?.passage; return p ? (p.l ? <a key={c} className="msg__src" href={href(p.l)} title={p.t}>{p.t}</a> : <span key={c} className="msg__src">{p.t}</span>) : null; })}</p>
+        ))}
+        <div className="msg__meta">
+          <span>written by {model.by}, checked against the sources{model.dropped ? ` · ${model.dropped} sentence${model.dropped === 1 ? "" : "s"} removed by the check` : ""}</span>
+          <a href={`#ask?q=${encodeURIComponent(run.question)}`}>Sources and steps</a>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="msg msg--iskra">
+      {model && "error" in model && <p className="note">The connected model could not be used: {model.error} The built-in answer follows.</p>}
+      {model && "kept" in model && <p className="note">{model.found ? `Nothing ${model.by} wrote passed the check against the sources.` : `${model.by} found no answer in the sources.`} The built-in answer follows.</p>}
       {run.notes.map((n) => <p key={n} className="note">{n}</p>)}
       {run.answer.abstained
         ? <p className="msg__line">{run.answer.why}</p>
@@ -82,9 +110,17 @@ export function IskraChat({ state, name, top, ready, onTour, touring = false }: 
     if (!kit) { pending.current = text; return; }
     setBusy(true);
     emit({ type: "SEARCHING" });
-    window.setTimeout(() => {                                   // long enough for the lantern to be seen looking
+    window.setTimeout(async () => {                             // long enough for the lantern to be seen looking
       const run = runAgent(text, kit);
-      setLog((l) => [...l, { who: "iskra", kind: "answer", run }]);
+      const s = loadSettings();
+      let model: ModelNote | undefined;
+      if (s.mode !== "offline" && !run.refused && run.hits.length > 0) {       // the same rule as the Ask page: a model may only reword what the search found
+        try {
+          const r = await askModel(s, text, run.hits);
+          model = { by: r.by, kept: r.verified.kept, dropped: r.verified.dropped.length, found: !r.verified.abstained };
+        } catch (e) { model = { error: String((e as Error).message ?? e) }; }
+      }
+      setLog((l) => [...l, { who: "iskra", kind: "answer", run, model }]);
       setBusy(false);
       emit({ type: "ANSWER_DONE", strength: run.refused ? "refused" : run.answer.abstained ? "gap" : "supported" });
     }, 420);
@@ -96,6 +132,8 @@ export function IskraChat({ state, name, top, ready, onTour, touring = false }: 
     setLog((l) => [...l, { who: "you", text }]);
     const place = placeIn(text);
     if (place) { go(place.path); setLog((l) => [...l, { who: "iskra", kind: "went", label: place.label }]); return; }
+    const talk = smallTalk(text, { model: connected(loadSettings()), examples: SUGGEST[top] ?? SUGGEST["/"] });
+    if (talk) { setLog((l) => [...l, { who: "iskra", kind: "talk", talk }]); return; }       // a greeting is answered as a greeting, in every mode
     answer(text);
   };
 
@@ -113,7 +151,8 @@ export function IskraChat({ state, name, top, ready, onTour, touring = false }: 
   }, [open]);
 
   const mood = busy ? "searching" : state.mood;
-  const status = busy ? "Looking through NASA's records…" : state.line || (page ? `With you on ${page.label}. Ring: ${KLASS[state.klass].label.toLowerCase()}.` : "Ready");
+  const via = connected(loadSettings());
+  const status = busy ? (via ? `Looking through NASA's records, then asking ${via}…` : "Looking through NASA's records…") : state.line || (page ? `With you on ${page.label}. Ring: ${KLASS[state.klass].label.toLowerCase()}.` : "Ready");
   const chips = SUGGEST[top] ?? SUGGEST["/"];
 
   return (
@@ -135,7 +174,8 @@ export function IskraChat({ state, name, top, ready, onTour, touring = false }: 
           <div className="chat__log">
             {log.map((m, i) => {
               if (m.who === "you") return <div key={i} className="msg msg--you">{m.text}</div>;
-              if (m.kind === "answer") return <Answer key={i} run={m.run} />;
+              if (m.kind === "answer") return <Answer key={i} run={m.run} model={m.model} />;
+              if (m.kind === "talk") return <div key={i} className="msg msg--iskra">{m.talk.lines.map((t, k) => <p key={k} className={k ? "note" : "msg__line"}>{t}</p>)}</div>;
               if (m.kind === "went") return <div key={i} className="msg msg--iskra"><p className="msg__line">Opened: {m.label}.</p></div>;
               const p = ALL_ITEMS.find((it) => it.path === m.page);
               return (

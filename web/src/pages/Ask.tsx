@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { href } from "../app/router";
 import { KLASS, KlassBadge } from "../lib/klass";
-import { askModel, callModel, loadSettings, Mode, ModelConfig, ModelRun, saveSettings, Settings, SYSTEM, userPrompt, Vendor, VENDOR_DEFAULT, verify, Verified } from "../lib/ai";
+import { askModel, callModel, loadSettings, Mode, ModelConfig, ModelRun, ping, saveSettings, Settings, SYSTEM, userPrompt, Vendor, VENDOR_DEFAULT, verify, Verified } from "../lib/ai";
+import { smallTalk, Talk } from "../lib/smalltalk";
+import { connected } from "../mascot/Chat";
 import { AgentRun, runAgent } from "../lib/agent";
 import { EvalKind, EvalReport, runEval } from "../lib/evalset";
 import { PLANTED, poisonDemo } from "../lib/poison";
@@ -41,6 +43,12 @@ const VENDORS: [Vendor, string][] = [["anthropic", "Anthropic (Claude)"], ["open
 const FANS = /\b(fan|fans|ventilat|airflow|self-?extinguish)/i;
 
 function ModelFields({ title, cfg, onChange, vendors }: { title: string; cfg: ModelConfig; onChange: (c: ModelConfig) => void; vendors: boolean }) {
+  const [t, setT] = useState<"busy" | { ok: string; ms: number } | { error: string } | null>(null);
+  useEffect(() => setT(null), [cfg.vendor, cfg.endpoint, cfg.model, cfg.key]);                 // a result belongs to the settings it was obtained with
+  const test = async () => {                                                                   // one word each way: shows whether address, key and model name work together
+    setT("busy");
+    try { const r = await ping(cfg); setT({ ok: r.reply, ms: r.ms }); } catch (e) { setT({ error: String((e as Error).message ?? e) }); }
+  };
   return (
     <fieldset className="aiset">
       <legend>{title}</legend>
@@ -53,6 +61,12 @@ function ModelFields({ title, cfg, onChange, vendors }: { title: string; cfg: Mo
       <label><span>Address</span><input value={cfg.endpoint} onChange={(e) => onChange({ ...cfg, endpoint: e.target.value })} spellCheck={false} /></label>
       <label><span>Model name</span><input value={cfg.model} onChange={(e) => onChange({ ...cfg, model: e.target.value })} placeholder="as the service names it" spellCheck={false} /></label>
       <label><span>Key{vendors ? "" : " (if the server asks for one)"}</span><input type="password" value={cfg.key} onChange={(e) => onChange({ ...cfg, key: e.target.value })} autoComplete="off" /></label>
+      <div className="row" style={{ ["--gap" as string]: "10px", marginTop: 4 }}>
+        <button type="button" className="btn btn--quiet" disabled={t === "busy" || !cfg.model} onClick={test}>{t === "busy" ? "Testing…" : "Test the connection"}</button>
+        {t && t !== "busy" && ("ok" in t
+          ? <span className="note" role="status"><IconCheck size={14} /> {cfg.model} replied “{t.ok}” in {(t.ms / 1000).toFixed(1)} s.</span>
+          : <span className="note" role="alert" style={{ color: "var(--ink)" }}><IconWarn size={14} /> {t.error}</span>)}
+      </div>
     </fieldset>
   );
 }
@@ -95,6 +109,7 @@ export function Ask({ manifest, route }: PageProps) {
   const [err, setErr] = useState<string | null>(null);
   const [focus, setFocus] = useState<number | null>(null);
   const [report, setReport] = useState<EvalReport | null>(null);
+  const [talk, setTalk] = useState<Talk | null>(null);
   const [live, setLive] = useState<{ raw: string; verified: Verified; by: string } | { error: string } | null>(null);
   const [liveBusy, setLiveBusy] = useState(false);
   const [progress, setProgress] = useState<{ f: number; text: string } | null>(null);
@@ -109,7 +124,9 @@ export function Ask({ manifest, route }: PageProps) {
   const ask = async (question: string) => {
     const text = question.trim();
     if (!kit || !text) return;
-    setQ(text); setErr(null); setRun(null); setFocus(null);
+    setQ(text); setErr(null); setRun(null); setFocus(null); setTalk(null);
+    const hello = smallTalk(text, { model: connected(settings), examples: EXAMPLES });
+    if (hello) { setAgent(null); setTalk(hello); return; }                                    // a greeting is answered as a greeting, in every mode
     emit({ type: "SEARCHING" });
     const a = runAgent(text, kit);
     setAgent(a);
@@ -176,6 +193,12 @@ export function Ask({ manifest, route }: PageProps) {
       </div>
       {error && <p className="note">The passages could not be loaded: {error}</p>}
 
+      {talk && (
+        <section className="panel" aria-live="polite">
+          {talk.lines.map((t, i) => <p key={i} className={i ? "note" : "claim claim--m"} style={i ? { marginTop: 8 } : undefined}>{t}</p>)}
+        </section>
+      )}
+
       {agent && offline && (
         <div className="askgrid">
           <section className="panel" aria-live="polite">
@@ -192,6 +215,9 @@ export function Ask({ manifest, route }: PageProps) {
             {err && <p className="callout"><IconWarn size={16} /><span>The model could not be used: {err} The offline answer is shown instead.</span></p>}
             {run && run.verified.abstained && <p className="callout"><IconInfo size={16} /><span>The model found no answer in the sources. The nearest passages are shown.</span></p>}
             {run && !run.verified.abstained && run.verified.kept.length === 0 && <p className="callout"><IconWarn size={16} /><span>Verification removed every sentence the model wrote. The built-in answer is shown instead.</span></p>}
+            {run && !run.verified.abstained && run.verified.kept.length === 0 && (
+              <details className="dropped"><summary>What {run.by} wrote</summary><p className="note" style={{ whiteSpace: "pre-wrap" }}>{run.raw}</p></details>
+            )}
 
             {useModel ? (
               <div className="answer">{run!.verified.kept.map((s, i) => <p key={i}>{s.text} {s.cites.map(cite)}</p>)}</div>
@@ -265,7 +291,7 @@ export function Ask({ manifest, route }: PageProps) {
             <p className="note" style={{ marginTop: 10, maxWidth: "92ch" }}>
               {settings.mode === "browser"
                 ? "The model runs in this tab and the passages never leave the machine. The first use needs a connection to fetch the model: the browser's own model is fetched by the browser, and a WebGPU model is some hundreds of megabytes, fetched once from its public host. This mode is written against the published interfaces and tested with stand-ins; it was not run in the build environment, which has no GPU."
-                : "Keys and addresses stay in this browser and are sent only to the address you set. A local server such as Ollama, LM Studio or llama.cpp must allow requests from this page (for Ollama, start it with OLLAMA_ORIGINS set to this site's address). The connectors are tested against each service's request and reply format, not against the live services."}
+                : "Keys and addresses stay in this browser and are sent only to the address you set. A local server such as Ollama, LM Studio or llama.cpp must allow requests from this page (for Ollama, start it with OLLAMA_ORIGINS set to this site's address). “Test the connection” sends one word and shows the service's own reply or its error. The connectors follow each service's published request format; they were not run against the live services in the build environment."}
             </p>
           </details>
         )}

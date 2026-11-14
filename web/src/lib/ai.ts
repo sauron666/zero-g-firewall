@@ -21,8 +21,8 @@ export const DEFAULTS: Settings = {
 };
 export const VENDOR_DEFAULT: Record<Vendor, { endpoint: string; model: string }> = {
   anthropic: { endpoint: "https://api.anthropic.com", model: "claude-sonnet-5-5" },
-  openai: { endpoint: "https://api.openai.com/v1", model: "" },
-  gemini: { endpoint: "https://generativelanguage.googleapis.com/v1beta", model: "" },
+  openai: { endpoint: "https://api.openai.com/v1", model: "gpt-6-luna" },                                   // names as the services list them in November 2026; the field can be edited
+  gemini: { endpoint: "https://generativelanguage.googleapis.com/v1beta", model: "gemini-3.8-flash" },
   compatible: { endpoint: "http://localhost:11434/v1", model: "" },
 };
 const KEY = "zgf.ai";
@@ -88,33 +88,77 @@ export function verify(answer: string, hits: Hit[]): Verified {
 }
 
 type Fetch = (input: string, init?: RequestInit) => Promise<Response>;
-export function request(cfg: ModelConfig, system: string, user: string): { url: string; init: RequestInit } {
+type Call = { url: string; init: RequestInit };
+/** Room for a model's own reasoning as well as its answer: current cloud models count both against one limit, and an answer cut off by it comes back empty. */
+const MAX_OUT = 8192;
+
+/**
+ * The requests to try, the most suitable first. Services change what they accept from one generation of models to the
+ * next: current Claude and GPT models refuse a sampling temperature, older ones do not know an effort level, and a local
+ * server may know neither. A request refused as malformed (HTTP 400) is therefore followed by a plainer one.
+ */
+export function attempts(cfg: ModelConfig, system: string, user: string): Call[] {
   const base = cfg.endpoint.replace(/\/+$/, "");
   const json = { "content-type": "application/json" };
-  if (cfg.vendor === "anthropic")
-    return { url: `${base}/v1/messages`, init: { method: "POST", headers: { ...json, "x-api-key": cfg.key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-      body: JSON.stringify({ model: cfg.model, max_tokens: 700, temperature: 0, system, messages: [{ role: "user", content: user }] }) } };
-  if (cfg.vendor === "gemini")
-    return { url: `${base}/models/${encodeURIComponent(cfg.model)}:generateContent`, init: { method: "POST", headers: { ...json, "x-goog-api-key": cfg.key },
-      body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: [{ role: "user", parts: [{ text: user }] }], generationConfig: { temperature: 0, maxOutputTokens: 700 } }) } };
-  return { url: `${base}/chat/completions`, init: { method: "POST", headers: cfg.key ? { ...json, authorization: `Bearer ${cfg.key}` } : json,
-    body: JSON.stringify({ model: cfg.model, temperature: 0, max_tokens: 700, messages: [{ role: "system", content: system }, { role: "user", content: user }] }) } };
+  const post = (url: string, headers: Record<string, string>, body: unknown): Call => ({ url, init: { method: "POST", headers, body: JSON.stringify(body) } });
+  if (cfg.vendor === "anthropic") {
+    const url = `${base}/v1/messages`;
+    const headers = { ...json, "x-api-key": cfg.key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" };
+    const body = { model: cfg.model, max_tokens: MAX_OUT, system, messages: [{ role: "user", content: user }] };
+    return [post(url, headers, { ...body, output_config: { effort: "low" } }), post(url, headers, body)];
+  }
+  if (cfg.vendor === "gemini") {
+    const url = `${base}/models/${encodeURIComponent(cfg.model)}:generateContent`;
+    const headers = { ...json, "x-goog-api-key": cfg.key };
+    const body = (generationConfig: unknown) => ({ systemInstruction: { parts: [{ text: system }] }, contents: [{ role: "user", parts: [{ text: user }] }], generationConfig });
+    return [post(url, headers, body({ maxOutputTokens: MAX_OUT, thinkingConfig: { thinkingLevel: "low" } })), post(url, headers, body({ maxOutputTokens: MAX_OUT }))];
+  }
+  const url = `${base}/chat/completions`;
+  const headers: Record<string, string> = cfg.key ? { ...json, authorization: `Bearer ${cfg.key}` } : json;
+  const messages = [{ role: "system", content: system }, { role: "user", content: user }];
+  if (cfg.vendor === "openai")
+    return [post(url, headers, { model: cfg.model, messages, max_completion_tokens: MAX_OUT, reasoning_effort: "low" }), post(url, headers, { model: cfg.model, messages, max_completion_tokens: MAX_OUT }), post(url, headers, { model: cfg.model, messages })];
+  return [post(url, headers, { model: cfg.model, messages, temperature: 0, max_tokens: 2048 }), post(url, headers, { model: cfg.model, messages })];
 }
+/** The first request that would be sent. */
+export const request = (cfg: ModelConfig, system: string, user: string): Call => attempts(cfg, system, user)[0];
+
 export function readReply(vendor: Vendor, data: unknown): string {
   const d = data as Record<string, any>;
-  if (vendor === "anthropic") return (d?.content ?? []).filter((b: any) => b?.type === "text").map((b: any) => b.text).join("").trim();
-  if (vendor === "gemini") return (d?.candidates?.[0]?.content?.parts ?? []).map((p: any) => p?.text ?? "").join("").trim();
+  if (vendor === "anthropic") return (d?.content ?? []).filter((b: any) => b?.type === "text").map((b: any) => b.text).join("").trim();      // reasoning blocks may come first
+  if (vendor === "gemini") return (d?.candidates?.[0]?.content?.parts ?? []).filter((p: any) => !p?.thought).map((p: any) => p?.text ?? "").join("").trim();
   return String(d?.choices?.[0]?.message?.content ?? "").trim();
 }
+/** What a service said was wrong, in its own words where it gives them. */
+export function reason(body: string): string {
+  try { const j = JSON.parse(body); const m = j?.error?.message ?? j?.message ?? j?.error; if (typeof m === "string" && m) return m.slice(0, 260); } catch { /* not JSON */ }
+  return body.replace(/\s+/g, " ").slice(0, 200);
+}
+const HINT: Record<number, string> = { 401: "The key was refused.", 403: "The key is not allowed to use this model.", 404: "Check the model name and the address.", 429: "The quota or the rate limit of the account was reached." };
 export async function callModel(cfg: ModelConfig, system: string, user: string, f: Fetch = fetch): Promise<string> {
   if (!cfg.model) throw new Error("No model name is set.");
-  const { url, init } = request(cfg, system, user);
-  let res: Response;
-  try { res = await f(url, init); } catch (e) { throw new Error(`Could not reach ${new URL(url).host}. ${String((e as Error).message ?? e)}`); }
-  if (!res.ok) throw new Error(`${new URL(url).host} answered ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  const out = readReply(cfg.vendor, await res.json());
-  if (!out) throw new Error("The model returned no text.");
-  return out;
+  const tries = attempts(cfg, system, user);
+  for (let i = 0; i < tries.length; i++) {
+    const { url, init } = tries[i];
+    const host = new URL(url).host;
+    let res: Response;
+    try { res = await f(url, init); } catch (e) { throw new Error(`Could not reach ${host}. ${String((e as Error).message ?? e)}`); }
+    if (!res.ok) {
+      if (res.status === 400 && i < tries.length - 1) continue;                         // refused as malformed: the plainer request follows
+      const hint = HINT[res.status] ?? (res.status >= 500 ? "The service had an error; try again." : "");
+      throw new Error(`${host} answered ${res.status}: ${reason(await res.text())}${hint ? " " + hint : ""}`);
+    }
+    const out = readReply(cfg.vendor, await res.json());
+    if (!out) throw new Error("The model returned no text. It may have spent its whole output on reasoning; another model or a shorter question may help.");
+    return out;
+  }
+  throw new Error("No request could be sent.");
+}
+/** A one-word exchange that shows whether the address, the key and the model name work together. */
+export async function ping(cfg: ModelConfig, f: Fetch = fetch): Promise<{ reply: string; ms: number }> {
+  const t0 = Date.now();
+  const reply = await callModel(cfg, "This is a connection test. Reply with the single word: ready", "Reply with the single word: ready", f);
+  return { reply: reply.replace(/\s+/g, " ").slice(0, 60), ms: Date.now() - t0 };
 }
 
 export interface ModelRun { verified: Verified; raw: string; draft?: string; by: string }

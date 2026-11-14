@@ -2,7 +2,7 @@
 
 ## Hand-off (14 November, evening): start here
 
-The site is live from `main` at https://sauron666.github.io/zero-g-firewall/. All 28 must-have features of `docs/COVERAGE.md` are done. Tests: 69 Python, 128 TypeScript, all passing; the integrity check runs 1,975 checks at each derivation.
+The site is live from `main` at https://sauron666.github.io/zero-g-firewall/. All 28 must-have features of `docs/COVERAGE.md` are done. Tests: 69 Python, 135 TypeScript, all passing; the integrity check runs 1,975 checks at each derivation.
 
 **Which raw cache.** Since 14 November 17:20 the site is built from the larger cache: 4,959 files, 330.9 MB, folder `nasa_raw2` on the team's machine, written by `sync_nasa_async.py` 2.0.0. The repository tracks that cache's ledger at `nasa_raw/ledger/ledger.jsonl` and its report at `nasa_raw/sync_report.json`. On the team's machine derive with `python pipeline/derive.py --raw nasa_raw2`, or rename the folders so that `nasa_raw2` becomes `nasa_raw`. The older, smaller folder no longer matches the tracked ledger.
 

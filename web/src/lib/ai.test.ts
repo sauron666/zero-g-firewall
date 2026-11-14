@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { askModel, DEFAULTS, readReply, request, userPrompt, verify } from "./ai";
+import { askModel, attempts, callModel, DEFAULTS, ping, readReply, reason, request, userPrompt, verify, VENDOR_DEFAULT } from "./ai";
 import { buildIndex, extractive, tokens } from "./search";
 import type { Passage } from "./types";
 
@@ -86,6 +86,37 @@ describe("model connectors", () => {
     expect(calls).toEqual(["http://localhost:11434/v1/chat/completions", "https://api.anthropic.com/v1/messages"]);
     expect(r.verified.kept.map((k) => k.text)).toEqual(["FLEX burned 274 droplets."]);
     expect(r.verified.dropped).toHaveLength(1);
+  });
+  it("sends nothing a current model refuses, and leaves room for its reasoning", () => {
+    for (const vendor of ["anthropic", "openai", "gemini"] as const) {
+      const first = JSON.parse(request({ vendor, ...VENDOR_DEFAULT[vendor], key: "k" }, "S", "U").init.body as string);
+      expect(JSON.stringify(first)).not.toContain("temperature");                              // refused with HTTP 400 by current Claude and GPT models
+      const cap = first.max_tokens ?? first.max_completion_tokens ?? first.generationConfig?.maxOutputTokens;
+      expect(cap).toBeGreaterThanOrEqual(4096);                                                // reasoning counts against the same limit as the answer
+      expect(VENDOR_DEFAULT[vendor].model).not.toBe("");                                       // choosing a service is enough to try it
+    }
+    expect(JSON.parse(request({ vendor: "openai", ...VENDOR_DEFAULT.openai, key: "k" }, "S", "U").init.body as string).max_tokens).toBeUndefined();
+  });
+  it("follows a request refused as malformed with a plainer one", async () => {
+    const bodies: any[] = [];
+    const picky = async (_url: string, init?: RequestInit) => {
+      const b = JSON.parse(init!.body as string);
+      bodies.push(b);
+      return b.output_config ? new Response(JSON.stringify({ type: "error", error: { type: "invalid_request_error", message: "output_config: Extra inputs are not permitted" } }), { status: 400 })
+        : new Response(JSON.stringify({ content: [{ type: "thinking", thinking: "..." }, { type: "text", text: "ready" }] }), { status: 200 });
+    };
+    expect(await callModel({ ...DEFAULTS.cloud, key: "k" }, "S", "U", picky)).toBe("ready");
+    expect(bodies.map((b) => !!b.output_config)).toEqual([true, false]);
+    expect(attempts({ ...DEFAULTS.cloud, key: "k" }, "S", "U").length).toBe(2);
+    expect((await ping({ ...DEFAULTS.cloud, key: "k" }, picky)).reply).toBe("ready");
+  });
+  it("says in the service's own words why a call failed", async () => {
+    const wrong = async () => new Response(JSON.stringify({ error: { message: "The model `gpt-0` does not exist", type: "invalid_request_error" } }), { status: 404 });
+    await expect(callModel({ vendor: "openai", endpoint: "https://api.openai.com/v1", model: "gpt-0", key: "k" }, "S", "U", wrong)).rejects.toThrow(/api\.openai\.com answered 404: The model `gpt-0` does not exist Check the model name/);
+    const empty = async () => new Response(JSON.stringify({ candidates: [{ content: { parts: [] }, finishReason: "MAX_TOKENS" }] }), { status: 200 });
+    await expect(callModel({ vendor: "gemini", ...VENDOR_DEFAULT.gemini, key: "k" }, "S", "U", empty)).rejects.toThrow(/returned no text/);
+    expect(reason("<html>Bad   gateway</html>")).toBe("<html>Bad gateway</html>");
+    expect(readReply("gemini", { candidates: [{ content: { parts: [{ text: "plan", thought: true }, { text: "A [1]." }] } }] })).toBe("A [1].");
   });
   it("reports a failed call in plain words", async () => {
     const down = async () => new Response("no", { status: 401 });
