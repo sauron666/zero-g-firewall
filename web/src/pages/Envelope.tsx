@@ -240,7 +240,7 @@ export function Envelope({ route, manifest }: PageProps) {
             <span className="note">Look for a mission</span>
             <div className="seg" role="group" aria-label="Mission whose atmosphere is marked on the map">
               <button type="button" aria-pressed={!lens} onClick={() => setMission("")}>None</button>
-              {rank.data.lenses.map((l) => <button key={l.id} type="button" aria-pressed={l.id === lens?.id} onClick={() => setMission(l.id)}>{l.name}</button>)}
+              {rank.data.lenses.map((l) => <button key={l.id} type="button" aria-pressed={l.id === lens?.id} onClick={() => { setMission(l.id); emit({ type: "NOTE", text: `Marked: ${l.name.toLowerCase()}.` }); }}>{l.name}</button>)}
             </div>
           </div>
           {lens && (

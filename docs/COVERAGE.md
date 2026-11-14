@@ -1,14 +1,14 @@
 # Coverage of the plan, feature by feature
 
-Checked on 14 November 2026 at 17:04 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
+Checked on 14 November 2026 at 17:11 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
 
 | Priority | Features | Done | Partial | Not built |
 |---|---|---|---|---|
 | P0 | 28 | 28 | 0 | 0 |
-| P1 | 59 | 40 | 7 | 12 |
+| P1 | 59 | 41 | 6 | 12 |
 | P2 | 38 | 2 | 9 | 27 |
 | P3 | 5 | 0 | 0 | 5 |
-| All | 130 | 70 | 16 | 44 |
+| All | 130 | 71 | 15 | 44 |
 
 ## Definition of done (specification, section 0)
 
@@ -105,7 +105,7 @@ Checked on 14 November 2026 at 17:04 Sofia time against the 130 features of the 
 | E05 | P1 | done | Physics plausibility | rate of rise, two separated detectors at once, frozen value, combustion gas and heat as corroboration |
 | E06 | P1 | done | Hypothesis triage | five explanations with signs for and against; inconclusive is a result |
 | E07 | P1 | done | Scenario set mapped to SPARTA technique IDs | EX-0014.03, EX-0001.02, EX-0014.01 on the three tampering scenarios |
-| E08 | P1 | **partial** | Alert timeline and hash-chained audit log with export | hash-chained audit log of every run; no export button |
+| E08 | P1 | done | Alert timeline and hash-chained audit log with export | alert timeline and a hash-chained audit log of every run, saved as JSON with the scenario, the seed and the chaining rule |
 | E09 | P1 | **partial** | Cost-of-action panel | a short panel linked to Two realities; no costed comparison |
 | E10 | P1 | done | Detection scorecard | 72 seeded runs in the browser; counts per scenario; tampering never lowered a fire alarm |
 | E11 | P2 | **not built** | Detection rules as readable, versioned files with unit tests |  |

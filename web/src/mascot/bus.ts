@@ -13,7 +13,8 @@ export type IskraEvent =
   | { type: "TOUR_STEP"; id: string; text: string }
   | { type: "TOUR_END" }
   | { type: "SUCCESS"; text?: string }
-  | { type: "ASK"; q?: string };            // open the conversation, with a question if one is given
+  | { type: "ASK"; q?: string }             // open the conversation, with a question if one is given
+  | { type: "NOTE"; text: string };         // a page says what the visitor just did; the companion repeats it
 
 type Fn = (e: IskraEvent) => void;
 const subs = new Set<Fn>();

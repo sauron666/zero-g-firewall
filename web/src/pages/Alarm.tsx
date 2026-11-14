@@ -177,7 +177,16 @@ export function Alarm({ route }: PageProps) {
           )}
 
           <section>
-            <div className="section__head"><h2 className="h3">Audit log of this run, chained by hash</h2><span className="note">{log.length} entries</span></div>
+            <div className="section__head"><h2 className="h3">Audit log of this run, chained by hash</h2>
+              <span className="row" style={{ ["--gap" as string]: "10px" }}><span className="note">{log.length} entries</span>
+                <button type="button" className="btn btn--quiet btn--sm" disabled={log.length === 0} onClick={() => {
+                  const body = JSON.stringify({ klass: "SYNTHETIC_SCENARIO", scenario: run?.scenario.id, seed: run?.seed, signature: run?.alg, rule: "hash = SHA-256 of the text prev|n|at|event; the first prev is 64 zeros", entries: log }, null, 1);
+                  const url = URL.createObjectURL(new Blob([body], { type: "application/json" }));
+                  const a = document.createElement("a");
+                  a.href = url; a.download = `zgf_alarm_log_${run?.scenario.id ?? "run"}_seed${run?.seed ?? 0}.json`;
+                  document.body.appendChild(a); a.click(); a.remove();
+                  window.setTimeout(() => URL.revokeObjectURL(url), 2000);
+                }}>Save the log</button></span></div>
             <div className="table-wrap scroll-y" style={{ maxHeight: 220 }}>
               <table className="datatable"><thead><tr><th>s</th><th>Event</th><th>Entry hash</th></tr></thead>
                 <tbody>{log.filter((l) => l.at <= at).map((l) => <tr key={l.n}><td className="num">{l.at}</td><td>{l.event}</td><td className="hash" title={`previous ${l.prev}`}>{l.hash.slice(0, 16)}…</td></tr>)}</tbody></table>

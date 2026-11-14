@@ -33,7 +33,7 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
   const [fans, setFansState] = useState(true);
   const [offAt, setOffAt] = useState<number | null>(null);          // the flame in ISKRA's lantern follows the same switch
   useEffect(() => { setOffAt(fans ? null : performance.now()); }, [fans]);
-  const setFans = (v: boolean) => { setFansState(v); emit({ type: "CONTEXT", fans: v }); };
+  const setFans = (v: boolean) => { setFansState(v); emit({ type: "CONTEXT", fans: v }); emit({ type: "NOTE", text: v ? "Fans on. Both flames are fed." : "Fans off. Watch the two flames." }); };
   useEffect(() => on((e) => { if (e.type === "FANS") setFansState(e.on); }), []);       // the guided tour flips the switch
   const nasa = manifest?.nasa ?? null;
   const mx = useData<MatrixDoc>(nasa ? "matrix.json" : null);

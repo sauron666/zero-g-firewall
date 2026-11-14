@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { KLASS, Klass } from "../lib/klass";
 import { IconClose } from "./icons";
+import { emit } from "../mascot/bus";
 
 /** Every number has a receipt: where it came from, its hash, how it was made. */
 export interface ReceiptData {
@@ -14,7 +15,7 @@ export const useReceipt = () => useContext(Ctx);
 
 export function ReceiptProvider({ children }: { children: React.ReactNode }) {
   const [r, setR] = useState<ReceiptData | null>(null);
-  const open = useCallback((x: ReceiptData) => setR(x), []);
+  const open = useCallback((x: ReceiptData) => { setR(x); emit({ type: "NOTE", text: "Here is where that comes from." }); }, []);
   useEffect(() => {
     if (!r) return;
     const on = (e: KeyboardEvent) => e.key === "Escape" && setR(null);

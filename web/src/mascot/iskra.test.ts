@@ -64,4 +64,8 @@ describe("the guided tour", () => {
     for (const s of STOPS) expect(pages.has("/" + s.to.split(/--|\?/)[0]), s.to).toBe(true);
     for (const s of STOPS) expect(s.text(null).length).toBeGreaterThan(40);
   });
+  it("repeats what a page says the visitor just did", () => {
+    expect(reduce(base, { type: "NOTE", text: "Fans off. Watch the two flames." }, 0)).toMatchObject({ mood: "pointing", line: "Fans off. Watch the two flames." });
+    expect(reduce(base, { type: "ASK" }, 0)).toEqual(base);
+  });
 });

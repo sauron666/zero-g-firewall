@@ -42,6 +42,7 @@ export function reduce(s: IskraState, e: IskraEvent, now: number): IskraState {
     case "TOUR_END": return { ...s, mood: "idle", line: "", touring: false };
     case "SUCCESS": return { ...s, mood: "success", line: e.text ?? "" };
     case "ASK": return s;
+    case "NOTE": return { ...s, mood: "pointing", line: e.text };
   }
 }
 

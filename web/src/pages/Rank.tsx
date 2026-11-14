@@ -52,7 +52,7 @@ export function Rank({ route, manifest }: PageProps) {
       </p>
       <div className="toolbar">
         <div className="seg" role="group" aria-label="Mission">
-          {doc.lenses.map((l) => <button key={l.id} type="button" aria-pressed={l.id === lens.id} onClick={() => { setLensId(l.id); setOpen(null); }}>{l.name}</button>)}
+          {doc.lenses.map((l) => <button key={l.id} type="button" aria-pressed={l.id === lens.id} onClick={() => { setLensId(l.id); setOpen(null); emit({ type: "NOTE", text: `Ranked for: ${l.name.toLowerCase()}.` }); }}>{l.name}</button>)}
         </div>
       </div>
       <p className="note" style={{ fontSize: 14 }}>
