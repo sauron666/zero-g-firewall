@@ -9,7 +9,8 @@ import { IconPause, IconPlay, IconReset, IconInfo } from "../components/icons";
 import { usePrefersReducedMotion, useWidth } from "../lib/hooks";
 import { useReceipt } from "../components/Receipt";
 import { useData } from "../lib/data";
-import type { ReportedDoc } from "../lib/types";
+import type { InventoryDoc, ReportedDoc } from "../lib/types";
+import { href } from "../app/router";
 import { DocBtn } from "../viz/Reported";
 
 type BodyId = "iss" | "moon" | "mars";
@@ -71,6 +72,9 @@ function RangeRows({ a, ens, width }: { a: Reality; ens: Ensemble | null; width:
 }
 
 export function Paradox() {
+  const inventory = useData<InventoryDoc>("inventory.json");                   // what the BASS-II table itself says, in words, about how its tests ended
+  const bass = inventory.data?.flow_words.tables.find((w) => w.accession === "PSI-25");
+  const bassOut = bass?.classes.find((c) => c.id === "went_out"), bassZero = bass?.classes.find((c) => c.id === "zero");
   const reported = useData<ReportedDoc>("reported.json");                      // what NASA measured in simulated lunar gravity; absent in a build without those documents
   const fabric = reported.data?.luci.rows.find((r) => r.id === "fabric_base");
   const longer = reported.data?.quotes.luci.find((q) => q.kind === "quote" && q.quote.includes("sooner than partial-g"));
@@ -309,6 +313,13 @@ export function Paradox() {
               <span>
                 <span className="choice__title">{b.label}</span>
                 <p className="choice__ev">{b.evidence}</p>
+                {b.id === "starved" && bass && bassOut && bassOut.rows > 0 && (
+                  <p className="choice__ev">
+                    In NASA's own table of that experiment, {bassOut.rows} of {bass.n_rows} rows say in the flow columns that the flame went out, {bassOut.down_to} of them “down to ext”, at {bassOut.o2_min}% to {bassOut.o2_max}% oxygen.
+                    {bassZero && bassZero.rows > 0 && <> In {bassZero.rows} rows a display reads 0 and the row has no word on the flame.</>}{" "}
+                    <a href={href("/evidence/measured")}>See the rows</a>
+                  </p>
+                )}
                 {b.id === "buoyant" && fabric && (
                   <p className="choice__ev">
                     Measured in that flight, as NASA's slides give it: the flame base on the fabric moved at {fabric.lunar} {fabric.unit}, against {fabric.earth} in the same test on Earth.
