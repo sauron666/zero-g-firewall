@@ -112,13 +112,26 @@ def saffire(lib: Library) -> dict:
                    "ok": all(limits["co_24h_ppm"] < r["co_ppm"] < limits["co_1h_ppm"] for r in pmma)})
     full = [r for r in rows if r["n_numbers_in_row"] == 10]
     checks.append({"what": "one row of the table has all ten values, which fixes the order of the columns (%s)" % ", ".join(r["id"] for r in full), "ok": bool(full)})
+    # the size of the fires and of the vehicles, as the paper states it twice: in its introduction and in its conclusion
+    whole = flat(" ".join(u["text"] for u in lib.units(SAFFIRE) or []))
+    sizes = re.findall(r"(?:spanned|ranging from) ([\d.]+) to ([\d.]+) kW (?:were tested in unmanned spacecraft )?with free air volumes of (\d+) to (\d+) cubic meters", whole)
+    if not sizes:
+        raise ReportedError("the Saffire paper no longer states the range of fire sizes and free volumes")
+    kw_lo, kw_hi, v_lo, v_hi = (float(x) for x in sizes[0])
+    scale = {"kw_min": kw_lo, "kw_max": kw_hi, "volume_min_m3": v_lo, "volume_max_m3": v_hi,
+             "ref": where(lib, SAFFIRE, page_with(lib, SAFFIRE, "%s to %s kW" % (sizes[0][0], sizes[0][1]))[0], "the paper's own summary of the test series")}
+    vols = [r["volume_m3"] for r in rows if r.get("volume_m3")]
+    whole_m3 = lambda x: math.floor(x + 0.5)
+    checks.append({"what": "the paper gives the fires as %g to %g kW in free volumes of %g to %g cubic metres, %d time%s in its text and with the same numbers; Table 1 lists volumes from %g to %g, which are %d and %d in whole cubic metres"
+                           % (kw_lo, kw_hi, v_lo, v_hi, len(sizes), "" if len(sizes) == 1 else "s", min(vols), max(vols), whole_m3(min(vols)), whole_m3(max(vols))),
+                   "ok": len(set(sizes)) == 1 and whole_m3(min(vols)) == v_lo and whole_m3(max(vols)) == v_hi})
     return {
         "title": "Five large fires in a cargo vehicle (Saffire IV to VI)",
         "rows": [{k: v for k, v in r.items() if k != "n_numbers_in_row"} for r in rows],
         "columns": {"p_kpa": "Ambient pressure, kPa", "o2_pct": "Oxygen, mol %", "flow_cm_s": "Air flow, cm/s", "length_cm": "Sample length, cm", "volume_m3": "Free volume, m³",
                     "t_outlet_c": "Highest temperature at the outlet of the flow duct, °C", "t_far_c": "Highest temperature at the far sensors or nearest location, °C",
                     "co2_ppm": "Rise in carbon dioxide at the far sensors, ppm", "co2_mmhg": "Rise in carbon dioxide partial pressure, mmHg", "co_ppm": "Rise in carbon monoxide at the far sensors, ppm"},
-        "limits": limits, "alarm": alarm,
+        "limits": limits, "alarm": alarm, "scale": scale,
         "refs": {"conditions": where(lib, SAFFIRE, u1, "Table 1"), "products": where(lib, SAFFIRE, u2, "Table 2"), "limits": where(lib, SAFFIRE, u3, "text and Figure 5 caption")},
         "checks": checks,
         "not_used": "Table 2 also lists burn duration and heat release. Some of those cells are empty, and the stored text does not show which, so they are left out.",

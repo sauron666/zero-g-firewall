@@ -47,6 +47,15 @@ class Curator(unittest.TestCase):
         self.assertEqual(r["negative_concentration"]["rows"], [0])
         self.assertIn("'Blue' = 'blue'", r["spelling_variants"]["detail"])
 
+    def test_a_final_oxygen_far_from_the_initial_one_is_flagged_in_both_directions(self):
+        t = table(["Test #", "Calibrated initial O2 % by vol", "Calibrated final O2 % by vol"],
+                  [["a", "21.0", "20.4"], ["b", "20.0", "39.1"], ["c", "20.8", "0.6"], ["d", "18.0", "none"], ["e", "17.5", "14.3"]])
+        f = self.rules(t)["final_oxygen_far_from_initial"]
+        self.assertEqual((f["level"], f["rows"], f["column"]), ("caution", [1, 2], "Calibrated final O2 % by vol"))
+        self.assertIn("in both directions: final values from 0.6% to 39.1%", f["detail"])
+        self.assertIn("In the other 2 rows the two differ by at most 3.2 points", f["detail"])                 # the row without a number is not compared
+        self.assertNotIn("final_oxygen_far_from_initial", self.rules(table(["Calibrated initial O2 % by vol", "Calibrated final O2 % by vol"], [["21", "20.5"], ["18", "17.1"]])))
+
     def test_spacing_alone_is_not_a_spelling_variant(self):
         self.assertNotIn("spelling_variants", self.rules(table(["Air display"], [["5   2"], ["5  2"], ["7"]])))
 
@@ -375,7 +384,7 @@ class Reported(unittest.TestCase):
           "VI-2 SIBAL 112 3217 580 3,650 409 48 20 2800 1.15 120\nVI-3 2-sided PMMA\n780 3080 1280\n77 21 8539 3.51 308\nVI-4 1-sided PMMA\n1200 1507 830\n57 21 %s 3.37 320\n*Empty fields were cases where the data were not available.")
     T3 = ("For carbon monoxide, NASA establishes a Spacecraft Maximum Allowed Concentration (SMAC) value based on the exposure duration. For carbon monoxide, the 1-hour SMAC is 425 ppm, and the 24-hour SMAC is 100 ppm7. "
           "NASA-STD-30018 which limits the 1-hour average CO2 partial pressure to no more than 3 mm Hg. Selecting 1 mg/m3 as a relatively tight alarm threshold, the FFD detector reached that threshold at 981 seconds. "
-          "The flow was changed from 20 cm/s to 5 cm/s at 1120 s and terminated at 1420 s.")
+          "The flow was changed from 20 cm/s to 5 cm/s at 1120 s and terminated at 1420 s. These tests spanned 1.5 to 3.2 kW with free air volumes of 17 to 19 cubic meters.")
 
     def lib(self, co2="8117"):
         from zgf import reported as P
@@ -394,6 +403,16 @@ class Reported(unittest.TestCase):
         from zgf import reported as P
         s = P.saffire(self.lib(co2="9917"))                          # parts per million no longer match the millimetres of mercury beside them
         self.assertFalse(all(c["ok"] for c in s["checks"]))
+
+    def test_the_size_of_the_fires_is_read_from_the_paper_and_checked_against_its_table(self):
+        from zgf import reported as P
+        s = P.saffire(self.lib())
+        self.assertEqual((s["scale"]["kw_min"], s["scale"]["kw_max"], s["scale"]["volume_min_m3"], s["scale"]["volume_max_m3"]), (1.5, 3.2, 17.0, 19.0))
+        self.assertEqual(s["scale"]["ref"]["loc"], "p. 3")                                       # the page that holds the sentence, not the page of the table
+        other = self.Lib({P.SAFFIRE: [self.T1, self.T2 % "8117", self.T3.replace("17 to 19 cubic meters", "20 to 25 cubic meters")]})
+        self.assertFalse(all(c["ok"] for c in P.saffire(other)["checks"]))                       # a sentence that no longer agrees with Table 1 fails its check
+        with self.assertRaises(P.ReportedError):                                                 # and a paper without the sentence stops the build: no size is typed in
+            P.saffire(self.Lib({P.SAFFIRE: [self.T1, self.T2 % "8117", self.T3.replace("cubic meters", "m3")]}))
 
     def test_a_missing_table_stops_the_build(self):
         from zgf import reported as P

@@ -28,6 +28,14 @@ export function utcAt(doc: RecordedDoc, t: number): string {
   return Number.isFinite(ms) ? new Date(ms).toISOString().slice(11, 19) : "";
 }
 
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+/** The calendar day of the recording in UTC, from the file's own time stamp: "5 June 2017". */
+export function utcDay(doc: RecordedDoc): string {
+  const d = new Date(Date.parse(doc.zero.utc));
+  return Number.isFinite(d.getTime()) ? `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}` : "";
+}
+
 export interface Moment { t: number; text: string; kind: "event" | "reading" }
 
 /** The moments worth saying aloud while the recording plays, in order. Every number is one the file or its derived block states. */

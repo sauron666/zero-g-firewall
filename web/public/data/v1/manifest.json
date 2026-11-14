@@ -13,7 +13,7 @@
   "official_resources_total": 10,
   "ledger_head": "079793b9c9ebb0d7e66906e362a54697c8cb0775f68f454c4dc88482957fde64",
   "ledger_chain_ok": true,
-  "curator_findings": 40,
+  "curator_findings": 41,
   "envelope_points": 887,
   "envelope_points_with_pressure": 746,
   "validation_rows": 587,
@@ -24,10 +24,10 @@
   "files_read": 88,
   "quotes": 139,
   "quotes_verified": 139,
-  "reported_values_checked": 13,
+  "reported_values_checked": 14,
   "droplet_rows_checked": 195,
   "droplet_rows_within_10pct": 152,
-  "passages": 576
+  "passages": 577
  },
  "artifacts": {
   "model/atmospheres.json": {
@@ -196,8 +196,8 @@
    "klass": "derived"
   },
   "curator_report.json": {
-   "sha256": "8ac200a1deacf76878a7ff595daaab534722f4e5b8ee6d6ba4a61c0de5c9ea4e",
-   "bytes": 18368,
+   "sha256": "a9b9795bce9b9323cc989d04ebea1fb8238452720296df482b2d5aa1c615dec9",
+   "bytes": 19071,
    "klass": "derived"
   },
   "envelope.json": {
@@ -226,13 +226,13 @@
    "klass": "literature"
   },
   "rank_features.json": {
-   "sha256": "add5644d97289174c38d51ba5c6329010cd79f160f0ecca549d9fe29cda339c8",
-   "bytes": 46997,
+   "sha256": "555fa159533dd8a689cd57b85c0ae4aa657d9c02dfc8b857b4d5c87f3a99825a",
+   "bytes": 47006,
    "klass": "derived"
   },
   "index.json": {
-   "sha256": "26877f8d2ea9aeef22ad5f092dc757fd24cf4d729fe8530d0ed78db334ae2a28",
-   "bytes": 470408,
+   "sha256": "5d43c2cd7153915ef8b67901c34e0bfe493eb2465d1cc871dde0ef7b4eae6372",
+   "bytes": 470827,
    "klass": "derived"
   },
   "falsify.json": {
@@ -416,8 +416,8 @@
    "klass": "observed"
   },
   "reported.json": {
-   "sha256": "e3c130726b30d565c4ad8a89126751e37a30a53159cc25439e1fc187fa9435e6",
-   "bytes": 20945,
+   "sha256": "f042ab1aa8358037f14745f2757a892430c31b30bd441fa97aa0cdc2aa569c1d",
+   "bytes": 21704,
    "klass": "literature"
   },
   "inventory.json": {
@@ -429,5 +429,5 @@
  "brand": "Zero-G Firewall",
  "team": "The Rule of Flame",
  "mascot": "ISKRA",
- "built_at_utc": "2026-11-14T17:13:12Z"
+ "built_at_utc": "2026-11-14T17:36:34Z"
 }

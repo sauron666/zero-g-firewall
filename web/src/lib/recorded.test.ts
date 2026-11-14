@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { lastAt, momentAt, moments, nearest, signed, stepPath, utcAt } from "./recorded";
+import { lastAt, momentAt, moments, nearest, signed, stepPath, utcAt, utcDay } from "./recorded";
 import type { RecordedDoc } from "./types";
 
 const doc = JSON.parse(readFileSync(new URL("../../public/data/v1/recorded.json", import.meta.url), "utf8")) as RecordedDoc;
@@ -11,6 +11,13 @@ describe("the Saffire-III recording", () => {
     expect(doc.series.t.length).toBe(doc.series.radiometers[0].length);
     expect(doc.series.t[0]).toBe(doc.window.from_t);
     expect(utcAt(doc, 0)).toBe(doc.zero.utc.slice(11, 19));
+  });
+
+  it("names its day from the file's own time stamp", () => {
+    const [y, m, d] = doc.zero.utc.slice(0, 10).split("-").map(Number);
+    expect(utcDay(doc)).toMatch(new RegExp(`^${d} [A-Z][a-z]+ ${y}$`));
+    expect(utcDay({ ...doc, zero: { ...doc.zero, utc: "2017-12-31T23:59:59Z" } })).toBe("31 December 2017");   // the day in UTC, whatever the reader's time zone
+    expect(m).toBeGreaterThan(0);
   });
 
   it("states peaks that are the highest readings it draws", () => {

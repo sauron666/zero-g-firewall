@@ -459,6 +459,7 @@ export interface ReportedDoc {
     limits: { co_1h_ppm: number; co_24h_ppm: number; co2_1h_mmhg: number };
     alarm: { threshold_mg_m3: number; t_s: number; test: string; flow_reduced_s?: number; flow_from_cm_s?: number; flow_to_cm_s?: number; flow_stopped_s?: number };
     refs: { conditions: DocRef; products: DocRef; limits: DocRef }; checks: ReportedCheck[]; not_used: string;
+    scale?: { kw_min: number; kw_max: number; volume_min_m3: number; volume_max_m3: number; ref: DocRef };
   };
   luci: {
     title: string; rows: LuciRow[]; checks: ReportedCheck[];

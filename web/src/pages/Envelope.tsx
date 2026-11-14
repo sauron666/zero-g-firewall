@@ -292,7 +292,7 @@ export function Envelope({ route, manifest }: PageProps) {
         </div>
         <ScatterLegend groups={allGroups} counts={counts} hidden={hidden} onToggle={toggle} extra={
           <>
-            <span className="legend__item"><span className="gdot gdot--partial" aria-hidden="true" />Lunar or Martian gravity (0 rows in PSI)</span>
+            <span className="legend__item"><span className="gdot gdot--partial" aria-hidden="true" />Lunar or Martian gravity ({d.gravity_counts.partial} {d.gravity_counts.partial === 1 ? "row" : "rows"} in PSI)</span>
             <span className="legend__item"><svg width="16" height="16" viewBox="-8 -8 16 16" aria-hidden="true"><circle r="4.6" fill="none" stroke="var(--ink)" strokeWidth="1.5" /><path d="M-8 0h4M4 0h4M0-8v4M0 4v4" stroke="var(--ink)" strokeWidth="1.5" /></svg>Atmosphere a crew breathes</span>
             <span className="legend__item"><svg width="14" height="14" viewBox="-7 -7 14 14" aria-hidden="true"><path d={shapePath("diamond", 60)} fill="none" stroke="var(--ink-2)" strokeWidth="1.5" strokeDasharray="3 2" /></svg>Historical, from NASA documents</span>
           </>

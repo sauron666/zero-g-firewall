@@ -1,6 +1,7 @@
 import { Readings, Tile } from "../dash/widgets";
-import type { DropletDoc, ValidationDoc } from "../lib/types";
-import { useState } from "react";
+import type { DropletDoc, ReportedDoc, ValidationDoc } from "../lib/types";
+import { DocBtn } from "../viz/Reported";
+import { useEffect, useState } from "react";
 import { scaleLinear } from "d3-scale";
 import { line as d3line } from "d3-shape";
 import { useData, fmtUtc } from "../lib/data";
@@ -142,6 +143,8 @@ function Num({ label, value, set, step, min, max, unit }: { label: string; value
 export function Physics() {
   const val = useData<ValidationDoc>("validation.json");
   const drops = useData<DropletDoc>("droplets.json");
+  const reported = useData<ReportedDoc>("reported.json");                      // numbers NASA reports outside PSI: the LUCI spin and the size of the Saffire fires
+
   const atm = useData<AtmModel>("model/atmospheres.json");
   const scl = useData<ScalingModel>("model/scaling.json");
   const openReceipt = useReceipt();
@@ -151,6 +154,11 @@ export function Physics() {
   const [q, setQ] = useState(3.2);
   const [dur, setDur] = useState(60);
   const [vol, setVol] = useState(18);
+  const spin = reported.data?.luci.spin;
+  const scale = reported.data?.saffire.scale;
+  // the controls open on NASA's own numbers once they are loaded: the LUCI spin, and the largest Saffire fire in the middle of the stated free volumes
+  useEffect(() => { if (spin) { setRpm(spin.rpm); setRad(spin.radius_m); } }, [spin]);
+  useEffect(() => { if (scale) { setQ(scale.kw_max); setVol((scale.volume_min_m3 + scale.volume_max_m3) / 2); } }, [scale]);
   const a = centripetal(rpm, rad);
   const cb = cabinBound(q, dur, vol);
   const expl = atm.data?.presets.find((p) => p.id === "exploration");
@@ -246,14 +254,17 @@ export function Physics() {
             <Num label="Spin rate" value={rpm} set={setRpm} step={0.5} min={1} max={60} unit="rpm" />
             <Num label="Radius" value={rad} set={setRad} step={0.01} min={0.2} max={20} unit="m" />
             <Num label="Gas speed" value={vgas} set={setVgas} step={0.01} min={0.01} max={2} unit="m/s" />
-            <button className="btn btn--quiet btn--sm" onClick={() => { setRpm(11); setRad(1.22); setVgas(0.1); }}>LUCI values</button>
+            {spin && <button className="btn btn--quiet btn--sm" onClick={() => { setRpm(spin.rpm); setRad(spin.radius_m); setVgas(0.1); }}>LUCI values</button>}
           </div>
           <dl className="kv" style={{ marginTop: 18 }}>
             <dt>Simulated gravity</dt><dd><b className="num">{a.toFixed(3)} m/s²</b>, {(a / G0).toFixed(3)} g</dd>
             <dt>Coriolis acceleration</dt><dd><b className="num">{(2 * omega(rpm) * vgas).toFixed(3)} m/s²</b>, {(coriolisFraction(rpm, rad, vgas) * 100).toFixed(0)}% of the simulated gravity</dd>
             <dt>Gravity change across 10 cm</dt><dd><b className="num">{(gravityGradient(0.1, rad) * 100).toFixed(1)}%</b></dd>
           </dl>
-          <p className="note" style={{ marginTop: 12 }}>LUCI spun a sounding-rocket payload at 11 rpm with the sample at 1.22 m (NTRS 20250010653). On the lunar surface there is no Coriolis term, which is why FM2 matters.</p>
+          <p className="note" style={{ marginTop: 12 }}>
+            {spin ? <>LUCI spun a sounding-rocket payload at {spin.rpm} rpm with the sample at {spin.radius_m} m. <DocBtn r={spin.ref} title="The spin that stood in for lunar gravity (LUCI)" label="NASA's slide" extra={[["rule", spin.rule]]} />{" "}</> : null}
+            On the Moon gravity needs no spin, so the sideways term is absent, which is why FM2 matters.
+          </p>
         </div>
 
         <div className="panel" data-klass="model">
@@ -275,7 +286,10 @@ export function Physics() {
             <dt>Temperature rise, at most</dt><dd><b className="num">{cb.dT.toFixed(1)} K</b></dd>
             <dt>Pressure rise, at most</dt><dd><b className="num">{(cb.dPfrac * 100).toFixed(1)}%</b></dd>
           </dl>
-          <p className="note" style={{ marginTop: 12 }}>Default values are the Saffire scale: 1.5 to 3.2 kW in 17 to 19 m³ (NTRS 20240002981), where gas rises mattered more than heat and pressure. Carbon monoxide is not computed.</p>
+          <p className="note" style={{ marginTop: 12 }}>
+            {scale ? <>The controls open at the Saffire scale: {scale.kw_min} to {scale.kw_max} kW in {scale.volume_min_m3} to {scale.volume_max_m3} m³. There NASA found the rise in temperature and pressure less significant than the rise in carbon dioxide and carbon monoxide. <DocBtn r={scale.ref} title="The size of the Saffire fires and vehicles" label="NASA's paper" />{" "}</> : null}
+            Carbon monoxide is not computed.
+          </p>
         </div>
       </section>
 

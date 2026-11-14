@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { scaleLinear } from "d3-scale";
 import { useWidth } from "../lib/hooks";
 import type { RecordedDoc } from "../lib/types";
-import { lastAt, momentAt, moments, nearest, signed, stepPath, utcAt } from "../lib/recorded";
+import { lastAt, momentAt, moments, nearest, signed, stepPath, utcAt, utcDay } from "../lib/recorded";
 import { SourceBtn } from "../components/Source";
 import { IconPause, IconPlay, IconReset } from "../components/icons";
 import { emit } from "../mascot/bus";
@@ -173,7 +173,7 @@ export function RecordedFire({ doc, compact = false }: { doc: RecordedDoc; compa
       ) : (
         <div className="table-wrap scroll-y" style={{ maxHeight: 320 }}>
           <table className="datatable">
-            <thead><tr><th className="r">Seconds from ignition</th><th>UTC, 5 June 2017</th><th className="r">Scatter reading</th><th className="r">Obscuration reading</th><th className="r">Highest radiometer</th></tr></thead>
+            <thead><tr><th className="r">Seconds from ignition</th><th>UTC, {utcDay(doc)}</th><th className="r">Scatter reading</th><th className="r">Obscuration reading</th><th className="r">Highest radiometer</th></tr></thead>
             <tbody>{sc.map(([t, v], i) => {
               const ob = lastAt(doc.detector.obscuration, t), k = nearest(T, t);
               return <tr key={i}><td className="r num">{t}</td><td className="num">{utcAt(doc, t)}</td><td className="r num">{v}</td>

@@ -19,6 +19,7 @@ import statistics
 
 MISSING = {"", "-", "–", "—", "n/a", "na", "none"}
 DASHES = {"-", "–", "—"}
+O2_FAR = 5.0          # percentage points between the oxygen read before a test and after it, beyond which the pair is flagged
 ERR = re.compile(r"^#(VALUE!|DIV/0!|REF!|N/A|NAME\?|NUM!|NULL!)$", re.I)
 NUM = re.compile(r"^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$")
 QTY = re.compile(r"^~?\s*([+-]?(?:\d+\.?\d*|\.\d+))\s*([A-Za-zµ°%][A-Za-z/%²]*)$")
@@ -198,6 +199,24 @@ def findings_for_table(t: dict, rel: str) -> list[dict]:
             zero = [i for i, c in enumerate(cells) if to_num(c) == 0]
             if zero:
                 add("zero_pressure", "caution", "%d row%s a pressure of 0." % (len(zero), " gives" if len(zero) == 1 else "s give"), "Those rows are left off the atmosphere map and counted as 'pressure not usable'.", name, zero)
+    # Oxygen read before and after one test should lie close together. A final reading far from the initial one, in either
+    # direction, is flagged; which of the two cells is wrong cannot be told from the table.
+    first = [(j, c) for j, c in enumerate(cols) if re.search(r"initial o2 %", c, re.I)]
+    last = [(j, c) for j, c in enumerate(cols) if re.search(r"final o2 %", c, re.I)]
+    if first and last:
+        (ja, _), (jb, name) = first[0], last[0]
+        pairs = [(i, to_num(r[ja]), to_num(r[jb])) for i, r in enumerate(rows) if ja < len(r) and jb < len(r)]
+        pairs = [(i, a, b) for i, a, b in pairs if a is not None and b is not None]
+        far = [(i, a, b) for i, a, b in pairs if abs(b - a) > O2_FAR]
+        if far:
+            near = max(abs(b - a) for i, a, b in pairs if abs(b - a) <= O2_FAR) if len(far) < len(pairs) else 0.0
+            lo, hi = min(b for _, _, b in far), max(b for _, _, b in far)
+            add("final_oxygen_far_from_initial", "caution",
+                "%d row%s a final oxygen more than %g points from the initial one, in both directions: final values from %g%% to %g%%. In the other %d rows the two differ by at most %g points."
+                % (len(far), " states" if len(far) == 1 else "s state", O2_FAR, lo, hi, len(pairs) - len(far), round(near, 2)) if lo < min(a for _, a, _ in far) < hi else
+                "%d row%s a final oxygen more than %g points from the initial one (final values from %g%% to %g%%). In the other %d rows the two differ by at most %g points."
+                % (len(far), " states" if len(far) == 1 else "s state", O2_FAR, lo, hi, len(pairs) - len(far), round(near, 2)),
+                "The site places a test by its initial oxygen only. Final values are shown as written and are not used in any count.", name, [i for i, _, _ in far])
     return out
 
 
