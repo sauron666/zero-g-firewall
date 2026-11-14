@@ -6,39 +6,45 @@ Acceptance rows (Q01 to Q35) are in `docs/pack/04_TESTS_SUBMISSION_PLAYBOOK.md`;
 
 ## The twelve stops (protect these above everything else)
 
-1. Overview with real counts and the "fetched from NASA" time. *(page exists; fills from `manifest.nasa`)*
-2. Myth card 2: "a fire will self-extinguish if ventilation is shut off": where it held, where NASA's sources say it may not, what is open.
+1. Overview with real counts and the "fetched from NASA" time. *(done)*
+2. Myth card 2: "a fire will self-extinguish if ventilation is shut off": where it held, where NASA's sources say it may not, what is open. *(done: Myths and evidence)*
 3. The same question in the evidence Q&A, every sentence cited to a row or a page.
-4. Atmosphere map: real test points, the lunar-habitat region, the empty partial-gravity cell, the Apollo 1 historical point, the ISS point live when the feed is up.
+4. Atmosphere map: real test points, the lunar-habitat region, the empty partial-gravity cell, the Apollo 1 historical point, the ISS point live when the feed is up. *(done, except the live point)*
 5. Ranking for a lunar habitat with the breakdown and the stability figure.
-6. What varied in one investigation, and the sensor inventory.
-7. Parity plot of the flame model against NASA's own `Tad` column, with N and error.
+6. What varied in one investigation, and the sensor inventory. *(what varied: done on every record card)*
+7. Parity plot of the flame model against NASA's own `Tad` column, with N and error. *(done: 587 rows, 2.1 K mean)*
 8. "A fan you cannot switch off". *(done: Flame physics page)*
 9. Alarm trust lab: a spoofed reading flagged, the detector-lineage chart, the cost of acting.
-10. A provenance receipt opened from a chart, and the signed release verified in the browser.
+10. A provenance receipt opened from a chart, and the signed release verified in the browser. *(receipts and the chain check: done; signature: not yet)*
 11. Official Resources Coverage: ten of ten.
 12. Limits and AI disclosure. *(done: Method and limits page)*
 
 Already built and to keep working: the opening scene with the fan switch, **Two realities (the Fan Paradox)**, Flame physics.
 
-## Gate 1: real NASA data on the site (do this first)
+## Where the build stands (14 November, early afternoon)
 
-1. `python pipeline/sync_nasa.py` in the project folder (resumes the existing `nasa_raw/`). Read `nasa_raw/sync_report.json`; investigate failures; note anything PSI now returns for Saffire IV to VI, LUCI, FM2 or SoFIE (`psi/search_*.json`).
-2. `python pipeline/derive.py --raw nasa_raw`. Fix whatever the real files break in `pipeline/zgf/derive_core.py` (it was written against the documented structure and tested only on a fixture). Compare counts with `docs/pack/05_DATA_DOSSIER.md` section 1 (26 hits; tables of about 2,860 rows) and log every difference.
-3. Pages: **Investigations** (explorer with search and facets: gravity, hardware family, pillar, in or out of scope; a card per investigation at `#evidence--PSI-25` with purpose, hardware, people, publications, the file inventory, the table preview with row receipts, the scope decision) and **Evidence ledger** (entries, chain status, filter by kind, verify a hash). Show PSI-108 and PSI-181 as "search noise, excluded, here is why" rather than hiding them.
-4. Commit, push, enable GitHub Pages, check the public URL in a private window.
+Done and deployed from `main`: sync and ledger, derivation stages 1 and 2, the literature layer with the quotation check, and these pages on real data: Investigations with record cards, Atmosphere map, Myths and evidence, Evidence ledger (chain re-computed in the browser), Data and models (curator report, model check), Flame physics with the parity plot. `docs/IMPLEMENTATION_STATUS.md` has the exact list.
 
-Done when Q01 to Q05 and Q07 hold.
+The raw cache is not in the repository. To re-derive, put the team's core archive (`zgf_raw_core_*.zip`, unpacked) in `nasa_raw/` or run `python pipeline/sync_nasa.py`, then `python pipeline/derive.py --raw nasa_raw`. The derivation needs `pypdf` and, for the model check, `cantera`.
 
-## Gate 2: the challenge, complete
+### What the real data taught us (read before touching the tables)
 
-5. **Canonical tables** (`tables_canonical/`): typed columns, units, conversions; the pitfalls in `docs/pack/05` section 1.4 become tests and **curator findings** (`curator_report.json`, page "Data and models").
-6. **What varied / what stayed constant** per investigation, computed from the tables (Q06); **sensor and hardware inventory** from metadata plus the Researcher's Guide appendix (as literature).
-7. **Atmosphere map** (`envelope.json`): every row with oxygen and pressure; habitat presets and the normoxic curve from `model/atmospheres.json`; historical points and facility ranges as literature layers drawn differently; gaps visible (Q10, Q11).
-8. **Ranking** with mission lenses (ISS, lunar habitat, Mars habitat, pressurised rover, suit), transparent factors, sliders, breakdown, matched and unmatched, and **rank stability** under seeded weight perturbations (Q08, Q32). **Compare** two or three investigations (Q09). **Nearest-evidence finder** at row level: match, near, different, not recorded; never a probability (Q31).
-9. **Literature layer**: extract text per page (pypdf for the guide and fact sheets) and per section (web pages) into `literature/passages.json`. Then build the content of `docs/pack/10_OFFICIAL_RESOURCES_MAP.md` section 4: **Myth vs Evidence** (three cards; card 2 first), **Official Resources Coverage**, **incident timeline**, **Earth applications**, **gap-to-plan map**. Every quotation in that file is a claim to verify against the stored text, with printed page and PDF page; what does not match becomes a labelled paraphrase (Q29, Q30, Q34, Q35).
-10. **Flame model validated against NASA**: run `physics.adiabatic_T` and `stoich_mixture_fraction` on the rows of the PSI-10 and PSI-159 tables that carry `Tad` and `Zst`; publish per-row differences, N, mean, median and maximum; draw the parity plot on the Flame physics page. A pre-event feasibility check on mirrored data saw about 4 K mean difference on 127 ethylene rows; a much larger number means the reference temperature or the stream definitions are wrong (Q14). Droplets: burn time against d0²/K on FLEX rows, reported with N and error.
-11. **Evidence Q&A, deterministic first** (`index.json`, BM25 in the browser, extractive answers with citations, abstention, curated two-sided answers for the three misconceptions) (Q12, Q13).
+- Counts: 26 search hits, 24 combustion records (19 flight, 5 ground), 25 experimental tables in 22 records, 2,009 in-scope rows. PSI-60, 62, 115 and 117 have no experimental table. PSI-108 and PSI-181 are search noise and are shown as set aside.
+- The CFI-G inverse-flame file has 861 empty lines after 154 data rows. FLEX is Windows-1252, uses an en dash for "no value", and its headers lost their subscripts (O, N, CO for O2, N2, CO2); they are **not** cut at 40 characters, as a pre-event note claimed.
+- Spreadsheet fill series corrupted two text columns (PSI-21 "Fuel Bottle": CH4 to CH14; PSI-23 "Atmosphere": N2 to N6). Use only the first value of each run.
+- NASA's `Tad` in PSI-159 is a one-atmosphere value; in PSI-10 it follows the row's pressure. `validation.json` holds both.
+- BASS-II and Saffire tables record oxygen but not pressure. They are never placed at an assumed pressure.
+- PSI's thumbnail address returns the same image for all 26 records, so thumbnails are not used.
+- The statement that BASS-II flames always quenched when the fan stopped is from ICES-2019-101, which is not in the ledger. Add its NTRS record to `sync_nasa.py` and fetch it before using that wording. Four NTRS full texts failed to download (see `nasa_raw/sync_report.json`); their abstracts are in the ledger.
+- `.xls` attachments (DAFT summary, SPICE flame length) need `xlrd`; `.xlsx` need `openpyxl`. Neither is parsed yet.
+
+## Gate 2: what is left of the challenge core
+
+1. **Ranking for a mission** (page Rank): lenses ISS, lunar habitat, Mars habitat, rover, suit. Factors computed from artifacts that exist: rows near the lens atmosphere (`envelope.json`), kind of fuel (solid, liquid, gas), whether flow or ventilation varied (`profiles.json`), whether outcomes are recorded, detection relevance, data held, curator cautions. Show the breakdown, sliders for weights, and stability under seeded weight perturbations. Compare two or three records side by side. Never a probability (Q08, Q09, Q32).
+2. **Gaps and plans** (page Gaps): no partial-gravity rows; no solid material with pressure; rows near each crew atmosphere; then the planned experiments from the Glenn pages in the ledger (FM2, FLARE, SoFIE) with checked quotations, and LUCI from its NTRS abstract.
+3. **Official Resources Coverage and Incidents and Earth uses** (page Lessons): Apollo 1, Apollo 13, Mir, the three Spinoff articles and the ScienceCast, each with checked sentences; this takes the counter from 4 to 10 of 10. Content spec: `docs/pack/10_OFFICIAL_RESOURCES_MAP.md` section 4. Add each use to `USES` in `pipeline/zgf/claims.py`.
+4. **Evidence Q&A, deterministic first** (page Ask): chunks from record texts, guide pages, abstracts, findings and myth items into `index.json`; BM25 in the browser; extractive answers with citations; abstention; the three misconceptions answered from `myths.json` (Q12, Q13).
+5. Tidy CSV exports with a data dictionary; sensor and hardware inventory from metadata and the guide's appendix.
 
 ## Gate 3: differentiators
 
