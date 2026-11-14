@@ -86,7 +86,7 @@ export function LineChart(p: LineChartProps) {
         ))}
         {p.series.map((s, i) => (
           <g key={s.id}>
-            <path d={paths[i]} fill="none" stroke={s.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" strokeDasharray={s.dash} />
+            <path className="ln" d={paths[i]} fill="none" stroke={s.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" strokeDasharray={s.dash} />
             <text x={width - m.r + 6} y={sy(Math.min(s.values[n - 1], sy.domain()[1]))} dy="0.32em" className="t-ink">{s.name}</text>
           </g>
         ))}

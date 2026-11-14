@@ -154,7 +154,7 @@ export function Paradox() {
   return (
     <div className="stack" style={{ ["--gap" as string]: "26px" }} ref={wrapRef}>
       <div className="stack" style={{ ["--gap" as string]: "12px" }}>
-        <h1 className="page-title">Two realities</h1>
+        <h1 className="page-title">Fans on, fans off</h1>
         <p className="lede">The same cabin, the same fire, the same first second. Only the ventilation differs. One slider moves time in both.</p>
         <div className="row">
           <KlassBadge k="model" note="illustration, bounded by physics" onClick={() => openReceipt({

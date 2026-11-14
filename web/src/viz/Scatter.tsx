@@ -131,7 +131,7 @@ export function Scatter(p: ScatterProps) {
           );
         })}
 
-        <g>
+        <g className="pts">
           {p.points.map((d, i) => {
             if (!inside(d)) return null;
             const g = gById.get(d.group);

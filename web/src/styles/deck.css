@@ -84,6 +84,12 @@ details.howto { border: 0; max-width: 92ch; }
 details.howto > summary { justify-content: flex-start; padding: 2px 0 6px; font-weight: 400; font-size: var(--t-13); color: var(--ink-3); }
 details.howto > summary::after { margin-left: 2px; }
 
+/* ---------- charts: marks carry a little of their own light in the dark theme ---------- */
+:root[data-theme="dark"] .plot .pts { filter: drop-shadow(0 0 3px rgba(72, 150, 255, 0.5)); }
+:root[data-theme="dark"] .plot .ln { filter: drop-shadow(0 0 4px color-mix(in srgb, currentColor 0%, rgba(120, 170, 255, 0.45))); }
+.plot text { font-family: var(--font-ui); }
+.tip { backdrop-filter: blur(8px); background: color-mix(in srgb, var(--raised) 92%, transparent); border-color: color-mix(in srgb, var(--g-micro) 40%, var(--axis)); }
+
 /* ---------- the opening page: mission control ---------- */
 .deck { display: grid; gap: 14px; }
 .deck__strip { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }

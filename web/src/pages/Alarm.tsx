@@ -211,7 +211,7 @@ export function Alarm({ route }: PageProps) {
         <div className="panel panel--tight" data-klass="derived">
           <h2 className="panel__title">What acting on the alarm costs</h2>
           <p className="doc" style={{ fontSize: "1rem", marginTop: 8 }}>NASA tested stopping the airflow as a way to put a flame out, and its guide lists the belief that a fire then extinguishes itself among the critical misconceptions. When an alarm leads to stopping the fans, a false alarm costs ventilation. A real one, answered that way, can blind the detector that raised it: in this site's model the duct detector may never see the smoke once the fans are off.</p>
-          <p className="note" style={{ marginTop: 8 }}><a href={href("/paradox")}>Two realities</a> shows it side by side. <a href={href("/playbooks/step-ventilation")}>The response playbook</a> has the step and its evidence. <a href={href("/falsify/detector")}>Try to refute it</a> has what NASA's documents say about detectors.</p>
+          <p className="note" style={{ marginTop: 8 }}><a href={href("/paradox")}>Fans on, fans off</a> shows it side by side. <a href={href("/playbooks/step-ventilation")}>The response playbook</a> has the step and its evidence. <a href={href("/falsify/detector")}>Try to refute it</a> has what NASA's documents say about detectors.</p>
         </div>
         <div className="panel panel--tight" data-klass="observed">
           <h2 className="panel__title">What NASA measured about smoke in free fall</h2>
