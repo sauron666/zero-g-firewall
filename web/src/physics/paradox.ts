@@ -32,6 +32,9 @@ export interface Branch {
   /** source strength long after the fans stop, relative to before */
   floor: number;
   evidence: string;
+  /** NASA's own words that the sentence above rests on; a test finds each inside a checked quotation of this branch */
+  cites: string[];
+  /** shown only in a build without the stored documents; otherwise the page shows receipts */
   source: string;
   appliesTo: ("micro" | "partial")[];
 }
@@ -39,21 +42,25 @@ export const BRANCHES: Record<BranchId, Branch> = {
   starved: {
     id: "starved", label: "The flame starves and goes out", floor: 0,
     evidence: "In a BASS-II test the flow was cut off under a spreading flame and the flame went out within 2 s.",
+    cites: ["the flow was abruptly cut off", "extinguish within 2 s"],
     source: "BASS-II Summary Report (NTRS 20210011385); data set PSI-25", appliesTo: ["micro", "partial"],
   },
   diffusion: {
     id: "diffusion", label: "A weak flame lives on diffusion alone", floor: 0.15,
     evidence: "A candle flame burned for over 45 minutes in microgravity tests; flame balls of about one watt lasted over 40 minutes.",
+    cites: ["for over 45 minutes", "approximately 1 Watt", "for over 40 minutes"],
     source: "A Researcher's Guide to: Combustion Science, p. 30", appliesTo: ["micro"],
   },
   selffed: {
     id: "selffed", label: "The fire has its own oxygen or a jet feeds it", floor: 1,
-    evidence: "On Mir in 1997 an oxygen generator burned for several minutes; a suppressant jet entrains air and sustains a flame with ambient flow off.",
+    evidence: "On Mir in 1997 an oxygen generator caught fire and the flame went out by itself; that the device fed its own flame is our reading. A suppressant jet entrains air and sustains a flame with the ambient flow off.",
+    cites: ["the canister ignited", "The flame finally extinguished itself", "entrains air and sustains the flame even when the ambient airflow is turned off"],
     source: "NASA history page on the Mir fire; Researcher's Guide, p. 31", appliesTo: ["micro", "partial"],
   },
   buoyant: {
     id: "buoyant", label: "Gravity keeps feeding the flame", floor: 0.9,
-    evidence: "Buoyant flow needs no fan. Fabric and an acrylic rod burned for over two and a half minutes in simulated lunar gravity; solids burn most readily in a flow of about 10 cm/s. PSI holds no partial-gravity rows.",
+    evidence: "Buoyant flow needs no fan. Fabric and an acrylic rod burned for over two and a half minutes in simulated lunar gravity; solids burn most readily in a flow of about 10 cm/s.",
+    cites: ["the burn lasts for over two and a half minutes", "on the order of 10 cm/s"],
     source: "Lunar Combustion Investigation abstract (NTRS 20250010653); Researcher's Guide, p. 31", appliesTo: ["partial"],
   },
 };

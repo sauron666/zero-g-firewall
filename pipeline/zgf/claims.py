@@ -46,6 +46,11 @@ NAMES = {
     LUNAR_SLIDES: "Ferkul et al., Material Flammability at Lunar and Martian Gravity, presentation, NTRS 20260001966",
 }
 RESOURCE = {GUIDE: "R4", MIR: "R7", GLENN: "R2", FM2: "R2"}
+# a short name for a receipt button; the full name stands in the receipt itself
+SHORT = {
+    GUIDE: "Researcher's Guide", MIR: "NASA History, the Mir fire", GLENN: "NASA Glenn", FM2: "NASA Glenn, FM2", BASS2: "BASS-II Summary Report", OLSON: "Olson and Ferkul",
+    LUCI: "LUCI abstract", SAFFIRE6: "Saffire VI abstract", SAFFIRE6_TEXT: "Saffire VI paper", LUCI_SLIDES: "LUCI slides", LUNAR: "Ferkul, Kralik and Liao", LUNAR_SLIDES: "Lunar and Martian gravity slides",
+}
 
 
 def q(doc: str, quote: str, says: str = "") -> dict:
@@ -67,7 +72,7 @@ CARDS = [
      "answer": "On the space station, cutting the airflow starved the flame NASA tested, within two seconds. NASA's own guide still lists the belief as a misconception, "
                "its documents name the cases where it can fail, and on the Moon gravity keeps air moving after every fan has stopped.",
      "groups": [
-         {"side": "holds", "title": "It held when the forced flow was the flame's only source of oxygen", "items": [
+         {"side": "holds", "title": "It held when the forced flow was the flame's only source of oxygen", "branch": "starved", "items": [
              q(BASS2, "After the flame propagated across half the sample length at a steady spread rate of 2.2 mm/s, the flow was abruptly cut off and the flame was observed to extinguish within 2 s",
                "A BASS-II test on the space station"),
              {"kind": "data", "id": "bass2_rows"},
@@ -77,14 +82,14 @@ CARDS = [
              q(GUIDE, "This resulted in several critical misconceptions about potential fires in spacecraft", "The guide, before listing this belief as the second of three"),
              FALLACY,
          ]},
-         {"side": "fails", "title": "Diffusion alone can feed a flame", "items": [
+         {"side": "fails", "title": "Diffusion alone can feed a flame", "branch": "diffusion", "items": [
              q(GUIDE, "Contrary to published speculation, the microgravity flame burned in some tests for over 45 minutes before extinguishing from a lack of fuel", "A candle in microgravity"),
              q(GUIDE, "producing the weakest flames ever burned (approximately 1 Watt) and some burning for over 40 minutes before the experiment timed out", "Flame balls, with no flow at all"),
          ]},
-         {"side": "fails", "title": "The response itself can supply the air", "items": [
+         {"side": "fails", "title": "The response itself can supply the air", "branch": "selffed", "items": [
              q(GUIDE, "The local jet entrains air and sustains the flame even when the ambient airflow is turned off", "A suppressant jet aimed at the flame"),
          ]},
-         {"side": "fails", "title": "The fuel can bring its own oxygen", "items": [
+         {"side": "fails", "title": "The fuel can bring its own oxygen", "branch": "selffed", "items": [
              q(MIR, "the canister ignited, shooting a three-foot flame with sparks and bits of molten metal across the module and generating a large quantity of dense smoke", "Mir, 24 February 1997"),
              q(MIR, "The flame finally extinguished itself", "After three extinguishers"),
              reading("The page calls the device a solid-fuel oxygen generator. That it fed its own flame, so that stopping ventilation could not have starved it, is our reading and not a sentence on the page."),
@@ -94,7 +99,7 @@ CARDS = [
              {"kind": "data", "id": "cool_flame_rows"},
              reading("Cool flames were seen on large droplets of particular fuels and on gas burners. Nothing here says cabin materials behave this way."),
          ]},
-         {"side": "fails", "title": "Gravity can supply the flow", "items": [
+         {"side": "fails", "title": "Gravity can supply the flow", "branch": "buoyant", "items": [
              q(GUIDE, "the characteristic gas velocity of the minimum in the curve is on the order of 10 cm/s and also corresponds to a maximum in the flame spread rate", "The flow at which solids burn most readily"),
              {"kind": "model", "id": "lunar_buoyant_flow"},
              q(GUIDE, "In the low-flow conditions of microgravity or partial gravity, some materials are flammable at lower oxygen concentrations than in normal gravity", ""),
@@ -102,7 +107,7 @@ CARDS = [
              q(LUNAR, "the crucial mechanism of buoyant oxygen entrainment at the flame base is still present, but at a slower rate", "NASA in 2026, on a marginal material on the Moon"),
              {"kind": "data", "id": "luci_rates"},
          ]},
-         {"side": "open", "title": "What nobody has measured yet", "items": [
+         {"side": "open", "title": "What nobody has measured yet", "branch": "open", "items": [
              {"kind": "data", "id": "partial_gravity_rows"},
              q(LUCI, "These are the first-ever, extended-duration (greater than 25 seconds) combustion tests performed in simulated Lunar gravity", "2025; the data are not in PSI"),
              q(FM2, "Conduct the first-ever observations and measurements of flame spread on the Moon", "An objective of the FM2 experiment"),
@@ -296,14 +301,14 @@ class Resolver:
             self.n_quotes += 1
             if not where:
                 self.missing.append("not found in %s: %s" % (item["doc"], item["quote"][:70]))
-            return {"kind": "quote", "quote": item["quote"], "says": item["says"], "quote_verified": bool(where), "source": NAMES[item["doc"]],
+            return {"kind": "quote", "quote": item["quote"], "says": item["says"], "quote_verified": bool(where), "source": NAMES[item["doc"]], "short": SHORT.get(item["doc"]),
                     "resource": RESOURCE.get(item["doc"]), "ref": self.lib.ref(item["doc"], where)}
         if item["kind"] == "reading":
             return {"kind": "reading", "text": item["text"]}
         if item["kind"] == "fact":
             return {"kind": "data", **{k: v for k, v in item.items() if k != "kind"}}
         src = (self.data if item["kind"] == "data" else self.model).get(item["id"])
-        return {"kind": item["kind"], **src} if src else None
+        return {"kind": item["kind"], "id": item["id"], **src} if src else None
 
 
 def build(raw_dir: str, out_dir: str) -> dict:
@@ -321,7 +326,7 @@ def build(raw_dir: str, out_dir: str) -> dict:
         for g in c["groups"]:
             items = [r for r in (resolve(i) for i in g["items"]) if r]
             if items:
-                groups.append({"side": g["side"], "title": g["title"], "items": items})
+                groups.append({"side": g["side"], "title": g["title"], **({"branch": g["branch"]} if g.get("branch") else {}), "items": items})
         cards.append({"id": c["id"], "n": c["n"], "myth": c["myth"], "myth_verified": bool(where), "myth_ref": lib.ref(GUIDE, where), "question": c["question"],
                       "answer": c["answer"], "groups": groups})
     n_quotes = resolve.n_quotes

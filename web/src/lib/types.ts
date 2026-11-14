@@ -295,12 +295,14 @@ export interface ValidationDoc {
 
 /** myths.json: NASA's three misconceptions against NASA's own documents and tables. */
 export type MythItem =
-  | { kind: "quote"; quote: string; says: string; quote_verified: boolean; source: string; resource?: string | null; ref: SourceRef & { loc?: string; match?: string } }
+  | { kind: "quote"; quote: string; says: string; quote_verified: boolean; source: string; short?: string | null; resource?: string | null; ref: SourceRef & { loc?: string; match?: string } }
   | { kind: "reading"; text: string }
-  | { kind: "data" | "model"; klass: Klass; text: string; accession?: string; also?: string[]; table?: string; ledger_seq?: number; sha256?: string; link?: string; columns?: string[]; rows?: string[][] };
+  | { kind: "data" | "model"; id?: string; klass: Klass; text: string; accession?: string; also?: string[]; table?: string; ledger_seq?: number; sha256?: string; link?: string; columns?: string[]; rows?: string[][] };
 export interface MythGroup {
   side: "holds" | "warns" | "fails" | "open";
   title: string;
+  /** on the fans card: the branch of the fans model this group stands behind */
+  branch?: string;
   items: MythItem[];
 }
 export interface MythCard {

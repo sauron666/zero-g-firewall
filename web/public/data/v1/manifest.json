@@ -221,8 +221,8 @@
    "klass": "observed"
   },
   "myths.json": {
-   "sha256": "de66fb1e65651637a6fdd0f56dc53eaeb71344ec9d6b6199757ebe7ae6358097",
-   "bytes": 28944,
+   "sha256": "adabdab649371e488837010774dcc84b2be30d757137a6a39ceedcbd3b82f73b",
+   "bytes": 29982,
    "klass": "literature"
   },
   "rank_features.json": {
@@ -236,18 +236,18 @@
    "klass": "derived"
   },
   "falsify.json": {
-   "sha256": "980ffe9ffaa82e155b2927cce1204bc4b1962471a7612e10bc550a7953a468a6",
-   "bytes": 34862,
+   "sha256": "d460cf15968e344d88023c25277a6ff1a10328dbb0bee5ddefe08d385476dafa",
+   "bytes": 35891,
    "klass": "derived"
   },
   "gaps.json": {
-   "sha256": "1f322316cedaffc3cad89373a3a1f41e8c8820028db111de1392035a0372ea3c",
-   "bytes": 27257,
+   "sha256": "748ae932153cd2de6a618d3c0bd014b516b7fa71e395d38fd393c4e0d7498ec3",
+   "bytes": 27821,
    "klass": "derived"
   },
   "lessons.json": {
-   "sha256": "0c3c278b2fd2ee3481f4da075edc2c906a681ae685c279c2ada40b9fd0c3064d",
-   "bytes": 16311,
+   "sha256": "126d36a8c1db296bf8fb5e00ecdf8b0a621c62ad841e9c5b4a3176a52040f7cc",
+   "bytes": 16594,
    "klass": "literature"
   },
   "exports/PSI-22__PSI_22_Experimental_table_ACME_E_FIELD_Flames.csv": {
@@ -396,8 +396,8 @@
    "klass": "literature"
   },
   "matrix.json": {
-   "sha256": "b612b5d951766c5d964e4812a16116ce25c01f204831cddbe6575e626e98b4eb",
-   "bytes": 32532,
+   "sha256": "f5b2ff930e02d67bf2942a71f4dfaf67a16042087f5cfdd4680d86ab675055a6",
+   "bytes": 33696,
    "klass": "derived"
   },
   "briefs.json": {
@@ -416,8 +416,8 @@
    "klass": "observed"
   },
   "reported.json": {
-   "sha256": "f042ab1aa8358037f14745f2757a892430c31b30bd441fa97aa0cdc2aa569c1d",
-   "bytes": 21704,
+   "sha256": "a1bac3dbd5eaf208ef5698dcc6f4a2233db61d13262f6384f128b03c36d85400",
+   "bytes": 22221,
    "klass": "literature"
   },
   "inventory.json": {
@@ -429,5 +429,5 @@
  "brand": "Zero-G Firewall",
  "team": "The Rule of Flame",
  "mascot": "ISKRA",
- "built_at_utc": "2026-11-14T17:36:34Z"
+ "built_at_utc": "2026-11-14T17:43:33Z"
 }

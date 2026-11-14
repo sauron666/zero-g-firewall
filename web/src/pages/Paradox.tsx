@@ -9,7 +9,9 @@ import { IconPause, IconPlay, IconReset, IconInfo } from "../components/icons";
 import { usePrefersReducedMotion, useWidth } from "../lib/hooks";
 import { useReceipt } from "../components/Receipt";
 import { useData } from "../lib/data";
-import type { InventoryDoc, ReportedDoc } from "../lib/types";
+import type { InventoryDoc, MythsDoc, ReportedDoc } from "../lib/types";
+import { receipts } from "../lib/receipts";
+import { SourceBtn } from "../components/Source";
 import { href } from "../app/router";
 import { DocBtn } from "../viz/Reported";
 
@@ -71,6 +73,8 @@ function RangeRows({ a, ens, width }: { a: Reality; ens: Ensemble | null; width:
   );
 }
 
+const firstSentence = (t: string) => { const i = t.indexOf(". "); return i < 0 ? t : t.slice(0, i + 1); };
+
 export function Paradox() {
   const inventory = useData<InventoryDoc>("inventory.json");                   // what the BASS-II table itself says, in words, about how its tests ended
   const bass = inventory.data?.flow_words.tables.find((w) => w.accession === "PSI-25");
@@ -78,6 +82,9 @@ export function Paradox() {
   const reported = useData<ReportedDoc>("reported.json");                      // what NASA measured in simulated lunar gravity; absent in a build without those documents
   const fabric = reported.data?.luci.rows.find((r) => r.id === "fabric_base");
   const longer = reported.data?.quotes.luci.find((q) => q.kind === "quote" && q.quote.includes("sooner than partial-g"));
+  const myths = useData<MythsDoc>("myths.json");                                // the checked quotations behind each branch, and the count of partial-gravity rows
+  const fans = myths.data?.items.find((c) => c.id === "fans");
+  const unmeasured = fans?.groups.flatMap((gr) => gr.items).find((it) => it.kind === "data" && it.id === "partial_gravity_rows");
   const [body, setBody] = useState<BodyId>("iss");
   const [mode, setMode] = useState<Mode>("start");
   const g = BODIES[body].g;
@@ -327,7 +334,16 @@ export function Paradox() {
                     <DocBtn r={fabric.ref} title="Flame spread in simulated lunar gravity, against Earth (LUCI)" />
                   </p>
                 )}
-                <p className="choice__src">{b.source}{g > 0 && b.id !== "selffed" ? ". In partial gravity: may, not measured." : ""}</p>
+                {b.id === "buoyant" && unmeasured && unmeasured.kind === "data" && <p className="choice__ev">{firstSentence(unmeasured.text)}</p>}
+                <p className="choice__src">
+                  {receipts(fans, b.id).length
+                    ? <>NASA's words: {receipts(fans, b.id).map((r) => (
+                        <SourceBtn key={r.label} title={`Quotation from ${r.source}`} sref={{ ...r.ref, page: r.ref.loc }} klass="literature" label={r.label}
+                                   extra={[...r.quotes.map((qt): [string, React.ReactNode] => ["quotation", `“${qt}”`]), ["checked", `found word for word in the stored document, at ${r.ref.loc ?? "the page text"}`]]} />
+                      ))}</>
+                    : b.source}
+                  {g > 0 && b.id !== "selffed" ? " In partial gravity: may, not measured." : ""}
+                </p>
               </span>
             </label>
           ))}

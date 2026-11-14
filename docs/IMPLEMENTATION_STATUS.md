@@ -46,7 +46,7 @@ Updated: 14 November 2026, 14:38 Sofia time. Kept truthful: nothing is listed as
 | Model artifacts (`web/public/data/v1/model/*.json`) | Built by `pipeline/build_models.py`; listed with SHA-256 in `manifest.json`. |
 | Site shell, light and dark themes, phone layout | Screens reviewed at 1440 px and 390 px; no horizontal overflow; no console errors. |
 | "Kill the fans?" opening with the fan switch | Flames follow gravity and forced flow; the station flame carries the "not a rule" wording. Illustration. |
-| Two realities (the Fan Paradox) | Two simulations from the same start, one time slider, detector readings, a comparison table, and an ensemble over flame responses, mixing, alarm level and buoyant speed. Model, illustrative. |
+| Two realities (the Fan Paradox) | Two simulations from the same start, one time slider, detector readings, a comparison table, and an ensemble over flame responses, mixing, alarm level and buoyant speed. Model, illustrative. Each flame response opens receipts to the checked NASA quotations behind it (`web/src/lib/receipts.ts`); a test ties every number in its sentence to those quotations. |
 | Flame physics page | Atmospheres chart with table view, "a fan you cannot switch off", spinning-platform calculator, cabin bounds. |
 | Method and limits page | The eight classes, what the site does not do, how data gets here, in scope and out of scope (counts read from the build), the ten official sources with their ledger entries and the pages that use them, AI use, the build. |
 
