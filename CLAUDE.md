@@ -33,7 +33,7 @@ NASA Space Apps Challenge 2026, Sofia local event, 14 to 15 November 2026. Solo 
 pipeline/sync_nasa.py        NASA -> nasa_raw/ with a hash-chained ledger (standard library only)
 pipeline/derive.py           nasa_raw/ -> web/public/data/v1/*.json (stage 1 exists; extend it)
 pipeline/build_models.py     physics model artifacts and golden vectors (needs cantera, numpy)
-pipeline/zgf/                ledger.py, derive_core.py, physics.py, transport.py, models.py
+pipeline/zgf/                ledger.py, derive_core.py, physics.py, transport.py, models.py; recorded.py (one raw recording), reported.py (numbers NASA reports outside PSI)
 pipeline/tests/              python -m unittest discover -s pipeline/tests
 web/                         Vite + React + TypeScript, plain CSS with tokens; static, offline, no key
 web/src/app/                 App.tsx (shell, route table), nav.ts, router.ts (plain hash names: #paradox, #evidence--PSI-25)
@@ -59,7 +59,7 @@ python -m unittest discover -s pipeline/tests
 cd web && npm ci && npm run dev              # npm test, npm run build
 ```
 
-The human may already have a large `nasa_raw/` from sync 1.0 (it over-fetched small files). That is fine: every file has a ledger entry. Run sync 1.1 once in the same folder to complete the core set.
+The cache the site is built from is the team's larger one (4,959 files, folder `nasa_raw2` on the team's machine, written by the concurrent variant `sync_nasa_async.py` 2.0.0; its ledger is the one tracked under `nasa_raw/ledger/`). Derive with `--raw nasa_raw2` there. `docs/NEXT.md` says what is still to fetch and that the variant's script has to be committed.
 
 ## How to work
 

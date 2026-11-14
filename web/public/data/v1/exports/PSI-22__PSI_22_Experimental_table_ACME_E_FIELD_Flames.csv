@@ -1,33 +1,33 @@
 psi_record,source_file,row,test_type,test_day,year,month,date,mesh_polarity,fuel_bottle,fuel_conc,flames_ignited,notes,source_sha256,ledger_entry
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,1,First round of tests with coflow burner,18073,2018,3,14,negative,100% CH4,100%,10,Test day is formatted YYDDD where YY identifies year and DDD identifies day of year (GMT).,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,2,First round of tests with coflow burner,18078,2018,3,19,negative,100% CH4,70%,10,Mesh polarity refers to the polarity of the high-voltage power supply and the copper electrode relative to the burner.,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,3,,,,,,,,100%,,"Fuel Conc. (diluted with nitrogen on a volume basis) was varied between tests, but typically matched the bottle. The list only accounts for flames ignited.",69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,4,First round of tests with coflow burner,18080,2018,3,21,negative,40% CH4,40%,8,Flames Ignited is the number ignited on that day (neglecting the day change on ISS).,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,5,First round of tests with coflow burner,18087,2018,3,28,negative,100% C2H4,80%,10,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,6,,,,,,,,100%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,7,First round of tests with coflow burner,18092,2018,4,2,negative,30% C2H4,30%,11,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,8,First round of tests with coflow burner,18095,2018,4,5,positive,30% C2H4,30%,10,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,9,First round of tests with coflow burner,18102,2018,4,12,positive,40% CH4,40%,8,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,10,First round of tests with coflow burner,18106,2018,4,16,positive,40% CH4,40%,13,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,11,First round of tests with coflow burner,18113,2018,4,23,positive,100% CH4,100%,15,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,12,First round of tests with coflow burner,18130,2018,5,10,positive,100% CH4,70%,13,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,13,First round of tests with coflow burner,18137,2018,5,17,positive,100% C2H4,80%,12,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,14,,,,,,,,100%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,15,Second round of tests with gas-jet burner,18269,2018,9,26,negative,40% CH4,40%,11,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,16,Second round of tests with gas-jet burner,18274,2018,10,1,negative,30% C2H4,30%,11,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,17,Second round of tests with gas-jet burner,18282,2018,10,9,negative,100% CH4,70%,13,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,18,,,,,,,,100%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,19,Second round of tests with gas-jet burner,18285,2018,10,12,negative,100% C2H4,100%,10,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,20,Second round of tests with gas-jet burner,18290,2018,10,17,negative,100% C2H4,80%,11,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,21,Second round of tests with gas-jet burner,18298,2018,10,25,positive,40% CH4,40%,9,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,22,Second round of tests with gas-jet burner,18302,2018,10,29,positive,30% C2H4,30%,10,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,23,Second round of tests with gas-jet burner,18312,2018,11,8,positive,100% CH4,70%,13,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,24,,,,,,,,100%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,25,Second round of tests with gas-jet burner,18319,2018,11,15,positive,100% C2H4,25%,11,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,26,,,,,,,,50%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,27,,,,,,,,80%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,28,,,,,,,,100%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,29,Second round of tests with gas-jet burner,18319,2018,11,15,positive,100% C2H4,25%,11,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,30,,,,,,,,50%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,31,,,,,,,,80%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
-PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,32,,,,,,,,100%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,1107
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,1,First round of tests with coflow burner,18073,2018,3,14,negative,100% CH4,100%,10,Test day is formatted YYDDD where YY identifies year and DDD identifies day of year (GMT).,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,2,First round of tests with coflow burner,18078,2018,3,19,negative,100% CH4,70%,10,Mesh polarity refers to the polarity of the high-voltage power supply and the copper electrode relative to the burner.,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,3,,,,,,,,100%,,"Fuel Conc. (diluted with nitrogen on a volume basis) was varied between tests, but typically matched the bottle. The list only accounts for flames ignited.",69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,4,First round of tests with coflow burner,18080,2018,3,21,negative,40% CH4,40%,8,Flames Ignited is the number ignited on that day (neglecting the day change on ISS).,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,5,First round of tests with coflow burner,18087,2018,3,28,negative,100% C2H4,80%,10,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,6,,,,,,,,100%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,7,First round of tests with coflow burner,18092,2018,4,2,negative,30% C2H4,30%,11,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,8,First round of tests with coflow burner,18095,2018,4,5,positive,30% C2H4,30%,10,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,9,First round of tests with coflow burner,18102,2018,4,12,positive,40% CH4,40%,8,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,10,First round of tests with coflow burner,18106,2018,4,16,positive,40% CH4,40%,13,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,11,First round of tests with coflow burner,18113,2018,4,23,positive,100% CH4,100%,15,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,12,First round of tests with coflow burner,18130,2018,5,10,positive,100% CH4,70%,13,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,13,First round of tests with coflow burner,18137,2018,5,17,positive,100% C2H4,80%,12,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,14,,,,,,,,100%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,15,Second round of tests with gas-jet burner,18269,2018,9,26,negative,40% CH4,40%,11,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,16,Second round of tests with gas-jet burner,18274,2018,10,1,negative,30% C2H4,30%,11,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,17,Second round of tests with gas-jet burner,18282,2018,10,9,negative,100% CH4,70%,13,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,18,,,,,,,,100%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,19,Second round of tests with gas-jet burner,18285,2018,10,12,negative,100% C2H4,100%,10,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,20,Second round of tests with gas-jet burner,18290,2018,10,17,negative,100% C2H4,80%,11,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,21,Second round of tests with gas-jet burner,18298,2018,10,25,positive,40% CH4,40%,9,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,22,Second round of tests with gas-jet burner,18302,2018,10,29,positive,30% C2H4,30%,10,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,23,Second round of tests with gas-jet burner,18312,2018,11,8,positive,100% CH4,70%,13,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,24,,,,,,,,100%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,25,Second round of tests with gas-jet burner,18319,2018,11,15,positive,100% C2H4,25%,11,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,26,,,,,,,,50%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,27,,,,,,,,80%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,28,,,,,,,,100%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,29,Second round of tests with gas-jet burner,18319,2018,11,15,positive,100% C2H4,25%,11,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,30,,,,,,,,50%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,31,,,,,,,,80%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224
+PSI-22,PSI-22_Experimental table_ACME E-FIELD Flames.csv,32,,,,,,,,100%,,,69090c357b83ae38d161d29001d1d32b40fd77b13324ca6585ee990cdceef524,224

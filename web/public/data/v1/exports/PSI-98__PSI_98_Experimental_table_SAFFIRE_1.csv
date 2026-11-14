@@ -1,5 +1,5 @@
 psi_record,source_file,row,sample_number,material,sample_thickness,sample_length,sample_width,air_flow,percent_o2,ignition_power,ignition_time,burn_time,flow_direction,camera_1,camera_2,oxygen_mole_fraction,pressure_kpa,source_sha256,ledger_entry
-PSI-98,PSI-98_Experimental table_SAFFIRE-1.csv,1,S1,SIBAL Fabric,0.37,40.6,94,20,21.5 - 21.7,182,8,420,Concurrent,S1C1,S1C2,0.215,,c01f29c62455f0a3b512290ab85e5687ecded326733189f002f580368402308d,1142
-PSI-98,PSI-98_Experimental table_SAFFIRE-1.csv,2,S2,SIBAL Fabric,0.37,40.6,94,20,~ 21.5,182,8,70,Opposed,S2C1,S2C2,0.215,,c01f29c62455f0a3b512290ab85e5687ecded326733189f002f580368402308d,1142
-PSI-98,PSI-98_Experimental table_SAFFIRE-1.csv,3,F1C1/F1C2,Pre-test flow visulation data for sample 1,,,,,,,,,,,,,,c01f29c62455f0a3b512290ab85e5687ecded326733189f002f580368402308d,1142
-PSI-98,PSI-98_Experimental table_SAFFIRE-1.csv,4,F2C1/F2C2,Pre-test flow visulation data for sample 2,,,,,,,,,,,,,,c01f29c62455f0a3b512290ab85e5687ecded326733189f002f580368402308d,1142
+PSI-98,PSI-98_Experimental table_SAFFIRE-1.csv,1,S1,SIBAL Fabric,0.37,40.6,94,20,21.5 - 21.7,182,8,420,Concurrent,S1C1,S1C2,0.215,,c01f29c62455f0a3b512290ab85e5687ecded326733189f002f580368402308d,80
+PSI-98,PSI-98_Experimental table_SAFFIRE-1.csv,2,S2,SIBAL Fabric,0.37,40.6,94,20,~ 21.5,182,8,70,Opposed,S2C1,S2C2,0.215,,c01f29c62455f0a3b512290ab85e5687ecded326733189f002f580368402308d,80
+PSI-98,PSI-98_Experimental table_SAFFIRE-1.csv,3,F1C1/F1C2,Pre-test flow visulation data for sample 1,,,,,,,,,,,,,,c01f29c62455f0a3b512290ab85e5687ecded326733189f002f580368402308d,80
+PSI-98,PSI-98_Experimental table_SAFFIRE-1.csv,4,F2C1/F2C2,Pre-test flow visulation data for sample 2,,,,,,,,,,,,,,c01f29c62455f0a3b512290ab85e5687ecded326733189f002f580368402308d,80

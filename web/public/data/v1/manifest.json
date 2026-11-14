@@ -1,17 +1,17 @@
 {
  "schema": "zgf-data/v1",
  "nasa": {
-  "synced_at_utc": "2026-11-14T10:57:08Z",
+  "synced_at_utc": "2026-11-14T11:08:57Z",
   "search_hits": 26,
   "investigations_in_scope": 24,
   "investigations_excluded": 2,
   "tables": 22,
   "table_rows": 2009,
-  "files_in_ledger": 1219,
-  "bytes_in_ledger": 38451159,
+  "files_in_ledger": 4959,
+  "bytes_in_ledger": 330903273,
   "official_resources_used": 10,
   "official_resources_total": 10,
-  "ledger_head": "2f80e83ca20ded09f5518fed46a7a2447f8e3fd142aff166a4d6926b2c531759",
+  "ledger_head": "079793b9c9ebb0d7e66906e362a54697c8cb0775f68f454c4dc88482957fde64",
   "ledger_chain_ok": true,
   "curator_findings": 40,
   "envelope_points": 887,
@@ -19,12 +19,14 @@
   "validation_rows": 587,
   "validation_mean_abs_K": 2.12,
   "export_files": 28,
-  "quotes": 115,
-  "quotes_verified": 115,
-  "files_read": 83,
+  "recorded_readings": 8974,
+  "files_read": 88,
+  "quotes": 138,
+  "quotes_verified": 138,
+  "reported_values_checked": 13,
   "droplet_rows_checked": 195,
   "droplet_rows_within_10pct": 152,
-  "passages": 532
+  "passages": 555
  },
  "artifacts": {
   "model/atmospheres.json": {
@@ -48,143 +50,143 @@
    "klass": "model"
   },
   "tables/PSI-22__PSI_22_Experimental_table_ACME_E_FIELD_Flames.json": {
-   "sha256": "129176c9b81efd8344b58a8304f183c2d3346b61f58585d1558021f3d9c31dfa",
-   "bytes": 3690,
+   "sha256": "9a0073941e31679e1391ca68efe6bd4962dbeb8cd77d8006a82b6840cd3bef68",
+   "bytes": 3689,
    "klass": "observed"
   },
   "tables/PSI-10__PSI_10_Experimental_table_Flame_Design_Normal_Flame.json": {
-   "sha256": "7ad7ed98877a65590a699a50c415c4c811a460461824f47f4935f464b06449f3",
-   "bytes": 33920,
+   "sha256": "91d1c78035243da26184235d310997bf5cdeac8d49971352eb849bd72ca596fb",
+   "bytes": 33922,
    "klass": "observed"
   },
   "tables/PSI-10__PSI_10_Experimental_table_Flame_Design_Inverse_Flame.json": {
-   "sha256": "a2ef3182661ebfdafaf304c40360a22eaed4caa4e77539c955e046dd7851071c",
-   "bytes": 21365,
+   "sha256": "bd7963b9483277d0b89ec474a3529da20147979e9117bca07101a91229d8d081",
+   "bytes": 21366,
    "klass": "observed"
   },
   "tables/PSI-159__PSI_159_Experimental_table_CFI_G_Normal_Flames.json": {
-   "sha256": "614c0788cb6b0a30fbdc770dee2347ee7bd4a9cb8d356c0f34b06829deb9d694",
+   "sha256": "af7c7c031b4f60f789590565d6f80aa6989f3cb9ad6a602b5817e51f24d33e3c",
    "bytes": 29318,
    "klass": "observed"
   },
   "tables/PSI-159__PSI_159_Experimental_table_CFI_G_Inverse_Flames.json": {
-   "sha256": "161f01e6148f8d8aa182706388f4b11dcd9503c1e848e7dd0367681379963694",
+   "sha256": "eacf9b718eddbadeaedb0206e9c5615b86af3ada00d661155e14ee5104a0fa65",
    "bytes": 28227,
    "klass": "observed"
   },
   "tables/PSI-107__PSI_107_Experimental_table_Spice.json": {
-   "sha256": "66650e4b5f86bf297d0f22b0c355023a7d05bb4989634e3b54b59fa3befb18a2",
-   "bytes": 40635,
+   "sha256": "149b97922f2508ff68a7e09d446949f916881bef6a1c9e9c8fdf5f3e36f617fd",
+   "bytes": 40634,
    "klass": "observed"
   },
   "tables/PSI-106__PSI_106_Experimental_table_Slice.json": {
-   "sha256": "5679faecdbd4706d068e82c74722e13c03eb82af0fabfb1c2df91f0dd8ec3a04",
+   "sha256": "2820ae214a573eaeae466cde93d942c92655195a187d6fb7d8c8a5ac4e31189e",
    "bytes": 1287,
    "klass": "observed"
   },
   "tables/PSI-100__PSI_100_Experimental_table_SAFFIRE_3.json": {
-   "sha256": "a95b05138e8f77c007f68c1d09a2ae1acdd3e9763b9796262ecf6684dad008b3",
-   "bytes": 798,
+   "sha256": "1de95bfbc5f6aaa2703a3d714c20625347b4996be4f561ea07965c168feb721f",
+   "bytes": 796,
    "klass": "observed"
   },
   "tables/PSI-102__PSI_102_Experimental_table_SAME.json": {
-   "sha256": "e7ae89fe02b170d4dfc914a120b4cc96f39d68423eaaa7a392a847c485f1d0b5",
-   "bytes": 923,
+   "sha256": "e24296c9093b94953139f521e8244b73e921b2974f2f97e0a7d0f432d1285aa7",
+   "bytes": 922,
    "klass": "observed"
   },
   "tables/PSI-69__PSI_69_Experimental_table_FLEX.json": {
-   "sha256": "0223cc5f10771f9be314655e36825689e7239c8a15ab8c60eade9815381f82b5",
-   "bytes": 33945,
+   "sha256": "fd29ea8bddfe6b50097ae15b92bf26122f1d6e8b462e5ad8087513635a26f083",
+   "bytes": 33944,
    "klass": "observed"
   },
   "tables/PSI-39__PSI_39_Experimental_table_CFI.json": {
-   "sha256": "2a1984280c333fdf2f96b030055ab874f961b2640e4053859477205ecfad2383",
+   "sha256": "955ad127dadaf1bfcad4a9a26b017ddfb7a88cf088903e9e03498b424d1be2f4",
    "bytes": 10043,
    "klass": "observed"
   },
   "tables/PSI-21__PSI_21_Experimental_table_CLD_Flame.json": {
-   "sha256": "3b120e7720b9e5fe3646a34bc0f6a0c3f51d3f7db26996604f684417e8c4c4e4",
-   "bytes": 3518,
+   "sha256": "82d3a5c5a85d5e36f82862a0c3e864288e196f0e11ee9b3b5ef7d8864e139445",
+   "bytes": 3517,
    "klass": "observed"
   },
   "tables/PSI-68__PSI_68_Experimental_table_Flex2.json": {
-   "sha256": "85e7e580804ba3cd23539b56a9f49f1191d94c37bbb8f19dbd1ae3e988be85d1",
-   "bytes": 1647,
+   "sha256": "c160d31ac61a9937547878b19e8ef56aad24ad47372c235f2cca70efa699e300",
+   "bytes": 1646,
    "klass": "observed"
   },
   "tables/PSI-26__PSI_26_Experimental_table_BASS.json": {
-   "sha256": "b9858345319e85fe8674db3c7430ca1463eed680afc4470c4af6fc1b684b1988",
-   "bytes": 6813,
+   "sha256": "516c9d08aaffe268acd83b9e43010cf6a2b813c23bfa02d2d2e66acd157b2903",
+   "bytes": 6811,
    "klass": "observed"
   },
   "tables/PSI-23__PSI_23_Experimental_table_ACME_s_Flame.json": {
-   "sha256": "0d64e79d41c05ca6bb1a2411c44c3802790cd446b9fdb9827099ce8b99f9970b",
+   "sha256": "14067fcb7dd41516130aa45d10a1df5c12b4567e9bdcc5ca6d55df05417e57b8",
    "bytes": 3321,
    "klass": "observed"
   },
   "tables/PSI-20__PSI_20_Experimental_table_ACME_BRE.json": {
-   "sha256": "eecfbe5cb62aee61fa35f67e0fc299a2d59a434dd391fae9458716fc5008ebfa",
-   "bytes": 1939,
+   "sha256": "b757964cfd388f37d440374b667473b62121e18fe98b3bb5d892db4d2deedf1f",
+   "bytes": 1937,
    "klass": "observed"
   },
   "tables/PSI-142__PSI_142_Experimental_table_Data_Summary_Table.json": {
-   "sha256": "7e1494a59fe345d02312d8b2db7abde12426a3e2008a1b3544a8d4f41f3379bd",
-   "bytes": 1331,
+   "sha256": "92a6775fae3e6cebdc1c749c069b4b792e1ae86c911ddae1a2d9a6a2f2645b0f",
+   "bytes": 1330,
    "klass": "observed"
   },
   "tables/PSI-99__PSI_99_Experimental_table_SAFFIRE_2.json": {
-   "sha256": "6d2edb8c87c75df0be5de1e63e0dc2d0b34d700c0f14ec9f9187b223dd489b49",
-   "bytes": 3035,
+   "sha256": "5e68457cb1b0c3d56af7ab385a2cca91d7b0db7383c8acc989a370f176f7798c",
+   "bytes": 3033,
    "klass": "observed"
   },
   "tables/PSI-25__PSI_25_Experimental_table_BASS_II.json": {
-   "sha256": "ee0f29d5103234387dbaaa4fa944b585ecf53e0f46a33dc62cee6bfbbcf51ccf",
-   "bytes": 21534,
+   "sha256": "bd700bdf92e62168d60c30aaa1ebf2fd6f73c39340c8521b9bb8a9658b0d0bd9",
+   "bytes": 21532,
    "klass": "observed"
   },
   "tables/PSI-47__PSI_47_Experimental_table_DAFT.json": {
-   "sha256": "c14db6f51dc512736e4e365c105688af7ffdd2774707f1ff1d1c2226c5c1188b",
-   "bytes": 1042,
+   "sha256": "de7721c6d525fe1c710d7b8c2cf4435372456c4ae5c780ce3a3eb02ef3192cf2",
+   "bytes": 1041,
    "klass": "observed"
   },
   "tables/PSI-98__PSI_98_Experimental_table_SAFFIRE_1.json": {
-   "sha256": "1e3f7c0325a4b4aeffd34c3c522ea2d31784d5cb474dd49cd40da5c7a2847e2e",
-   "bytes": 1104,
+   "sha256": "c1392788687374d3ed5c22fe546a844fcc1008ae96d5a7e4e30b9adb1b07995a",
+   "bytes": 1102,
    "klass": "observed"
   },
   "tables/PSI-181__PSI_181_Experimental_table_Experimental_Table_PSI_181.json": {
-   "sha256": "926ed2b1cf941c5c7ca12b2ef3b255da1916d3b030788336114d14682c10e08b",
-   "bytes": 1296,
+   "sha256": "fa481db44ba8420d7c22afb3a56456170148c2bf4cd528f3418b567c03ca9f34",
+   "bytes": 1295,
    "klass": "observed"
   },
   "tables/PSI-108__PSI_108_Experimental_table_STDCE_1.json": {
-   "sha256": "8ab6322685198ff9eabfd35938859b9ca44d8b0f0580bf00ee9bec1459debadf",
-   "bytes": 8274,
+   "sha256": "9514697c402e889649f12bb1904da75a79c7c2caba68b2884fe5891fd6e12fe9",
+   "bytes": 8273,
    "klass": "observed"
   },
   "tables/PSI-108__PSI_108_Experimental_table_STDCE_1_1.json": {
-   "sha256": "c09032fb1f3e1c62427a8d8fa3dc678e60c8089f1d4e5f8e3d63ca27cc2f40a9",
-   "bytes": 7782,
+   "sha256": "22e5b5b253ada14abae38735abfb01fbb1649e53c900a86df970666a7f5a0fb1",
+   "bytes": 7781,
    "klass": "observed"
   },
   "tables/PSI-101__PSI_101_Experimental_table_SAME_R.json": {
-   "sha256": "ad9f683004156f0f8f53772456691f4f673c2d8951d7b4cb7e28644bd5481a14",
-   "bytes": 8488,
+   "sha256": "0f95761b6b70a99e438c7ed0831581c9e931cfe6a3c58be0f97650b29d4bfe7e",
+   "bytes": 8487,
    "klass": "observed"
   },
   "investigations.json": {
-   "sha256": "49d23e218ffb1c55a9af0831a7eb53082e84e3b1c0859982fa1af053ee0d60be",
-   "bytes": 296855,
+   "sha256": "e800cfa58c975717eb8b7cd23c0b8a375d5fc46d68870b6e923b449189a96668",
+   "bytes": 333378,
    "klass": "observed"
   },
   "tables/index.json": {
-   "sha256": "2df32cab24f9e7e0186aa9d1c21e43cbb68b8c4efac147992f6d55a80967ee87",
-   "bytes": 7334,
+   "sha256": "77cc870df6c3e4c5273e01e34d278ebd2e459c894bd769db9c6561b088a490ec",
+   "bytes": 7313,
    "klass": "observed"
   },
   "official_resources.json": {
-   "sha256": "624d8dc99682c1ba8d8231c6c34a593fba456d32facd87e4270b3b4be3c8df9c",
-   "bytes": 10102,
+   "sha256": "f16db832de22e7ed4f32c735284c006c2d887450bd84adc69d9a6897142e16f8",
+   "bytes": 10058,
    "klass": "literature"
   },
   "profiles.json": {
@@ -208,18 +210,18 @@
    "klass": "model"
   },
   "ledger.jsonl": {
-   "sha256": "fc43845f75ebd8184ad2dbfd91f576b3ed8dc0fb2c10189986f8a61a966fe9a9",
-   "bytes": 1352078,
+   "sha256": "e05c6a0b7f36845276d64bae58295f0c35b19ae097bb09afbf859a214aca66c6",
+   "bytes": 5632712,
    "klass": "observed"
   },
   "ledger_index.json": {
-   "sha256": "41e73d8dfd8ed770664c80ace47734af74b0b244076e158a99244e366ff99003",
-   "bytes": 1370,
+   "sha256": "b9dcf60e443272e5f100bcd00f4fe5ecda200fb107932cf55932b8bd68072262",
+   "bytes": 1693,
    "klass": "observed"
   },
   "myths.json": {
-   "sha256": "813c3a87a5e72f558586586fbb375f2e24e6a1ee83da55fbd9491c9a82236c40",
-   "bytes": 21471,
+   "sha256": "26fb8bbc316ee23fdf280e50525c0c1682e57d126c6f315951fe6bd510a64351",
+   "bytes": 22658,
    "klass": "literature"
   },
   "rank_features.json": {
@@ -228,143 +230,143 @@
    "klass": "derived"
   },
   "index.json": {
-   "sha256": "2010df87e993deda02fa2cc32f6501191b8f1626855708b42db6e2b9c35be6ab",
-   "bytes": 447944,
+   "sha256": "1c17f056d9c39c08568c259bea8f821e708220c9825d2fcd3fd469e0e4852dc8",
+   "bytes": 459813,
    "klass": "derived"
   },
   "falsify.json": {
-   "sha256": "1c03770647981a919d8826a7a9a94538a71ddbfef8dd6c89776f892157f54798",
-   "bytes": 26436,
+   "sha256": "666c42466f9d0ec401dc60958e5a67dbb7d2093d4254d3b14d9148cc0e1a52c7",
+   "bytes": 28576,
    "klass": "derived"
   },
   "gaps.json": {
-   "sha256": "8ccb1a11ba0604799baa20f6d766c3dfde3e686fb1150cd94db4a927a9c8416c",
-   "bytes": 16798,
+   "sha256": "2de63f3c4b445ade0e7bfff465f133a9d40dc860ac0e393054a2ebd882dafbdf",
+   "bytes": 20971,
    "klass": "derived"
   },
   "lessons.json": {
-   "sha256": "1830b08e9d6fa863249d25aa64f14ce39cae7bdb31701df5dc2bba54c08dfdc9",
-   "bytes": 16373,
+   "sha256": "0c3c278b2fd2ee3481f4da075edc2c906a681ae685c279c2ada40b9fd0c3064d",
+   "bytes": 16311,
    "klass": "literature"
   },
   "exports/PSI-22__PSI_22_Experimental_table_ACME_E_FIELD_Flames.csv": {
-   "sha256": "42481cb7bc37f680c9c614a3a0f1f3460e609d60bf04ad020dc9f3c29d252e9c",
-   "bytes": 6643,
+   "sha256": "db13e77d5f70f1f12812bef302ca84651116d4696986374b9d6f6f855f44ee0e",
+   "bytes": 6611,
    "klass": "observed"
   },
   "exports/PSI-10__PSI_10_Experimental_table_Flame_Design_Normal_Flame.csv": {
-   "sha256": "a38b910535f532d659e261fdc4ea4520524ba9b17063df5e180dd9e450f5fb89",
-   "bytes": 57365,
+   "sha256": "29b516db56e53fe48081d754d8b95cb917af7323be6724c3a62d3098b32f15e9",
+   "bytes": 57779,
    "klass": "observed"
   },
   "exports/PSI-10__PSI_10_Experimental_table_Flame_Design_Inverse_Flame.csv": {
-   "sha256": "976e7a1c784a157dd089dc4c1441e3220897eb05f609a40206c130d14df93a88",
-   "bytes": 33416,
+   "sha256": "59d85c63aefef6958be2739b6b9b567a171f0668c7117e5003335dc858280c65",
+   "bytes": 33536,
    "klass": "observed"
   },
   "exports/PSI-159__PSI_159_Experimental_table_CFI_G_Normal_Flames.csv": {
-   "sha256": "2c1efc80f4ee61521a6d1c7b058971ccbd3ff9c082b9b7e5d23f1b61ea972405",
+   "sha256": "0f3b1492ecd03d0e781fe1aff9041af45eae16aac139e808c0daddbe7934f13c",
    "bytes": 48214,
    "klass": "observed"
   },
   "exports/PSI-159__PSI_159_Experimental_table_CFI_G_Inverse_Flames.csv": {
-   "sha256": "8abcabf418e956fc98db33409262d3cd0f884131cf2b0de9dd1131bb953a1b59",
+   "sha256": "8fd5b9e0ecfa7b1b465416498fb1177b0a9a9e10203f872e13ff6145fe9d7311",
    "bytes": 41674,
    "klass": "observed"
   },
   "exports/PSI-107__PSI_107_Experimental_table_Spice.csv": {
-   "sha256": "16d0d1464d1b8ac8bf3b9c78cf678846615012c85f058691d1fa2d612781f5af",
-   "bytes": 86453,
+   "sha256": "5294468a19b0b373b1778c90b3d0f2fbd2a125bd83403e7ad6ab90ee50f13b35",
+   "bytes": 85984,
    "klass": "observed"
   },
   "exports/PSI-106__PSI_106_Experimental_table_Slice.csv": {
-   "sha256": "2fa807548b4276ebf755fffb219fd2ab9b35041b3b2243da283a6898fbc5e469",
+   "sha256": "794d89b22def1017722f141cba4e37486ebbe41f19c3bb34c0c6d8d357a9f7f7",
    "bytes": 2171,
    "klass": "observed"
   },
   "exports/PSI-100__PSI_100_Experimental_table_SAFFIRE_3.csv": {
-   "sha256": "df58ab3e75c9af95b188d5dfc768493b6a8f7223cdfbde4db395028c144404da",
-   "bytes": 529,
+   "sha256": "401b5ec202ab83cf70f1616c30738dde63646f07acd623958c5eb7437b3109e7",
+   "bytes": 525,
    "klass": "observed"
   },
   "exports/PSI-102__PSI_102_Experimental_table_SAME.csv": {
-   "sha256": "c9d970f01c19bd1d726119fe9fadd51cbef7c0e60d8852a556d0cf9ed61016d4",
-   "bytes": 1281,
+   "sha256": "3a1319a77b34edf57d8809117b629bf98c3bfd8f5c3a7c1c70bd1563d31ab464",
+   "bytes": 1273,
    "klass": "observed"
   },
   "exports/PSI-69__PSI_69_Experimental_table_FLEX.csv": {
-   "sha256": "e96830804f1fa373b731605711c16136dcf12fca7408897b99103aa3d7cf6a54",
-   "bytes": 59224,
+   "sha256": "a59a8fc473676017bb3b1ff3df4facff6aaad14c1756977426d96dea8120e8d9",
+   "bytes": 58950,
    "klass": "observed"
   },
   "exports/PSI-39__PSI_39_Experimental_table_CFI.csv": {
-   "sha256": "35897c503cb09455b9b29e790fa5161aaf88c644948bebaedc675ad33fe43357",
+   "sha256": "2bbba6c87ec31457080d7f59ff6a55da3b75aeaf54f8fe07279e9cf11fb3c309",
    "bytes": 18649,
    "klass": "observed"
   },
   "exports/PSI-21__PSI_21_Experimental_table_CLD_Flame.csv": {
-   "sha256": "5211a235a10b866884e6ccc7a45465de83df74fc92b9b4172d6bdf6dcdcf7b44",
-   "bytes": 6305,
+   "sha256": "3a2d5003ec4632ff8826169beae17461bb7ecf623222e7fc868c9ef82d41a831",
+   "bytes": 6273,
    "klass": "observed"
   },
   "exports/PSI-68__PSI_68_Experimental_table_Flex2.csv": {
-   "sha256": "593fb40593162593f69b6f226bdd088ceac60d61f936c105be92b2a2e37edc32",
-   "bytes": 1950,
+   "sha256": "05a3d8302ef191162d047e88a6775699fb193338231c82e97f7c3fa13a4f63f5",
+   "bytes": 1942,
    "klass": "observed"
   },
   "exports/PSI-26__PSI_26_Experimental_table_BASS.csv": {
-   "sha256": "5b590f1b6039a0e2b8dce093b6c44c64956ced67aae68b948a7f00eabae09e28",
-   "bytes": 18709,
+   "sha256": "236a823893ac952905f66e67502e66953ac5f6248f7175bc38d80e8ac288c1b6",
+   "bytes": 18465,
    "klass": "observed"
   },
   "exports/PSI-23__PSI_23_Experimental_table_ACME_s_Flame.csv": {
-   "sha256": "e16ba20f1841990908246015480b7c78b647dfe18012e348055b678ca2bc21f0",
+   "sha256": "62845ec11255fefecdcbd0ce810317d9d0700038c58aee1eb56361e31246ee36",
    "bytes": 4692,
    "klass": "observed"
   },
   "exports/PSI-20__PSI_20_Experimental_table_ACME_BRE.csv": {
-   "sha256": "a8218299b8435600e2ce23e6fea242eaffd921847ad08516803e8050313b7e7c",
-   "bytes": 3266,
+   "sha256": "4ffcfa9d47b9a82557a0dee6e97c007726d5cfe1bb4e65b788b46ea8ee818d93",
+   "bytes": 3230,
    "klass": "observed"
   },
   "exports/PSI-142__PSI_142_Experimental_table_Data_Summary_Table.csv": {
-   "sha256": "6fcab12fba364c4a26cead4d404a2cd3de13588aabed6fc46e5d2e84d56ec479",
-   "bytes": 1808,
+   "sha256": "37187f213f61d1010ad728e6b7083a6f8969aab6dac3c919db096ed9d6abdf15",
+   "bytes": 1800,
    "klass": "observed"
   },
   "exports/PSI-99__PSI_99_Experimental_table_SAFFIRE_2.csv": {
-   "sha256": "825e652a7abf473fb8d869bb48b82f5b8f781950c3747a7e294432a0e4842e4c",
-   "bytes": 3867,
+   "sha256": "8ec8e30331dc39021d1b2bb6d4e993e805707b1b0a011e8d60824179b2053e5b",
+   "bytes": 3837,
    "klass": "observed"
   },
   "exports/PSI-25__PSI_25_Experimental_table_BASS_II.csv": {
-   "sha256": "1e8bc9094a704da9865587ed3d9175941f1f4049e12f9636de4df8df015a4686",
-   "bytes": 32606,
+   "sha256": "4044c29f0373ddbf0cd02029b987cfff1a9c76a8a16c7f9bdae7fd57145a6bbf",
+   "bytes": 32348,
    "klass": "observed"
   },
   "exports/PSI-47__PSI_47_Experimental_table_DAFT.csv": {
-   "sha256": "f7522942bfa7052b07296901432253eb1f49cb52ce969ca4f08cec65c1b50c4b",
-   "bytes": 797,
+   "sha256": "efd1dc075730901f38120f5301fae459ed2b6ccb7975cdf178e888e8e2cac4a8",
+   "bytes": 795,
    "klass": "observed"
   },
   "exports/PSI-98__PSI_98_Experimental_table_SAFFIRE_1.csv": {
-   "sha256": "d7a13e0730c6e65d4f16d4bc7ecb09ff410e26be9aa8019fb308c5b6507f1124",
-   "bytes": 1010,
+   "sha256": "cd247b18985537dd6c65980d1b8b59f9cd61b0b521b543a386a17eb7a3ddc622",
+   "bytes": 1002,
    "klass": "observed"
   },
   "exports/PSI-101__PSI_101_Experimental_table_SAME_R.csv": {
-   "sha256": "9dc6ee00363c4188b7728a4eba213952e324e21ac86a98a6f020c0cfe6183ef8",
-   "bytes": 18549,
+   "sha256": "d564b0a09bd594a1ddc8c1ca963721623d95d8547e2440fa8320541159fdc69f",
+   "bytes": 18440,
    "klass": "observed"
   },
   "exports/tests_long.csv": {
-   "sha256": "8194fc0ea2b4fc7fee98b387dba2c22d96e9e682246906721ca37638d30c69cf",
-   "bytes": 2426937,
+   "sha256": "5f0a5bf2aaa07e9fa7cc1073fc8de27db56483c66d45c713b68d55e7437e2e48",
+   "bytes": 2418611,
    "klass": "observed"
   },
   "exports/test_conditions.csv": {
-   "sha256": "1b4edfaf46726d19c17442aa9c222d3b36fbe081705fe66cfec26befb0c6a0ff",
-   "bytes": 163669,
+   "sha256": "21bf83680ce96e18858926465a0c0ce96c743ddd859db77d065ff14e48e117c2",
+   "bytes": 163529,
    "klass": "derived"
   },
   "exports/data_dictionary.csv": {
@@ -388,13 +390,13 @@
    "klass": "derived"
   },
   "research_area.json": {
-   "sha256": "aea84565c31a552ead025ab7e6c23c800e25a82d903f1a4daeab3aac45601f6c",
-   "bytes": 3804,
+   "sha256": "4a99aa48cba46be6ac3fbba5bc4b57e199281d933482850b8f76fbf908c4ecf5",
+   "bytes": 3802,
    "klass": "literature"
   },
   "matrix.json": {
-   "sha256": "6b73d28892cf5958d383a62b27a2a0227e9b526cec399db1719162275aeb0b26",
-   "bytes": 29607,
+   "sha256": "fb353b997a56c25ba74435fa776fab580c39ed5f6e3a4febf07a59247121cb89",
+   "bytes": 29539,
    "klass": "derived"
   },
   "briefs.json": {
@@ -403,13 +405,23 @@
    "klass": "illustrative"
   },
   "droplets.json": {
-   "sha256": "2275578bbb743b0943a397a094a02bcf6b0fc70c23e3b1cc255441dfc0895e3d",
-   "bytes": 39830,
+   "sha256": "fd5d3711fd2a1d94727747a5a636a498e7563b50c89bc5f7d60f47f13e7c9cbe",
+   "bytes": 39829,
    "klass": "derived"
+  },
+  "recorded.json": {
+   "sha256": "0530d964276b51e4fb5c7f573e26302fafd349581b42bbcd9085dcf79104117d",
+   "bytes": 68390,
+   "klass": "observed"
+  },
+  "reported.json": {
+   "sha256": "e3c130726b30d565c4ad8a89126751e37a30a53159cc25439e1fc187fa9435e6",
+   "bytes": 20945,
+   "klass": "literature"
   }
  },
  "brand": "Zero-G Firewall",
  "team": "The Rule of Flame",
  "mascot": "ISKRA",
- "built_at_utc": "2026-11-14T14:18:40Z"
+ "built_at_utc": "2026-11-14T15:49:51Z"
 }

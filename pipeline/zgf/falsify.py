@@ -14,7 +14,7 @@ import json
 import os
 
 from . import ledger as L
-from .claims import (BASS2, FM2, GLENN, GUIDE, LUCI, MIR, OLSON, SAFFIRE6, M2, M3, Resolver, data_items, model_items, q, reading)
+from .claims import (BASS2, FM2, GLENN, GUIDE, LUCI, LUNAR, MIR, OLSON, SAFFIRE6, SAFFIRE6_TEXT, M2, M3, Resolver, data_items, model_items, q, reading)
 from .literature import Library
 
 SPINOFF_DET = "doc:spinoff_fire_detector"
@@ -97,7 +97,7 @@ def claims(out_dir: str) -> list[dict]:
              fact("Solid-material rows that state pressure: %d. The BASS-II and Saffire tables give oxygen only." % solids_p, link="/envelope"),
              fact("Rows near a suit atmosphere (pure oxygen at 4.3 psia): %d." % near["suit"]["n_near"], link="/envelope"),
              UNTESTED_G]}],
-         "untested": [fact("Whether the raw files of these records hold pressures that the experimental tables omit. The site reads the tables and a few summaries, not the raw data.")],
+         "untested": [fact("Whether the raw files of these records hold pressures that the experimental tables omit. The site reads the tables, a few summaries and one raw data file (the Saffire-III recording), not the other raw data.")],
          "next": [q(FM2, "Conduct the first-ever observations and measurements of flame spread on the Moon", "FM2, planned")]},
         {"id": "our-model", "origin": "/physics", "verdict": "holds",
          "claim": "The flame-temperature model on this site agrees with NASA's own numbers.",
@@ -116,8 +116,13 @@ def claims(out_dir: str) -> list[dict]:
          "claim": "A smoke detector that works on Earth will work the same way in a spacecraft.",
          "summary": "NASA's documents say smoke itself is different without buoyancy, and that telling smoke from dust took a purpose-built detector.",
          "scope": ["stated without conditions"],
-         "holds": [reading("Detectors of both kinds have flown and have raised alarms; nothing here says they do not work.")],
-         "fails": [{"title": "The particles are not the same", "items": [
+         "holds": [reading("Detectors of both kinds have flown and have raised alarms; nothing here says they do not work."),
+                   {"kind": "data", "id": "recorded_delay"}],
+         "fails": [{"title": "A wire and a fire can read alike", "items": [{"kind": "data", "id": "recorded_detector"}]},
+                   {"title": "The alarm can come after the gases", "items": [
+             q(SAFFIRE6_TEXT, "Selecting 1 mg/m3 as a relatively tight alarm threshold, the FFD detector reached that threshold at 981 seconds. By this point, much of the hazardous gas release had occurred.", "Saffire VI, two-sided acrylic sample"),
+             {"kind": "data", "id": "saffire_products"}]},
+                   {"title": "The particles are not the same", "items": [
              q(GUIDE, "Fundamental research in microgravity highlighted the vastly different particulate size associated with flames in microgravity", ""),
              q(SPINOFF_DET, "can discriminate between combustion particles and extraneous matters such as dust", "A detector first used in space shuttle orbiters"),
              q(SAFFIRE6, "Overall, the temperature and pressure rise in the spacecraft were found to be less significant than the increase in carbon dioxide and carbon monoxide", "What a large fire changed most in a cargo vehicle")]}],

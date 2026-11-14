@@ -61,3 +61,11 @@ Read files only through `ledger.read(raw_dir, entry)`: it re-checks the hash.
 4. Every quotation equals the stored document text at its page or section.
 5. Every entry of `official_resources.json` that counts as used has a receipt and a link to a page that exists.
 6. Units convert consistently (mmHg, atm, bar, psia to kPa; fraction and percent; cm/s and m/s).
+
+## `recorded.json` (class NASA data, with a derived block)
+
+One raw data file of PSI-100, the Saffire-III recording. `series.t` is seconds from the ignition of sample S1 (`zero.utc`); `series.radiometers` and `series.anemometers` hold one list per column, all as long as `series.t`; `detector.scatter` and `detector.obscuration` are lists of `[t, reading]` exactly as the vehicle wrote them. `events` come from the igniter and smoke-wire currents. `derived` holds the few numbers stated beside the chart, each with its rule in `derived.rules`; the integrity check recomputes every stated peak from the series. No unit is given because the file gives none. Written only when the file is in the ledger.
+
+## `reported.json` (class NASA document)
+
+Numbers NASA reported outside PSI, read from the stored text of each document by a pattern: `saffire.rows` (five tests: conditions and what rose in the cabin), `saffire.limits`, `saffire.alarm`; `luci.rows` (spread rates in simulated lunar gravity and on Earth), `luci.spin`, `luci.oxygen`, `luci.launched`; `fm2.tests` (planned). Every set has `checks`, each `{what, ok}`; a failed check stops the build. Every value has a `ref` with the ledger entry, the SHA-256, the address and the page. `quotes` are checked quotations in the same shape as on the Myths page. None of these numbers may be added to a count of PSI rows.

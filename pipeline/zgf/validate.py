@@ -61,7 +61,7 @@ def check(out_dir: str) -> dict:
             for v in o:
                 walk(v)
 
-    for name in ("myths.json", "falsify.json", "lessons.json", "gaps.json", "matrix.json"):
+    for name in ("myths.json", "falsify.json", "lessons.json", "gaps.json", "matrix.json", "reported.json"):
         if os.path.exists(os.path.join(out_dir, name)):
             walk(load(name))
     if os.path.exists(os.path.join(out_dir, "matrix.json")):
@@ -70,7 +70,61 @@ def check(out_dir: str) -> dict:
         n += droplet(load("droplets.json"), tables)
     if os.path.exists(os.path.join(out_dir, "gaps.json")) and load("gaps.json").get("coverage"):
         n += cover(load("gaps.json")["coverage"], load("envelope.json"), sum(tables.values()))
+    if os.path.exists(os.path.join(out_dir, "recorded.json")):
+        n += recorded(load("recorded.json"), ledger)
+    if os.path.exists(os.path.join(out_dir, "reported.json")):
+        n += reported(load("reported.json"), ledger)
     return {"checks": n, "ok": True}
+
+
+def recorded(d: dict, ledger: dict) -> int:
+    """The recording may show only what its file holds: a receipt for the file, series of one length on one clock,
+    and every number stated beside the chart found again in the series that the chart draws."""
+    src = d["source"]
+    if ledger.get(src.get("ledger_seq")) != src.get("sha256"):
+        raise IntegrityError("the recording has no matching ledger entry")
+    s = d["series"]
+    t = s["t"]
+    if any(b < a for a, b in zip(t, t[1:])) or any(len(x) != len(t) for x in s["radiometers"] + s["anemometers"]):
+        raise IntegrityError("recording: the series are not on one clock")
+    lo, hi = d["window"]["from_t"], d["window"]["to_t"]
+    if not all(lo <= e["t"] <= hi for e in d["events"]) or not any(e["id"] == "S1" and e["t"] == 0 for e in d["events"]):
+        raise IntegrityError("recording: an event lies outside the window, or the clock does not start at the ignition")
+    sc, D = d["detector"]["scatter"], d["derived"]
+    ev = {e["id"]: e["t"] for e in d["events"]}
+    fire, wire = D["scatter"]["fire"], D["scatter"]["wire"]
+    if max(v for ti, v in sc if ti >= 0) != fire["peak"] or max(v for ti, v in sc if ev["wire1"] <= ti < ev["S2"]) != wire["peak"]:
+        raise IntegrityError("recording: a stated peak of the detector is not the highest reading drawn")
+    if not any(ti == fire["peak_s"] and v == fire["peak"] for ti, v in sc):
+        raise IntegrityError("recording: the stated time of the detector's peak is not a reading")
+    for k, r in enumerate(D["radiometers"]):
+        if max(v for ti, v in zip(t, s["radiometers"][k]) if ti >= 0) != r["peak"]:
+            raise IntegrityError("recording: the stated peak of %s is not the highest reading drawn" % r["id"])
+    if not (D["flame"]["from_t"] >= 0 and D["flame"]["until_t"] <= hi):
+        raise IntegrityError("recording: the flame's stated span lies outside the window")
+    return 5 + len(D["radiometers"])
+
+
+def reported(d: dict, ledger: dict) -> int:
+    """A reported number needs the document it was read from, and has to pass the cross-checks the build ran on it."""
+    n = 0
+    refs = [d["saffire"]["refs"][k] for k in d["saffire"]["refs"]] + [r["ref"] for r in d["luci"]["rows"]] + [d["luci"]["spin"]["ref"], d["fm2"]["ref"]]
+    for r in refs:
+        if ledger.get(r.get("ledger_seq")) != r.get("sha256") or not r.get("loc"):
+            raise IntegrityError("a reported number has no document and page behind it")
+        n += 1
+    for name in ("saffire", "luci", "fm2"):
+        for c in d[name]["checks"]:
+            if not c["ok"]:
+                raise IntegrityError("reported: %s" % c["what"])
+            n += 1
+    for r in d["saffire"]["rows"]:
+        if abs(r["co2_ppm"] * 1e-6 * r["p_kpa"] * 7.50062 - r["co2_mmhg"]) > 0.03 * r["co2_mmhg"]:
+            raise IntegrityError("reported: carbon dioxide of %s does not agree in its two units" % r["id"])
+    for r in d["luci"]["rows"]:
+        if abs(r["lunar"] / r["earth"] - r["ratio"]) > 0.011:
+            raise IntegrityError("reported: the ratio of %s does not follow from its two rates" % r["id"])
+    return n + len(d["saffire"]["rows"]) + len(d["luci"]["rows"])
 
 
 def cover(c: dict, env: dict, rows_in_all_tables: int) -> int:

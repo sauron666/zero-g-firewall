@@ -2,15 +2,18 @@
 
 ## Hand-off (14 November, evening): start here
 
-The site is live from `main` at https://sauron666.github.io/zero-g-firewall/. All 28 must-have features of `docs/COVERAGE.md` are done. Tests: 53 Python, 106 TypeScript, all passing; the integrity check runs 1,683 checks at each derivation.
+The site is live from `main` at https://sauron666.github.io/zero-g-firewall/. All 28 must-have features of `docs/COVERAGE.md` are done. Tests: 62 Python, 114 TypeScript, all passing; the integrity check runs 1,758 checks at each derivation.
+
+**Which raw cache.** Since 14 November 17:20 the site is built from the larger cache: 4,959 files, 330.9 MB, folder `nasa_raw2` on the team's machine, written by `sync_nasa_async.py` 2.0.0. The repository tracks that cache's ledger at `nasa_raw/ledger/ledger.jsonl` and its report at `nasa_raw/sync_report.json`. On the team's machine derive with `python pipeline/derive.py --raw nasa_raw2`, or rename the folders so that `nasa_raw2` becomes `nasa_raw`. The older, smaller folder no longer matches the tracked ledger.
 
 **Direction set by the team on 14 November, 16:25. Keep to it.** Show the engineering, demonstrate the science, let the results speak. The look is a flight deck (`docs/DESIGN.md`, `web/src/styles/deck.css`): mission control as the opening page, readings at the head of a page, ISKRA as a conversation on every page. The interface does not talk about how it was built: one sentence on the Method page, details in `docs/AI_USE.md`. Lead with results; state a real limit once, beside the result; fold explanations of the machinery into "How it works". Reference pages for engineers stay last in the navigation.
 
 Do next, in this order:
 
-1. **On the machine that holds `nasa_raw/` (it has NASA access):** run `python pipeline/sync_nasa.py` once (version 1.2.0 adds NASA's fire protection brief and one NTRS record), then `python pipeline/derive.py --raw nasa_raw`. Look at `matrix.waiting_for_sync` in the output: it must be empty. Open the stored text of `doc:std3001_fire_protection_brief` and compare it with the three quotations declared for `BRIEF` in `pipeline/zgf/matrix.py`; they were typed from a web summary and may not match word for word. Correct them until `quotes_verified` equals `quotes`. The opening page then states the station's own procedure with a receipt (the logic is already in `web/src/pages/Home.tsx`). Commit the new data files and the ledger.
+0. **Add `sync_nasa_async.py` to `pipeline/` and commit it.** The ledger and the sync report name it (version 2.0.0, script SHA-256 `1bdb439dd71390b6715abc849e8001835504d86c3957aa1ac343bf6c9bb898d8`), and a reader who follows a receipt should find the tool that fetched the file. Then change rule 1 of `CLAUDE.md` and the README to name both scripts.
+1. **On the machine that holds the cache (it has NASA access):** run `python pipeline/sync_nasa.py --out nasa_raw2` once (version 1.2.0 adds NASA's fire protection brief and one NTRS record; it appends to the same ledger), then `python pipeline/derive.py --raw nasa_raw2`. Look at `matrix.waiting_for_sync` in the output: it must be empty. Open the stored text of `doc:std3001_fire_protection_brief` and compare it with the three quotations declared for `BRIEF` in `pipeline/zgf/matrix.py`; they were typed from a web summary and may not match word for word. Correct them until `quotes_verified` equals `quotes`. The opening page then states the station's own procedure with a receipt (the logic is already in `web/src/pages/Home.tsx`). Commit the new ledger, sync report and data files together.
 2. Done on 14 November, evening, and live: the controls view on the Fire matrix page (B13), the nearest tests to a design point with a CSV on the Atmosphere map (B23), and the brief for a mission on the ranking page (B15).
-3. Still open, by value: export of the alarm lab's audit log (E08, small); a sensor and measurement inventory across the records (B11: which table states oxygen, pressure, flow, temperature, gases, particle size; the column profiles in `profiles.json` hold what is needed); a signed release (K03); detector evidence cards for SAME, SAME-R and DAFT (E01). ISS live telemetry (M01) only if it can be tested against the real feed.
+3. Still open, by value: a sensor and measurement inventory across the records (B11: which table states oxygen, pressure, flow, temperature, gases, particle size; the column profiles in `profiles.json` hold what is needed); a signed release (K03); detector evidence cards for SAME, SAME-R and DAFT (E01). ISS live telemetry (M01) only if it can be tested against the real feed.
 4. Polish worth doing if time remains: readings at the head of the remaining pages (`Readings` and `Tile` in `web/src/dash/widgets.tsx`), and a pass over long paragraphs on the Alarm, Ledger and Data pages: lead with the result, fold the rest.
 
 Deliverables that must follow the site: the 30-second video (`node tools/video/record.mjs web/dist out_dir`, about four minutes; captions read their numbers from the build), the pitch slides and the jury questions (links are with the team). Re-record after any change a viewer would see. Sunday: freeze around 11:00, video due 14:00, submit before 22:00.
@@ -22,6 +25,18 @@ Checks before every push: `python -m unittest discover -s pipeline/tests`, `cd w
 Clock: the event ends Sunday 15 November 2026 at 23:59 Sofia time. Freeze features on Sunday around 11:00, submit at least two hours before the deadline. Ask the human when the local pitch is.
 
 Acceptance rows (Q01 to Q35) are in `docs/pack/04_TESTS_SUBMISSION_PLAYBOOK.md`; feature IDs (A01, B04...) in `docs/pack/01_MASTER_SPEC.md`; facts and check values in `docs/pack/05`, `06` and `10`.
+
+## What the larger cache opens up (14 November, evening)
+
+Done with it: the Saffire-III recording on the Alarm page and the opening page (`pipeline/zgf/recorded.py`); NASA's reported numbers for Saffire IV to VI, LUCI and FM2 (`pipeline/zgf/reported.py`), drawn on the Alarm page, the coverage chart and the atmosphere map; what the ledger holds of each record, on its page.
+
+Not used yet, in order of value:
+
+- **SAME and SAME-R analysed data** (`PSI-101_Analyzed Data_SAME, SAME-R_Results.xlsx` and the per-run workbooks in PSI-101 and PSI-102): detector responses and particle sizes by material. This is the material for detector evidence cards (E01). The derivation uses the standard library only, so reading `.xlsx` needs a small reader or a new dependency in CI.
+- **BASS-II test matrices** (`PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx`): per test, the sequence of flow settings and the gas readings before and after, for example carbon monoxide at the start and the end. Some notes say a flow was lowered "to ext". Do not turn free-text notes into an outcome column without a rule that a reader can check.
+- **PSI-117 analysed CSV files** (burning histories, extinction diameters, average burning rates): a second check for the droplet panel. Keep experiment and simulation rows apart.
+- **Raw time series of CFI, CFI-G, s-Flame and Flame Design** (about 4,300 small text and CSV files): one trace per test point. A viewer on the record page would need a rule for which file belongs to which row of the experimental table.
+- **PSI-179, the Aerosol Sampling Experiment** (cabin dust on the station): outside the combustion search by NASA's own research area. It bears on false alarms; use its text only with that scope stated.
 
 ## The twelve stops (protect these above everything else)
 

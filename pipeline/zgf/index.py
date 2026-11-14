@@ -146,6 +146,39 @@ def build(raw_dir: str, out_dir: str) -> dict:
                 "In %d of the %d FLEX tests that state all four values, the d-squared law gives NASA's own burn time within 10%%: the initial diameter squared minus the extinction diameter squared, divided by the burning rate. "
                 "The median of law over stated time is %.2f. %d of %d rows state all four values. %s The check is silent on what follows the visible flame and on any gravity but free fall."
                 % (dr["within"]["10"], dr["n_usable"], dr["ratio"]["median"], dr["n_usable"], dr["n_rows"], dr["rate_unit"]["why"]), "/physics")
+    if os.path.exists(os.path.join(out_dir, "reported.json")):
+        rp = load("reported.json")
+        lu, sf, fm = rp["luci"], rp["saffire"], rp["fm2"]
+        rate = {r["id"]: r for r in lu["rows"]}
+        add("rep:luci", "derived", "Reported by NASA, read from its slides: burning in simulated lunar gravity (LUCI)",
+            "In lunar gravity simulated by spin, NASA's LUCI flight burned a fabric and an acrylic rod in 2025; nothing has been burned on the Moon itself, and no PSI table holds a row from lunar or Martian gravity. "
+            "Flame spread measured in that simulated lunar gravity: the flame base on the fabric spread at %g mm/s against %g mm/s in the same test on Earth, its flame tip at %g against %g, "
+            "and the flame tip on the acrylic rod at %g against %g. The rocket spun at %g rpm, which gives %g g at the experiment."
+            % (rate["fabric_base"]["lunar"], rate["fabric_base"]["earth"], rate["fabric_tip"]["lunar"], rate["fabric_tip"]["earth"], rate["rod_tip"]["lunar"], rate["rod_tip"]["earth"],
+               lu["spin"]["rpm"], lu["spin"]["g"]), "/gaps")
+        add("rep:fm2", "derived", "Reported by NASA, read from its slides: the tests planned on the Moon (FM2)",
+            "NASA plans %d burn tests of one fabric on the Moon in the FM2 experiment, each at %g psia, starting at %s%% oxygen. They would be the first flames observed on another world."
+            % (len(fm["tests"]), fm["tests"][0]["p_psia"], ", ".join("%g" % t["o2_pct"] for t in fm["tests"])), "/gaps")
+        add("rep:saffire", "derived", "Reported by NASA, read from its paper: large fires in a cargo vehicle (Saffire IV to VI)",
+            "Outside PSI, NASA's paper on Saffire IV to VI reports solid materials burned at up to %g%% oxygen: five large burns in a cargo vehicle, at %s%% oxygen and %s kPa. "
+            "Carbon monoxide at the far sensors rose by %s ppm and carbon dioxide by %s mmHg, against limits of %g ppm for 24 hours, %g ppm for one hour and %g mmHg. "
+            "The highest temperature at the far sensors was %g °C. In the two-sided acrylic test the smoke reading reached an alarm threshold of %g mg/m3 at %g s on the test clock."
+            % (max(r["o2_pct"] for r in sf["rows"]), ", ".join("%g" % r["o2_pct"] for r in sf["rows"]), ", ".join("%g" % r["p_kpa"] for r in sf["rows"]), ", ".join("%g" % r["co_ppm"] for r in sf["rows"]),
+               ", ".join("%g" % r["co2_mmhg"] for r in sf["rows"]), sf["limits"]["co_24h_ppm"], sf["limits"]["co_1h_ppm"], sf["limits"]["co2_1h_mmhg"], max(r["t_far_c"] for r in sf["rows"]),
+               sf["alarm"]["threshold_mg_m3"], sf["alarm"]["t_s"]), "/alarm")
+        for group, items in rp["quotes"].items():
+            for n, it in enumerate(items):
+                if it["quote_verified"]:
+                    add("rep:q:%s:%d" % (group, n), "literature", "%s%s" % (it["source"], ", " + it["ref"]["loc"] if it["ref"].get("loc") else ""),
+                        "%s\"%s\"" % ((it["says"] + ": ") if it["says"] else "", it["quote"]), "/alarm" if group == "saffire" else "/gaps", it["ref"], it["ref"].get("loc"))
+    if os.path.exists(os.path.join(out_dir, "recorded.json")):
+        rc = load("recorded.json")
+        sc, fl = rc["derived"]["scatter"], rc["derived"]["flame"]
+        add("rec:saffire3", "derived", "Recorded aboard the Cygnus cargo vehicle: its smoke detector during the Saffire-III fire",
+            "During the Saffire-III fire of 5 June 2017 the smoke detector of the Cygnus vehicle recorded a peak scatter reading of %g, against %g after a smoke wire with nothing burning (raw data of PSI-100). "
+            "The reading was above %g for %g s during the fire and for %g s after the wire; before both it had stayed at or below %g for %d minutes. "
+            "It peaked %g s after the igniter fired, and the radiometers were back at baseline at %g s. The file gives no units and no alarm level."
+            % (sc["fire"]["peak"], sc["wire"]["peak"], round(sc["mark"], 2), sc["fire"]["above_mark_s"], sc["wire"]["above_mark_s"], sc["quiet"]["max"], sc["quiet"]["minutes"], sc["fire"]["peak_s"], fl["until_t"]), "/alarm")
     if val:
         o = val["overall"]["closer_convention_per_table"]
         add("val:summary", "model", "Model check against NASA's Tad column",

@@ -17,7 +17,7 @@ import os
 import re
 
 from . import ledger as L
-from .claims import FM2, GLENN, GUIDE, LUCI, MIR, NAMES, OLSON, SAFFIRE6, Resolver, data_items, model_items, q, reading
+from .claims import FM2, GLENN, GUIDE, LUCI, LUCI_SLIDES, LUNAR, LUNAR_SLIDES, MIR, NAMES, OLSON, SAFFIRE6, SAFFIRE6_TEXT, Resolver, data_items, model_items, q, reading
 from .falsify import fact
 from .literature import Library
 
@@ -122,16 +122,21 @@ def gaps(out_dir: str, searches: dict[str, int]) -> list[dict]:
         return "PSI's search for \"%s\" returns %d record%s: %s." % (term, len(hits), "" if len(hits) == 1 else "s", ", ".join(hits[:4]))
     rows_all = sum(t.get("rows") or 0 for i in load("investigations.json")["items"] if i.get("scope", {}).get("in_scope") for t in i["tables"])
     return [
-        {"id": "partial-gravity", "title": "Nothing was burned in lunar or Martian gravity", "measure": "0", "unit": "of %s test rows" % format(rows_all, ","),
+        {"id": "partial-gravity", "title": "No row in PSI's tables was taken in lunar or Martian gravity", "measure": "0", "unit": "of %s test rows" % format(rows_all, ","),
          "why": "Buoyant flow grows with gravity, and the flow near a small flame on the Moon falls where solids burn most readily. Free-fall data bound that case from one side and 1 g data from the other.",
          "evidence": [fact("Every record in PSI's combustion search is a flight experiment in free fall or ground work. No table row was taken in partial gravity.", link="/envelope"), {"kind": "model", "id": "lunar_buoyant_flow"}],
          "plans": [{"name": "FM2, Flammability of Materials on the Moon", "state": "planned", "items": [
                        q(GLENN, "FM2 is the first-ever combustion experiment to be performed on another planetary body", ""),
                        q(FM2, "The experiment burns four fuel samples individually in atmospheric conditions planned for future lunar habitats or vehicles", ""),
+                       q(LUNAR, "The first-ever combustion experiments on another world will be performed, with a planned launch date of late 2026.", ""),
+                       {"kind": "data", "id": "fm2_tests"},
                        fact(in_psi("FM2"))]},
                    {"name": "LUCI, Lunar Combustion Investigation", "state": "flown", "items": [
                        q(LUCI, "These are the first-ever, extended-duration (greater than 25 seconds) combustion tests performed in simulated Lunar gravity", ""),
-                       fact(in_psi("LUCI") + " Its results are in a NASA report, not in the data repository.")]}]},
+                       {"kind": "data", "id": "luci_rates"},
+                       q(LUCI_SLIDES, "1-g extinction happens ~ 45 seconds sooner than partial-g extinction", "The fabric"),
+                       q(LUNAR, "the available times are too short to provide significant flame development (5 s for drop tower and ~25 s for aircraft)", "Why so little else exists"),
+                       fact(in_psi("LUCI") + " Its results are in a NASA presentation, not in the data repository.")]}]},
         {"id": "solids-pressure", "title": "No solid material is on record at a known pressure", "measure": str(n_solid_p), "unit": "of %d solid-material rows state pressure" % n_solid,
          "why": "Cabins are built of solids. Exploration cabins trade pressure for oxygen, and the solid-fuel tables in PSI give oxygen alone.",
          "evidence": [fact("BASS-II and Saffire list oxygen for %d rows and pressure for none, so none can be placed on the atmosphere map." % n_solid, link="/envelope")],
@@ -149,7 +154,8 @@ def gaps(out_dir: str, searches: dict[str, int]) -> list[dict]:
          "plans": [{"name": "SoFIE, Solid Fuel Ignition and Extinction", "state": "on the station", "items": [
                        q(GUIDE, "SoFIE can accommodate testing in exploration atmospheres with reduced pressure and elevated oxygen", ""),
                        q(SOFIE, "The atmosphere will be a mix of oxygen and nitrogen, with the oxygen percentage ranging from atmospheric up to 85%", ""),
-                       fact(in_psi("SoFIE"))]}]},
+                       fact(in_psi("SoFIE"))]},
+                   {"name": "Saffire IV to VI", "state": "flown; in a paper, not in PSI", "items": [{"kind": "data", "id": "saffire_conditions"}]}]},
         {"id": "exploration-atmosphere", "title": "Few tests sit near the atmospheres planned for exploration", "measure": "%d and %d" % (near["challenge_limit"]["n_near"], near["exploration"]["n_near"]),
          "unit": "of %d rows lie near 30%% oxygen at 10.2 psia and 34%% at 8.2 psia" % both,
          "why": "Those rows are liquid droplets and gas flames. Near a suit atmosphere, pure oxygen at 4.3 psia, there are %d." % near["suit"]["n_near"],
@@ -169,7 +175,10 @@ def gaps(out_dir: str, searches: dict[str, int]) -> list[dict]:
          "evidence": [fact(in_psi("Saffire"), "observed", "/evidence"),
                       q(SAFFIRE6, "These tests spanned 1.5 to 3.2 kW with free air volumes of 17 to 19 cubic meters", "The scale of the later flights"),
                       q(SAFFIRE6, "Overall, the temperature and pressure rise in the spacecraft were found to be less significant than the increase in carbon dioxide and carbon monoxide", "What they found mattered most")],
-         "plans": [{"name": "Saffire IV to VI", "state": "flown", "items": [fact("Their results are in NASA reports (one is in this site's ledger, NTRS 20240002981). The data sets are not in PSI.")]}]},
+         "plans": [{"name": "Saffire IV to VI", "state": "flown", "items": [
+                       fact("Their results are in NASA reports (one is in this site's ledger, NTRS 20240002981). The data sets are not in PSI."),
+                       {"kind": "data", "id": "saffire_products"},
+                       q(SAFFIRE6_TEXT, "Further work will be needed to extend these results to the partial gravity environment expected on future mission to the moon and Mars.", "")]}]},
     ]
 
 

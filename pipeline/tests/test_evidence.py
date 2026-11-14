@@ -305,3 +305,138 @@ class Droplets(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Recording(unittest.TestCase):
+    """A two-stream file like NASA's: the experiment writes each second, the vehicle now and then, and each leaves the other's columns at a fixed value."""
+
+    def file(self, fire_peak=1.8):
+        from zgf import recorded as R
+        head = [R.TIME, "SaffireTimestamp"] + R.RADIOMETERS + R.ANEMOMETERS + [R.WIRE, R.IGNITER["S1"], R.IGNITER["S2"], R.SCATTER, R.OBSCURATION] + R.OTHER_DETECTOR + list(R.CABIN.values())
+        off = {**{r: -4000.0 for r in R.RADIOMETERS}, **{a: -76.0 for a in R.ANEMOMETERS}, R.WIRE: -3.0, R.IGNITER["S1"]: -3.0, R.IGNITER["S2"]: -3.0}
+        rows = []
+        t0 = 1496691300000
+        for s in range(0, 1300):
+            own = dict(off)
+            if s >= 100:                                            # the experiment is powered from 100 s
+                flame = max(0.0, 150.0 - abs(s - 800) * 1.5) if s >= 700 else 0.0
+                own.update({r: -17.0 + flame for r in R.RADIOMETERS})
+                own.update({a: 24.0 for a in R.ANEMOMETERS})
+                own[R.WIRE] = 0.5 if 300 <= s < 310 else 0.0
+                own[R.IGNITER["S2"]] = 0.9 if 500 <= s < 507 else 0.0
+                own[R.IGNITER["S1"]] = 0.9 if 700 <= s < 707 else 0.0
+            rows.append([t0 + 1000 * s, 0] + [own[h] for h in head[2:11]] + [0] * (len(head) - 11))
+            if s % 10 == 5:                                         # a vehicle row: the experiment's columns hold their power-off values
+                sc = 0.02
+                if 320 <= s < 340: sc = 1.6
+                if 760 <= s: sc = min(fire_peak, 0.1 + (s - 760) * 0.01) if s < 1000 else 0.4
+                veh = {R.SCATTER: sc, R.OBSCURATION: 3.8, R.CABIN["pressure"]: 14.0, R.CABIN["temperature"]: 20.0, R.CABIN["fan"]: 100.0}
+                rows.append([t0 + 1000 * s + 400, 0] + [off[h] for h in head[2:11]] + [veh.get(h, 0) for h in head[11:]])
+        rows.append([-62135597038000, 0] + [0] * (len(head) - 2))  # NASA's file ends with a row dated year 1
+        return ("\n".join(",".join(str(x) for x in r) for r in [head] + rows)).encode("utf-8")
+
+    def test_events_peaks_and_the_two_streams(self):
+        from zgf import recorded as R
+        d = R.read(self.file())
+        self.assertEqual(len(d["aside"]), 1)
+        a = R.analyse(d)
+        ev = {e["id"]: e["t"] for e in a["events"]}
+        self.assertEqual((ev["S1"], ev["S2"], ev["wire1"]), (0.0, -200.0, -400.0))
+        self.assertEqual({r["baseline"] for r in a["radiometers"]}, {-17.0})                    # the vehicle's rows do not drag the baseline to -4000
+        self.assertEqual({(r["peak"], r["peak_t"]) for r in a["radiometers"]}, {(133.0, 100.0)})
+        s = a["scatter"]
+        self.assertEqual((s["quiet"]["max"], s["wire"]["peak"], s["fire"]["peak"]), (0.02, 1.6, 1.8))
+        self.assertEqual(s["wire"]["above_mark_s"], 20.0)
+        self.assertGreater(s["fire"]["above_mark_s"], 5 * s["wire"]["above_mark_s"])
+        self.assertEqual(s["typical_step_s"], 10.0)
+
+    def test_two_firings_of_one_igniter_stop_the_build(self):
+        from zgf import recorded as R
+        d = R.read(self.file())
+        col = d["cols"][R.IGNITER["S1"]]
+        for i, t in enumerate(d["t"]):
+            if 900 <= t < 905 and col[i] == 0.0:
+                col[i] = 0.9
+        with self.assertRaises(ValueError):
+            R.analyse(d)
+
+
+class Reported(unittest.TestCase):
+    class Lib:
+        def __init__(self, pages): self.pages = pages
+        def units(self, key): return [{"loc": "p. %d" % (i + 1), "text": t} for i, t in enumerate(self.pages.get(key, []))]
+        def ref(self, key, where=None): return {"ledger_seq": 1, "sha256": "x", "url": "u", "loc": (where or {}).get("loc")}
+
+    T1 = ("Table 1. Saffire IV-VI Sample Test Conditions considered in this paper.\nFlight/Sample IV-1 V-2 VI-2 VI-3 VI-4\nMaterial SIBAL Cloth\nLength (cm) 50  50 50 18 18\n"
+          "Air Flow Rate (cm/s) 20 20 20 20 20\nFlow Direction Concurrent Concurrent Concurrent Concurrent Concurrent\nAmbient Pressure (kPa) 100.0 70.7 54.1 54.6 55.2\n"
+          "Oxygen Concentration (mol %)\n22.0 26.2 31.0 30.3 28.8\nFree volume (m3) 17.9 19.0 16.7 16.7 16.7\n")
+    T2 = ("Table 2. Saffire IV-VI Heat release and increase of carbon oxides*.\nMax Temp\nat SFU outlet (°C)\nMax Temp at FFD or nearest location\n(°C)\nFFD inlet CO2\nincrease (ppm)\n"
+          "CO2 partial pressure increase (mmHg)\nFFD inlet CO increase (ppm)\nIV-1 SIBAL 130\n3,150 409 45 25 1390 1.03 80\nV-2 Cotton Jersey\n2,800 560 46 23 2360 1.26 83\n"
+          "VI-2 SIBAL 112 3217 580 3,650 409 48 20 2800 1.15 120\nVI-3 2-sided PMMA\n780 3080 1280\n77 21 8539 3.51 308\nVI-4 1-sided PMMA\n1200 1507 830\n57 21 %s 3.37 320\n*Empty fields were cases where the data were not available.")
+    T3 = ("For carbon monoxide, NASA establishes a Spacecraft Maximum Allowed Concentration (SMAC) value based on the exposure duration. For carbon monoxide, the 1-hour SMAC is 425 ppm, and the 24-hour SMAC is 100 ppm7. "
+          "NASA-STD-30018 which limits the 1-hour average CO2 partial pressure to no more than 3 mm Hg. Selecting 1 mg/m3 as a relatively tight alarm threshold, the FFD detector reached that threshold at 981 seconds. "
+          "The flow was changed from 20 cm/s to 5 cm/s at 1120 s and terminated at 1420 s.")
+
+    def lib(self, co2="8117"):
+        from zgf import reported as P
+        return self.Lib({P.SAFFIRE: [self.T1, self.T2 % co2, self.T3]})
+
+    def test_the_tables_are_read_from_the_text(self):
+        from zgf import reported as P
+        s = P.saffire(self.lib())
+        self.assertEqual([r["id"] for r in s["rows"]], ["IV-1", "V-2", "VI-2", "VI-3", "VI-4"])
+        self.assertEqual([r["material"] for r in s["rows"]], ["SIBAL", "Cotton Jersey", "SIBAL", "2-sided PMMA", "1-sided PMMA"])
+        self.assertEqual([(r["o2_pct"], r["p_kpa"], r["co_ppm"], r["co2_mmhg"], r["t_outlet_c"]) for r in s["rows"]][3], (30.3, 54.6, 308.0, 3.51, 77.0))
+        self.assertEqual((s["limits"]["co_1h_ppm"], s["limits"]["co2_1h_mmhg"], s["alarm"]["t_s"], s["alarm"]["flow_reduced_s"]), (425.0, 3.0, 981.0, 1120.0))
+        self.assertTrue(all(c["ok"] for c in s["checks"]))
+
+    def test_a_number_that_disagrees_with_its_own_row_fails_its_check(self):
+        from zgf import reported as P
+        s = P.saffire(self.lib(co2="9917"))                          # parts per million no longer match the millimetres of mercury beside them
+        self.assertFalse(all(c["ok"] for c in s["checks"]))
+
+    def test_a_missing_table_stops_the_build(self):
+        from zgf import reported as P
+        with self.assertRaises(P.ReportedError):
+            P.saffire(self.Lib({P.SAFFIRE: [self.T1.replace("Ambient Pressure (kPa) 100.0", "Ambient Pressure (kPa) n/a"), self.T2 % "8117", self.T3]}))
+
+    def test_spin_gives_lunar_gravity(self):
+        from zgf import reported as P
+        pages = {P.LUCI: ["SIBAL Flame Spread Fit Comparison\nFlame Spread Rates (from linear fits):\nPartial- G (mm/s)\n1-G (mm/s)\nRatio\nFlame Base\n.9 1.5 .6\nFlame Tip\n1.1 2.8 .39",
+                          "PMMA Flame Tip Comparison\nPartial-G (cm/s)\n1-G (cm/s)\nRatio\n.15 .40 .38\nFlame Tip Spread (from linear fits):",
+                          "A steady vehicle rotation of 11 RPM is established, with an effective radius of rotation of 1.22 m at the experiment location."],
+                 P.LUNAR_SLIDES: ["Upward Spread\nLunar-g = 0.165 gE\n2-cm-wide SIBAL fabric"]}
+        d = P.luci(self.Lib(pages))
+        self.assertEqual([(r["lunar"], r["earth"], r["ratio"]) for r in d["rows"]], [(0.9, 1.5, 0.6), (1.1, 2.8, 0.39), (1.5, 4.0, 0.38)])
+        self.assertEqual(d["spin"]["g"], 0.165)
+        self.assertTrue(all(c["ok"] for c in d["checks"]))
+
+    def test_the_four_planned_tests(self):
+        from zgf import reported as P
+        page = ("Initial Chamber Conditions\nTest 1: 8.2 psia (+/- 0.3 psi), 37% O2 , balance nitrogen) Test 2: 8.2 psia (+/- 0.3 psi), 33% O2 , balance nitrogen) "
+                "Test 3: 8.2 psia (+/- 0.3 psi), 29% O2 , balance nitrogen) Test 4: 8.2 psia (+/- 0.3 psi), 25% O2 , balance nitrogen)")
+        d = P.fm2(self.Lib({P.LUNAR_SLIDES: [page]}))
+        self.assertEqual([(t["o2_pct"], t["p_psia"]) for t in d["tests"]], [(37.0, 8.2), (33.0, 8.2), (29.0, 8.2), (25.0, 8.2)])
+        with self.assertRaises(P.ReportedError):
+            P.fm2(self.Lib({P.LUNAR_SLIDES: [page.replace("Test 4: 8.2 psia (+/- 0.3 psi), 25% O2", "Test 4: to be decided")]}))
+
+
+class Holdings(unittest.TestCase):
+    def test_folders_and_documents_of_a_record(self):
+        from zgf import derive_core as C
+        mk = lambda n, name, role="supporting_file", size=10: {"kind": "psi_file", "accession": "PSI-9", "key": "psi:file:PSI-9:" + name, "file_name": name, "role": role, "size": size,
+                                                                "seq": n, "sha256": "h%d" % n, "url": "u"}
+        es = [mk(1, "PSI-9_Experimental table_T.csv", "experimental_table"), mk(2, "PSI-9_Raw Data_a.txt"), mk(3, "PSI-9_Raw Data_b.txt"), mk(4, "PSI-9_Reports_Final Report.pdf", size=500),
+              {**mk(5, "PSI-8_Reports_other.pdf"), "accession": "PSI-8"}]
+        docs, held = C.held(es, {e["key"]: e for e in es}, "PSI-9")
+        self.assertEqual([d["file"] for d in docs], ["PSI-9_Reports_Final Report.pdf"])
+        self.assertEqual((held["files"], held["bytes"], held["folders"]["Raw Data"]["files"], held["documents"]), (4, 530, 2, 1))
+        self.assertEqual(C.folder_of("PSI-9", "PSI-9_Science Documents_BASS-II_ReadMe.docx"), "Science Documents")
+
+
+class PagedText(unittest.TestCase):
+    def test_a_report_stored_page_by_page_is_addressed_by_page(self):
+        from zgf.literature import tika_pages
+        x = '<html><body><div class="page"><p>First page,\n</p><p>two lines.</p></div>\n<div class="page"><p>Second &amp; last.</p></div></body></html>'
+        self.assertEqual(tika_pages(x), ["First page,\ntwo lines.", "Second & last."])
+        self.assertEqual(tika_pages("plain text of an older report"), [])

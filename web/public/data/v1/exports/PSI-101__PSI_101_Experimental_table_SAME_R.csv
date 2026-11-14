@@ -1,110 +1,110 @@
 psi_record,source_file,row,sample_type,same_test_number,description,date,inlet_velocity,rt_r0,duration,primary_aging_time,primary_mixing_time,net_aging_time,source_sha256,ledger_entry
-PSI-101,PSI-101_Experimental table_SAME-R.csv,1,Kapton,51,B.L. new formula,21-Jul,8.1,1.38,60,11,8,38,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,2,Kapton,51a,B.L. new formula,22-Jul,8.1,1.38,60,,,261,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,3,Kapton,61,Baseline Aging,2-Aug,8.1,1.38,60,11,8,38,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,4,Kapton,61a,aged,2-Aug,8.1,1.38,,,,807,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,5,Kapton,62,High Temp aging,2-Aug,8.1,1.48,60,11,8,39,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,6,Kapton,62a,aged,2-Aug,8.1,1.48,,,,808,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,7,Kapton,70,High temp aged STS det,24-Aug,8.1,1.48,60,720,8,747,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,8,Kapton,73,Baseline Aging,26-Aug,8.1,1.38,60,11,8,33,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,9,Kapton,73a,aged,26-Aug,8.1,1.38,,,,560,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,10,Kapton,75,Mid Temp aging (no Ptrak),26-Aug,8.1,1.43,60,11,8,32,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,11,Kapton,75a,aged,26-Aug,8.1,1.43,,,,563,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,12,Kapton,77,High Temp aging,26-Aug,8.1,1.48,60,11,8,31,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,13,Kapton,77a,aged,26-Aug,8.1,1.48,,,,559,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,14,Kapton,85,Mid Temp aging run. Repeat 75,30-Aug,8.1,1.43,60,11,8,33,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,15,Kapton,85a,aged,30-Aug,8.1,1.43,,,,563,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,16,Kapton,90,Mid Temp aging reburn 85,30-Aug,8.1,1.43,60,11,8,38,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,17,Kapton,90a,aged,30-Aug,8.1,1.43,,,,569,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,18,Kapton,92,Baseline STS det,7-Sep,8.1,1.38,60,11,8,35,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,19,Kapton,93,Mid Temp aging run 75 repeat,7-Sep,8.1,1.43,60,11,8,36,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,20,Kapton,93a,aged,7-Sep,8.1,1.43,,,,568,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,21,Kapton,94,Mid Temp aging run mid high,7-Sep,8.1,1.45,60,11,8,42,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,22,Kapton,94a,aged,7-Sep,8.1,1.45,,,,567,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,23,Kapton,101,No flow run w/ aging,8-Sep,0,1.48,60,11,8,29,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,24,Kapton,101a,aged,8-Sep,0,1.48,,,,561,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,25,Kapton,102,No flow run w/ aging,8-Sep,0,1.48,120,11,8,28,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,26,Kapton,102a,aged,8-Sep,0,1.48,,,,563,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,27,Kapton,108,Low flow run w/aging,9-Sep,1,1.48,60,11,8,30,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,28,Kapton,108a,aged,9-Sep,1,1.48,,,,560,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,29,Kapton,114,low flow run w STS no Ptrak,9-Sep,2,1.43,60,11,8,28,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,30,Silicone,48,Low Temp,16-Jul,8,1.304,60,11,8,62,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,31,Silicone,53,HighTemp,22-Jul,8.1,1.35,60,1,8,52,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,32,Silicone,59,baseline aged,30-Jul,8.1,1.327,60,11,8,24,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,33,Silicone,59a,aged,30-Jul,8.1,1.327,,,,856,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,34,Silicone,60,Htemp ageing,30-Jul,8.1,1.35,60,11,8,49,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,35,Silicone,60a,aged,30-Jul,8.1,1.35,,,,856,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,36,Silicone,65,Baseline long aging,23-Aug,8.1,1.327,60,11,8,50,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,37,Silicone,65a,aged,23-Aug,8.1,1.327,,,,1923,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,38,Silicone,66,High T aging,23-Aug,8.1,1.36,60,11,8,42,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,39,Silicone,66a,aged,23-Aug,8.1,1.36,,,,837,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,40,Silicone,67,High temp aged,24-Aug,8.1,1.35,60,720,8,751,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,41,Silicone,72,Baseline STS det,25-Aug,8.1,1.327,60,11,8,42,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,42,Silicone,86,Mid temp aging,30-Aug,8.1,1.345,60,11,8,50,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,43,Silicone,86a,aged,30-Aug,8.1,1.345,,,,628,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,44,Silicone,91,Baseline STS det,7-Sep,8.1,1.327,60,11,8,46,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,45,Silicone,99,No flow run w/aging,8-Sep,0,1.35,60,11,8,48,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,46,Silicone,99a,aged,8-Sep,0,1.35,,,,627,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,47,Silicone,103,low flow run w/ aging,9-Sep,1,1.35,60,11,8,48,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,48,Silicone,103a,aged,9-Sep,1,1.35,,,,619,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,49,Silicone,104,No flow run w/ aging,9-Sep,0,1.35,60,11,8,51,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,50,Silicone,104a,aged,9-Sep,0,1.35,,,,636,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,51,Silicone,109,low flow run w STS,9-Sep,2,1.35,60,11,8,28,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,52,Lampwick,49,B.L. High RT/R0,19-Jul,8,1.251,60,11,8,51,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,53,Lampwick,54,Baseline,29-Jul,8.1,1.245,60,11,8,57,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,54,Lampwick,55,High RT/R0 test aging,29-Jul,8.1,1.245,60,11,8,47,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,55,Lampwick,55a,aged,29-Jul,8.1,1.245,,,,218,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,56,Lampwick,57,High RT/R0 reburn sample,29-Jul,8.1,1.253,60,11,8,,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,57,Lampwick,68,High temp aged STS det,24-Aug,8.1,1.28,60,720,8,747,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,58,Lampwick,78,Baseline aging,26-Aug,8.1,1.245,60,11,8,37,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,59,Lampwick,78a,aged,26-Aug,8.1,1.245,,,,581,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,60,Lampwick,80,High temp aging,26-Aug,8.1,1.28,60,11,8,40,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,61,Lampwick,80a,aged,26-Aug,8.1,1.28,,,,580,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,62,Lampwick,82,Mid temp aging,26-Aug,8.1,1.265,60,11,8,39,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,63,Lampwick,82a,aged,27-Aug,8.1,1.265,,,,579,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,64,Lampwick,88,Baseline STS det,30-Aug,8.1,1.245,60,11,8,,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,65,Lampwick,96,No flow run w/aging,7-Sep,0,1.245,60,11,8,34,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,66,Lampwick,96a,aged,7-Sep,0,1.245,,,,582,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,67,Lampwick,98,No flow run w/aging,8-Sep,0,1.28,60,11,8,37,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,68,Lampwick,98a,aged,8-Sep,0,1.28,,,,585,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,69,Lampwick,106,No flow run w/aging,9-Sep,0,1.28,60,11,8,30,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,70,Lampwick,106a,aged,9-Sep,0,1.28,,,,558,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,71,Lampwick,110,low flow run w/STS,9-Sep,2,1.28,60,11,8,21,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,72,Teflon,50,B.L. High RT/R0,20-Jul,8.1,1.452,60,11,8,33,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,73,Teflon,56,Baseline,29-Jul,8.1,1.445,60,11,8,41,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,74,Teflon,57,High RT/R0 reburn sample,29-Jul,8.1,1.253,60,11,8,,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,75,Teflon,58,Baseline aging,30-Jul,8.1,1.445,60,11,8,34,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,76,Teflon,58a,aged,30-Jul,8.1,1.445,,,,805,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,77,Teflon,69,High temp aged STS det,24-Aug,8.1,1.45,60,720,8,745,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,78,Teflon,79,Baseline aging,26-Aug,8.1,1.445,60,11,8,33,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,79,Teflon,79a,aged,26-Aug,8.1,1.445,,,,560,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,80,Teflon,81,High temp aging,26-Aug,8.1,1.45,60,11,8,30,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,81,Teflon,81a,aged,27-Aug,8.1,1.45,,,,559,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,82,Teflon,83,Mid temp aging,26-Aug,8.1,1.448,60,11,8,30,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,83,Teflon,83a,aged,27-Aug,8.1,1.448,,,,557,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,84,Teflon,89,Baseline STS det,30-Aug,8.1,1.445,60,11,8,31,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,85,Teflon,100,No flow run w/ aging,8-Sep,0,1.45,60,11,8,29,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,86,Teflon,100a,aged,8-Sep,0,1.45,,,,560,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,87,Teflon,105,No flow run w/ aging,9-Sep,0,1.45,60,11,8,24,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,88,Teflon,105a,aged,9-Sep,0,1.45,,,,559,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,89,Teflon,111,low flow run w/ STS,9-Sep,2,1.45,60,11,8,43,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,90,Pyrell,52,Baseline,22-Jul,8.1,1.22,60,11,8,,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,91,Pyrell,63,Baseline Aging,23-Aug,8.1,1.22,60,11,8,56,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,92,Pyrell,63a,aged,23-Aug,8.1,1.22,,,,840,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,93,Pyrell,64,High Temp aging,23-Aug,8.1,1.23,60,11,8,47,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,94,Pyrell,64a,aged,23-Aug,8.1,1.23,,,,842,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,95,Pyrell,71,High temp aged STS det,24-Aug,8.1,1.23,60,720,8,750,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,96,Pyrell,74,Baseline Aging,26-Aug,8.1,1.22,60,11,8,48,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,97,Pyrell,74a,aged,26-Aug,8.1,1.22,,,,623,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,98,Pyrell,76,High Temp aging,26-Aug,8.1,1.23,60,11,8,51,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,99,Pyrell,76a,aged,26-Aug,8.1,1.23,,,,625,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,100,Pyrell,84,Mid Temp aging retry,30-Aug,8.1,1.225,60,11,8,53,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,101,Pyrell,84a,aged,30-Aug,8.1,1.225,,,,632,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,102,Pyrell,87,Baseline STS det,30-Aug,8.1,1.22,60,11,8,45,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,103,Pyrell,95,No flow run w/ aging,7-Sep,0,1.22,60,11,8,38,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,104,Pyrell,95a,aged,7-Sep,0,1.22,,,,,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,105,Pyrell,97,No flow run w/aging,8-Sep,0,1.23,60,11,8,48,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,106,Pyrell,97a,aged,8-Sep,0,1.23,,,,624,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,107,Pyrell,107,Low flow run w/aging,9-Sep,1,1.23,60,11,8,32,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,108,Pyrell,107a,aged,9-Sep,1,1.23,,,,559,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
-PSI-101,PSI-101_Experimental table_SAME-R.csv,109,Pyrell,113,low flow run w STS,9-Sep,2,1.23,60,11,8,31,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,1151
+PSI-101,PSI-101_Experimental table_SAME-R.csv,1,Kapton,51,B.L. new formula,21-Jul,8.1,1.38,60,11,8,38,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,2,Kapton,51a,B.L. new formula,22-Jul,8.1,1.38,60,,,261,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,3,Kapton,61,Baseline Aging,2-Aug,8.1,1.38,60,11,8,38,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,4,Kapton,61a,aged,2-Aug,8.1,1.38,,,,807,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,5,Kapton,62,High Temp aging,2-Aug,8.1,1.48,60,11,8,39,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,6,Kapton,62a,aged,2-Aug,8.1,1.48,,,,808,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,7,Kapton,70,High temp aged STS det,24-Aug,8.1,1.48,60,720,8,747,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,8,Kapton,73,Baseline Aging,26-Aug,8.1,1.38,60,11,8,33,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,9,Kapton,73a,aged,26-Aug,8.1,1.38,,,,560,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,10,Kapton,75,Mid Temp aging (no Ptrak),26-Aug,8.1,1.43,60,11,8,32,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,11,Kapton,75a,aged,26-Aug,8.1,1.43,,,,563,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,12,Kapton,77,High Temp aging,26-Aug,8.1,1.48,60,11,8,31,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,13,Kapton,77a,aged,26-Aug,8.1,1.48,,,,559,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,14,Kapton,85,Mid Temp aging run. Repeat 75,30-Aug,8.1,1.43,60,11,8,33,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,15,Kapton,85a,aged,30-Aug,8.1,1.43,,,,563,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,16,Kapton,90,Mid Temp aging reburn 85,30-Aug,8.1,1.43,60,11,8,38,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,17,Kapton,90a,aged,30-Aug,8.1,1.43,,,,569,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,18,Kapton,92,Baseline STS det,7-Sep,8.1,1.38,60,11,8,35,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,19,Kapton,93,Mid Temp aging run 75 repeat,7-Sep,8.1,1.43,60,11,8,36,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,20,Kapton,93a,aged,7-Sep,8.1,1.43,,,,568,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,21,Kapton,94,Mid Temp aging run mid high,7-Sep,8.1,1.45,60,11,8,42,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,22,Kapton,94a,aged,7-Sep,8.1,1.45,,,,567,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,23,Kapton,101,No flow run w/ aging,8-Sep,0,1.48,60,11,8,29,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,24,Kapton,101a,aged,8-Sep,0,1.48,,,,561,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,25,Kapton,102,No flow run w/ aging,8-Sep,0,1.48,120,11,8,28,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,26,Kapton,102a,aged,8-Sep,0,1.48,,,,563,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,27,Kapton,108,Low flow run w/aging,9-Sep,1,1.48,60,11,8,30,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,28,Kapton,108a,aged,9-Sep,1,1.48,,,,560,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,29,Kapton,114,low flow run w STS no Ptrak,9-Sep,2,1.43,60,11,8,28,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,30,Silicone,48,Low Temp,16-Jul,8,1.304,60,11,8,62,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,31,Silicone,53,HighTemp,22-Jul,8.1,1.35,60,1,8,52,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,32,Silicone,59,baseline aged,30-Jul,8.1,1.327,60,11,8,24,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,33,Silicone,59a,aged,30-Jul,8.1,1.327,,,,856,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,34,Silicone,60,Htemp ageing,30-Jul,8.1,1.35,60,11,8,49,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,35,Silicone,60a,aged,30-Jul,8.1,1.35,,,,856,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,36,Silicone,65,Baseline long aging,23-Aug,8.1,1.327,60,11,8,50,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,37,Silicone,65a,aged,23-Aug,8.1,1.327,,,,1923,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,38,Silicone,66,High T aging,23-Aug,8.1,1.36,60,11,8,42,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,39,Silicone,66a,aged,23-Aug,8.1,1.36,,,,837,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,40,Silicone,67,High temp aged,24-Aug,8.1,1.35,60,720,8,751,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,41,Silicone,72,Baseline STS det,25-Aug,8.1,1.327,60,11,8,42,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,42,Silicone,86,Mid temp aging,30-Aug,8.1,1.345,60,11,8,50,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,43,Silicone,86a,aged,30-Aug,8.1,1.345,,,,628,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,44,Silicone,91,Baseline STS det,7-Sep,8.1,1.327,60,11,8,46,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,45,Silicone,99,No flow run w/aging,8-Sep,0,1.35,60,11,8,48,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,46,Silicone,99a,aged,8-Sep,0,1.35,,,,627,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,47,Silicone,103,low flow run w/ aging,9-Sep,1,1.35,60,11,8,48,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,48,Silicone,103a,aged,9-Sep,1,1.35,,,,619,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,49,Silicone,104,No flow run w/ aging,9-Sep,0,1.35,60,11,8,51,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,50,Silicone,104a,aged,9-Sep,0,1.35,,,,636,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,51,Silicone,109,low flow run w STS,9-Sep,2,1.35,60,11,8,28,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,52,Lampwick,49,B.L. High RT/R0,19-Jul,8,1.251,60,11,8,51,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,53,Lampwick,54,Baseline,29-Jul,8.1,1.245,60,11,8,57,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,54,Lampwick,55,High RT/R0 test aging,29-Jul,8.1,1.245,60,11,8,47,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,55,Lampwick,55a,aged,29-Jul,8.1,1.245,,,,218,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,56,Lampwick,57,High RT/R0 reburn sample,29-Jul,8.1,1.253,60,11,8,,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,57,Lampwick,68,High temp aged STS det,24-Aug,8.1,1.28,60,720,8,747,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,58,Lampwick,78,Baseline aging,26-Aug,8.1,1.245,60,11,8,37,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,59,Lampwick,78a,aged,26-Aug,8.1,1.245,,,,581,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,60,Lampwick,80,High temp aging,26-Aug,8.1,1.28,60,11,8,40,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,61,Lampwick,80a,aged,26-Aug,8.1,1.28,,,,580,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,62,Lampwick,82,Mid temp aging,26-Aug,8.1,1.265,60,11,8,39,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,63,Lampwick,82a,aged,27-Aug,8.1,1.265,,,,579,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,64,Lampwick,88,Baseline STS det,30-Aug,8.1,1.245,60,11,8,,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,65,Lampwick,96,No flow run w/aging,7-Sep,0,1.245,60,11,8,34,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,66,Lampwick,96a,aged,7-Sep,0,1.245,,,,582,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,67,Lampwick,98,No flow run w/aging,8-Sep,0,1.28,60,11,8,37,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,68,Lampwick,98a,aged,8-Sep,0,1.28,,,,585,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,69,Lampwick,106,No flow run w/aging,9-Sep,0,1.28,60,11,8,30,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,70,Lampwick,106a,aged,9-Sep,0,1.28,,,,558,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,71,Lampwick,110,low flow run w/STS,9-Sep,2,1.28,60,11,8,21,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,72,Teflon,50,B.L. High RT/R0,20-Jul,8.1,1.452,60,11,8,33,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,73,Teflon,56,Baseline,29-Jul,8.1,1.445,60,11,8,41,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,74,Teflon,57,High RT/R0 reburn sample,29-Jul,8.1,1.253,60,11,8,,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,75,Teflon,58,Baseline aging,30-Jul,8.1,1.445,60,11,8,34,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,76,Teflon,58a,aged,30-Jul,8.1,1.445,,,,805,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,77,Teflon,69,High temp aged STS det,24-Aug,8.1,1.45,60,720,8,745,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,78,Teflon,79,Baseline aging,26-Aug,8.1,1.445,60,11,8,33,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,79,Teflon,79a,aged,26-Aug,8.1,1.445,,,,560,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,80,Teflon,81,High temp aging,26-Aug,8.1,1.45,60,11,8,30,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,81,Teflon,81a,aged,27-Aug,8.1,1.45,,,,559,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,82,Teflon,83,Mid temp aging,26-Aug,8.1,1.448,60,11,8,30,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,83,Teflon,83a,aged,27-Aug,8.1,1.448,,,,557,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,84,Teflon,89,Baseline STS det,30-Aug,8.1,1.445,60,11,8,31,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,85,Teflon,100,No flow run w/ aging,8-Sep,0,1.45,60,11,8,29,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,86,Teflon,100a,aged,8-Sep,0,1.45,,,,560,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,87,Teflon,105,No flow run w/ aging,9-Sep,0,1.45,60,11,8,24,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,88,Teflon,105a,aged,9-Sep,0,1.45,,,,559,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,89,Teflon,111,low flow run w/ STS,9-Sep,2,1.45,60,11,8,43,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,90,Pyrell,52,Baseline,22-Jul,8.1,1.22,60,11,8,,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,91,Pyrell,63,Baseline Aging,23-Aug,8.1,1.22,60,11,8,56,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,92,Pyrell,63a,aged,23-Aug,8.1,1.22,,,,840,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,93,Pyrell,64,High Temp aging,23-Aug,8.1,1.23,60,11,8,47,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,94,Pyrell,64a,aged,23-Aug,8.1,1.23,,,,842,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,95,Pyrell,71,High temp aged STS det,24-Aug,8.1,1.23,60,720,8,750,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,96,Pyrell,74,Baseline Aging,26-Aug,8.1,1.22,60,11,8,48,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,97,Pyrell,74a,aged,26-Aug,8.1,1.22,,,,623,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,98,Pyrell,76,High Temp aging,26-Aug,8.1,1.23,60,11,8,51,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,99,Pyrell,76a,aged,26-Aug,8.1,1.23,,,,625,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,100,Pyrell,84,Mid Temp aging retry,30-Aug,8.1,1.225,60,11,8,53,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,101,Pyrell,84a,aged,30-Aug,8.1,1.225,,,,632,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,102,Pyrell,87,Baseline STS det,30-Aug,8.1,1.22,60,11,8,45,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,103,Pyrell,95,No flow run w/ aging,7-Sep,0,1.22,60,11,8,38,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,104,Pyrell,95a,aged,7-Sep,0,1.22,,,,,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,105,Pyrell,97,No flow run w/aging,8-Sep,0,1.23,60,11,8,48,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,106,Pyrell,97a,aged,8-Sep,0,1.23,,,,624,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,107,Pyrell,107,Low flow run w/aging,9-Sep,1,1.23,60,11,8,32,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,108,Pyrell,107a,aged,9-Sep,1,1.23,,,,559,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161
+PSI-101,PSI-101_Experimental table_SAME-R.csv,109,Pyrell,113,low flow run w STS,9-Sep,2,1.23,60,11,8,31,87164b7dc9168a4273c159f7a9f23699afbd06ad97b77974377e79b9bf8a3bef,161

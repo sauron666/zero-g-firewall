@@ -76,7 +76,26 @@ def units(raw_dir: str, entry: dict) -> list[dict]:
         return [{"loc": "record", "text": json.dumps(d, ensure_ascii=False)}]
     if ctype.startswith("text/html"):
         return [{"loc": "page text", "text": html_text(b)}]
-    return [{"loc": "full text", "text": b.decode("utf-8", errors="replace")}]
+    text = b.decode("utf-8", errors="replace")
+    pages = tika_pages(text)
+    if pages:
+        return [{"loc": "p. %d" % (i + 1), "page_pdf": i + 1, "page": None, "text": t} for i, t in enumerate(pages)]
+    return [{"loc": "full text", "text": text}]
+
+
+def tika_pages(text: str) -> list[str]:
+    """
+    NASA's report server stores the text of newer PDFs as XHTML with one <div class="page"> per page.
+    Returns the text of each page, or an empty list when the file is not in that form.
+    """
+    if '<div class="page">' not in text[:200000]:
+        return []
+    out = []
+    for part in text.split('<div class="page">')[1:]:
+        p = _Text()
+        p.feed(part)
+        out.append(re.sub(r"\n\s*\n+", "\n", re.sub(r"[ \t\r\f\v]+", " ", "".join(p.out))).strip())
+    return out
 
 
 class Library:

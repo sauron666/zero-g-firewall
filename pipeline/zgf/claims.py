@@ -24,6 +24,11 @@ BASS2 = "ntrs:text:20210011385:TM-20210011385.pdf.txt"
 OLSON = "ntrs:text:20130010991:20130010991.txt"
 LUCI = "ntrs:record:20250010653"
 SAFFIRE6 = "ntrs:record:20240002981"
+# full texts of the newer reports, stored page by page
+SAFFIRE6_TEXT = "ntrs:text:20240002981:Saffire-ICES-2024-ICES-365-accepted final.pdf.txt"
+LUCI_SLIDES = "ntrs:text:20250010653:ASGSR 2025-LUCI-Ferkul-Presentation-v2-20250010653.pdf.txt"
+LUNAR = "ntrs:text:20260000646:Ferkul-Lunar and Planetary Science Conference 2026.pdf.txt"
+LUNAR_SLIDES = "ntrs:text:20260001966:Ferkul-Lunar and Planetary Science Conf 2026 v2.pdf.txt"
 
 NAMES = {
     GUIDE: "A Researcher's Guide to: Combustion Science (NASA)",
@@ -34,6 +39,10 @@ NAMES = {
     OLSON: "Olson and Ferkul, Evaluating Material Flammability in Microgravity and Martian Gravity Compared to the NASA Standard Normal Gravity Test, NTRS 20130010991",
     LUCI: "Ferkul et al., Lunar Combustion Investigation: Flammability Results from a Rotating Sounding Rocket, NTRS 20250010653 (abstract)",
     SAFFIRE6: "Urban et al., Preliminary Results from the Saffire VI Experiment, NTRS 20240002981 (abstract)",
+    SAFFIRE6_TEXT: "Urban et al., Preliminary Results from the Saffire VI Experiment, ICES-2024-365, NTRS 20240002981",
+    LUCI_SLIDES: "Ferkul et al., Lunar Combustion Investigation: Flammability Results from a Rotating Sounding Rocket, presentation, NTRS 20250010653",
+    LUNAR: "Ferkul, Kralik and Liao, Material Flammability at Lunar and Martian Gravity, extended abstract, NTRS 20260000646",
+    LUNAR_SLIDES: "Ferkul et al., Material Flammability at Lunar and Martian Gravity, presentation, NTRS 20260001966",
 }
 RESOURCE = {GUIDE: "R4", MIR: "R7", GLENN: "R2", FM2: "R2"}
 
@@ -88,6 +97,8 @@ CARDS = [
              {"kind": "model", "id": "lunar_buoyant_flow"},
              q(GUIDE, "In the low-flow conditions of microgravity or partial gravity, some materials are flammable at lower oxygen concentrations than in normal gravity", ""),
              q(LUCI, "the burn lasts for over two and a half minutes", "Fabric and an acrylic rod burning in simulated lunar gravity on a spinning rocket"),
+             q(LUNAR, "the crucial mechanism of buoyant oxygen entrainment at the flame base is still present, but at a slower rate", "NASA in 2026, on a marginal material on the Moon"),
+             {"kind": "data", "id": "luci_rates"},
          ]},
          {"side": "open", "title": "What nobody has measured yet", "items": [
              {"kind": "data", "id": "partial_gravity_rows"},
@@ -193,6 +204,54 @@ def data_items(out_dir: str) -> dict[str, dict]:
             out["saffire2_pairs"] = {"klass": "observed", "accession": "PSI-99", "table": t["artifact"], "ledger_seq": t["ledger_seq"], "sha256": t["sha256"],
                                      "text": "Saffire-II in PSI gives a microgravity and a 1 g result for %d samples in the same table. They are shown as NASA wrote them; the lost symbol in '?-g' is the micro sign." % len(pairs),
                                      "columns": want, "rows": pairs}
+    out.update(reported_items(out_dir))
+    return out
+
+
+def reported_items(out_dir: str) -> dict[str, dict]:
+    """Facts from reported.json and recorded.json, when this build has them: numbers NASA reported outside PSI, and one recording."""
+    out: dict[str, dict] = {}
+    path = os.path.join(out_dir, "reported.json")
+    if os.path.exists(path):
+        rp = json.load(open(path, encoding="utf-8"))
+        rows = rp["luci"]["rows"]
+        fb = next(r for r in rows if r["id"] == "fabric_base")
+        out["luci_rates"] = {"klass": "literature", "link": "/gaps",
+                             "text": "NASA's LUCI flight, in simulated lunar gravity: the flame base on the fabric moved at %g mm/s, against %g mm/s in the same test on Earth. "
+                                     "Slower, and it burned longer. Read from NASA's slides; the data are not in PSI." % (fb["lunar"], fb["earth"]),
+                             "columns": ["Sample", "Measured", "Lunar gravity, simulated", "On Earth", "Ratio on the slide"],
+                             "rows": [[r["sample"], r["measure"], "%g %s" % (r["lunar"], r["unit"]), "%g %s" % (r["earth"], r["unit"]), "%g" % r["ratio"]] for r in rows]}
+        tests = rp["fm2"]["tests"]
+        out["fm2_tests"] = {"klass": "literature", "link": "/gaps",
+                            "text": "NASA's plan for the Moon, from its 2026 presentation: %d tests of one fabric at %g psia, starting at %s%% oxygen."
+                                    % (len(tests), tests[0]["p_psia"], ", ".join("%g" % t["o2_pct"] for t in tests[:-1]) + " and %g" % tests[-1]["o2_pct"])}
+        sf = rp["saffire"]
+        hi, lo = max(r["o2_pct"] for r in sf["rows"]), min(r["o2_pct"] for r in sf["rows"])
+        out["saffire_conditions"] = {"klass": "literature", "link": "/gaps",
+                                     "text": "NASA's paper on Saffire IV to VI lists %d large burns of solid materials at %g%% to %g%% oxygen and %g to %g kPa. These tests are not in a PSI table."
+                                             % (len(sf["rows"]), lo, hi, min(r["p_kpa"] for r in sf["rows"]), max(r["p_kpa"] for r in sf["rows"])),
+                                     "columns": ["Test", "Material", "Oxygen, mol %", "Pressure, kPa"],
+                                     "rows": [[r["id"], r["material"], "%g" % r["o2_pct"], "%g" % r["p_kpa"]] for r in sf["rows"]]}
+        pm = [r for r in sf["rows"] if "PMMA" in r["material"]]
+        out["saffire_products"] = {"klass": "literature", "link": "/alarm",
+                                   "text": "In the two acrylic tests of Saffire VI, carbon monoxide at the far sensors rose by %s ppm and carbon dioxide by %s mmHg. NASA's limits in the same paper: %g ppm of carbon monoxide for 24 hours, "
+                                           "%g ppm for one hour, %g mmHg of carbon dioxide as a one-hour average. The highest temperature at the far sensors was %s °C."
+                                           % (" and ".join("%g" % r["co_ppm"] for r in pm), " and ".join("%g" % r["co2_mmhg"] for r in pm), sf["limits"]["co_24h_ppm"], sf["limits"]["co_1h_ppm"],
+                                              sf["limits"]["co2_1h_mmhg"], " and ".join("%g" % r["t_far_c"] for r in pm))}
+    path = os.path.join(out_dir, "recorded.json")
+    if os.path.exists(path):
+        rc = json.load(open(path, encoding="utf-8"))
+        sc, src = rc["derived"]["scatter"], rc["source"]
+        out["recorded_detector"] = {"klass": "derived", "accession": "PSI-100", "link": "/alarm",
+                                    "text": "Saffire-III, from the vehicle's own telemetry in PSI-100: the smoke detector's scatter reading peaked at %g after a smoke wire was powered and at %g while a sheet of fabric %s long burned. "
+                                            "It stayed above %g for %g s the first time and for %g s the second. The file gives no units and no alarm level."
+                                            % (sc["wire"]["peak"], sc["fire"]["peak"], rc["samples"][0].get("Sample Length", "").strip() or "about a metre", round(sc["mark"], 2), sc["wire"]["above_mark_s"], sc["fire"]["above_mark_s"]),
+                                    "ledger_seq": src["ledger_seq"], "sha256": src["sha256"]}
+        out["recorded_delay"] = {"klass": "derived", "accession": "PSI-100", "link": "/alarm",
+                                 "text": "In the same recording, with the cabin fan running, the detector's reading first exceeded its level of the minute before ignition %g s after the igniter fired, "
+                                         "was half-way to its peak after %g s, and peaked after %g s. The radiometers were back at baseline %g s after ignition."
+                                         % (sc["fire"]["first_above_before_s"], sc["fire"]["half_s"], sc["fire"]["peak_s"], rc["derived"]["flame"]["until_t"]),
+                                 "ledger_seq": src["ledger_seq"], "sha256": src["sha256"]}
     return out
 
 
@@ -275,7 +334,8 @@ def build(raw_dir: str, out_dir: str) -> dict:
     manifest = json.load(open(mpath, encoding="utf-8"))
     manifest["artifacts"].update(written)
     manifest["nasa"].update({"official_resources_used": sum(1 for r in res["items"] if r["in_ledger"] and r["used_in"]),
-                             "quotes": n_quotes, "quotes_verified": doc["quotes_verified"], "files_read": len(L.READ)})
+                             "quotes": manifest["nasa"].get("quotes", 0) + n_quotes, "quotes_verified": manifest["nasa"].get("quotes_verified", 0) + doc["quotes_verified"],
+                             "files_read": len(L.READ)})
     with open(mpath, "w", encoding="utf-8") as fh:
         json.dump(manifest, fh, indent=1)
     return {"quotes": n_quotes, "verified": doc["quotes_verified"], "problems": missing, "resources_used": manifest["nasa"]["official_resources_used"]}

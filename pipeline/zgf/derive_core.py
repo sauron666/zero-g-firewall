@@ -167,6 +167,39 @@ def table(entry: dict, b: bytes) -> dict:
     }
 
 
+def folder_of(acc: str, file_name: str) -> str:
+    """PSI names a file <accession>_<folder>_<name>; the folder is NASA's own category ("Raw Data", "Reports", ...)."""
+    rest = file_name[len(acc) + 1:] if file_name.startswith(acc + "_") else file_name
+    return rest.split("_", 1)[0] if "_" in rest else ""
+
+
+def held(entries: list[dict], by_key: dict, acc: str, limit: int = 40) -> tuple[list[dict], dict]:
+    """
+    What the ledger holds of one record: a count for every folder, and a receipt for each file that is neither
+    the experimental table nor raw data (reports, analysed data, readme files, presentations).
+    """
+    mine = [e for e in entries if e.get("kind") == "psi_file" and e.get("accession") == acc and by_key[e["key"]] is e]
+    folders: dict[str, dict] = {}
+    for e in mine:
+        f = folders.setdefault(folder_of(acc, str(e.get("file_name", ""))) or "Other", {"files": 0, "bytes": 0})
+        f["files"] += 1
+        f["bytes"] += e["size"]
+    docs = sorted((e for e in mine if e.get("role") != "experimental_table" and folder_of(acc, str(e.get("file_name", ""))) != "Raw Data"),
+                  key=lambda e: (folder_of(acc, e["file_name"]), e["file_name"]))
+    listed = [{"file": e.get("file_name"), "folder": folder_of(acc, e["file_name"]), "bytes": e["size"], **L.ref(e)} for e in docs[:limit]]
+    return listed, {"files": len(mine), "bytes": sum(e["size"] for e in mine), "folders": folders, "documents": len(docs), "documents_listed": len(listed)}
+
+
+def written_by(raw_dir: str) -> dict | None:
+    """The tool that wrote the cache, as its own report states it. The report is not part of the hash chain."""
+    path = os.path.join(raw_dir, "sync_report.json")
+    if not os.path.exists(path):
+        return None
+    with open(path, encoding="utf-8") as fh:
+        r = json.load(fh)
+    return {k: r.get(k) for k in ("tool", "version", "script_sha256", "started_utc", "finished_utc", "scope_note") if r.get(k) is not None}
+
+
 def slug(s: str) -> str:
     return re.sub(r"[^A-Za-z0-9]+", "_", s).strip("_")[:80]
 
@@ -203,8 +236,7 @@ def run(raw_dir: str, out_dir: str) -> dict:
             continue
         meta = json.loads(L.read(raw_dir, m_entry).decode("utf-8"))
         inv = investigation(meta, hit, m_entry)
-        inv["core_files"] = [{"file": e.get("file_name"), "bytes": e["size"], **L.ref(e)} for e in entries
-                             if e.get("kind") == "psi_file" and e.get("accession") == acc and e.get("selection") == "core" and by_key[e["key"]] is e]
+        inv["core_files"], inv["in_ledger"] = held(entries, by_key, acc)
         for e in entries:
             if e.get("kind") == "psi_file" and e.get("accession") == acc and e.get("role") == "experimental_table" and by_key[e["key"]] is e:
                 name = str(e.get("file_name", ""))
@@ -249,7 +281,8 @@ def run(raw_dir: str, out_dir: str) -> dict:
                               "first_utc": entries[0]["retrieved_at_utc"], "last_utc": entries[-1]["retrieved_at_utc"], "by_kind": kinds,
                               "used": sorted(L.READ), "not_in_cache": sum(1 for e in entries if not os.path.exists(os.path.join(raw_dir, e["local_path"]))),
                               "hash_rule": "entry_hash = SHA-256( prev_hash + the entry without entry_hash, as JSON with sorted keys and no spaces ); the first prev_hash is 64 zeros",
-                              "note": "Entries read by this build are marked. The others were fetched from NASA by the first run of the sync, which took more raw files than the site needs; they stay in the ledger and the site does not use them."}, "observed")
+                              "written_by": written_by(raw_dir),
+                              "note": "Entries read by this build are marked. The others are files of the same records (raw data, reports, analysed data) that no chart on this site reads yet; each has a hash, and each record's page lists what the ledger holds of it."}, "observed")
     old = os.path.join(out_dir, "ledger.json")
     if os.path.exists(old):
         os.remove(old)
