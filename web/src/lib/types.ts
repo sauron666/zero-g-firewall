@@ -357,3 +357,19 @@ export interface Passage {
   loc?: string;
 }
 export interface IndexDoc { klass: Klass; note: string; count: number; chunks: Passage[] }
+
+/** falsify.json: conclusions set against the conditions under which they fail. */
+export interface FalsifyClaim {
+  id: string;
+  claim: string;
+  origin: string;
+  verdict: "holds" | "limited" | "contradicted" | "untested";
+  verdict_label: string;
+  summary: string;
+  scope: string[];
+  holds: MythItem[];
+  fails: { title: string; items: MythItem[] }[];
+  untested: MythItem[];
+  next: MythItem[];
+}
+export interface FalsifyDoc { klass: Klass; note: string; quotes: number; quotes_verified: number; verdicts: Record<string, string>; items: FalsifyClaim[] }

@@ -14,7 +14,7 @@ const SIDE: Record<MythGroup["side"], { label: string; icon: React.ReactNode }> 
   open: { label: "Open", icon: <span aria-hidden="true" style={{ fontWeight: 700 }}>?</span> },
 };
 
-function Item({ it }: { it: MythItem }) {
+export function Item({ it }: { it: MythItem }) {
   if (it.kind === "quote") {
     const loc = it.ref.loc ? `, ${it.ref.loc}` : "";
     return (
@@ -47,7 +47,7 @@ function Item({ it }: { it: MythItem }) {
         <KlassBadge k={it.klass} />
         {it.accession && <a href={href(`/evidence/${it.accession}`)}>{it.accession}</a>}
         {(it.also ?? []).map((a) => <a key={a} href={href(`/evidence/${a}`)}>{a}</a>)}
-        {it.link && <a href={href(it.link)}>{it.link === "/physics" ? "See the model" : "See the map"}</a>}
+        {it.link && <a href={href(it.link)}>{it.link === "/physics" ? "See the model" : it.link === "/envelope" ? "See the map" : it.link === "/data" ? "See the report" : "See the records"}</a>}
         {it.sha256 && it.ledger_seq != null && it.accession && <SourceBtn title={`${it.accession}: table`} sref={{ ledger_seq: it.ledger_seq, sha256: it.sha256, url: `https://psi.nasa.gov/physci/repo/data/investigations/${it.accession}`, accession: it.accession }} label="receipt" />}
       </div>
     </div>

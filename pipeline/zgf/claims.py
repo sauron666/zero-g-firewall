@@ -128,9 +128,10 @@ CARDS = [
 
 USES = {      # official resource -> where the site uses it (only pages that exist)
     "R1": [("/evidence", "every investigation card and table"), ("/envelope", "every point of the atmosphere map"), ("/data", "the curator report and the model check"), ("/ledger", "the first entry of the ledger")],
-    "R2": [("/myths", "the caution about the 1 g test, and the FM2 objective")],
-    "R4": [("/myths", "the three misconceptions and most of the evidence against them")],
-    "R7": [("/myths", "the Mir fire: a flame fed by its own oxygen")],
+    "R2": [("/myths", "the caution about the 1 g test, and the FM2 objective"), ("/falsify", "what would test each conclusion next")],
+    "R4": [("/myths", "the three misconceptions and most of the evidence against them"), ("/falsify", "the conditions under which each conclusion fails"), ("/ask", "153 passages of the guide, searchable")],
+    "R7": [("/myths", "the Mir fire: a flame fed by its own oxygen"), ("/falsify", "a case where stopping the flow could not have starved the flame")],
+    "R9": [("/falsify", "a detector built to tell combustion particles from dust")],
 }
 
 
@@ -197,29 +198,40 @@ def model_items() -> dict[str, dict]:
                                            "A bound from a formula, not a measurement." % (lo * 100, hi * 100)}}
 
 
+class Resolver:
+    """Turns a declared evidence item into what the site shows: a checked quotation, a computed fact, or a labelled reading."""
+
+    def __init__(self, lib: Library, by_key: dict, data: dict, model: dict):
+        self.lib, self.by_key, self.data, self.model = lib, by_key, data, model
+        self.missing: list[str] = []
+        self.n_quotes = 0
+
+    def __call__(self, item: dict) -> dict | None:
+        if item["kind"] == "quote":
+            if item["doc"] not in self.by_key:
+                self.missing.append("document not in the ledger: %s" % item["doc"])
+                return None
+            where = self.lib.find(item["doc"], item["quote"])
+            self.n_quotes += 1
+            if not where:
+                self.missing.append("not found in %s: %s" % (item["doc"], item["quote"][:70]))
+            return {"kind": "quote", "quote": item["quote"], "says": item["says"], "quote_verified": bool(where), "source": NAMES[item["doc"]],
+                    "resource": RESOURCE.get(item["doc"]), "ref": self.lib.ref(item["doc"], where)}
+        if item["kind"] == "reading":
+            return {"kind": "reading", "text": item["text"]}
+        if item["kind"] == "fact":
+            return {"kind": "data", **{k: v for k, v in item.items() if k != "kind"}}
+        src = (self.data if item["kind"] == "data" else self.model).get(item["id"])
+        return {"kind": item["kind"], **src} if src else None
+
+
 def build(raw_dir: str, out_dir: str) -> dict:
     entries = L.load(raw_dir)
     by_key = L.latest(entries)
     lib = Library(raw_dir, by_key)
     data, model = data_items(out_dir), model_items()
-    missing, n_quotes = [], 0
-
-    def resolve(item: dict) -> dict | None:
-        nonlocal n_quotes
-        if item["kind"] == "quote":
-            if item["doc"] not in by_key:
-                missing.append("document not in the ledger: %s" % item["doc"])
-                return None
-            where = lib.find(item["doc"], item["quote"])
-            n_quotes += 1
-            if not where:
-                missing.append("not found in %s: %s" % (item["doc"], item["quote"][:70]))
-            return {"kind": "quote", "quote": item["quote"], "says": item["says"], "quote_verified": bool(where), "source": NAMES[item["doc"]],
-                    "resource": RESOURCE.get(item["doc"]), "ref": lib.ref(item["doc"], where)}
-        if item["kind"] == "reading":
-            return {"kind": "reading", "text": item["text"]}
-        src = (data if item["kind"] == "data" else model).get(item["id"])
-        return {"kind": item["kind"], **src} if src else None
+    resolve = Resolver(lib, by_key, data, model)
+    missing = resolve.missing
 
     cards = []
     for c in CARDS:
@@ -231,6 +243,7 @@ def build(raw_dir: str, out_dir: str) -> dict:
                 groups.append({"side": g["side"], "title": g["title"], "items": items})
         cards.append({"id": c["id"], "n": c["n"], "myth": c["myth"], "myth_verified": bool(where), "myth_ref": lib.ref(GUIDE, where), "question": c["question"],
                       "answer": c["answer"], "groups": groups})
+    n_quotes = resolve.n_quotes
     doc = {"klass": "literature",
            "note": "Quotations are checked against the stored NASA documents at every build. The short answers and the sentences marked as readings are this project's own; they are not NASA conclusions and not operational advice.",
            "source": NAMES[GUIDE], "quotes": n_quotes, "quotes_verified": n_quotes - sum(1 for m in missing if m.startswith("not found")), "items": cards}
