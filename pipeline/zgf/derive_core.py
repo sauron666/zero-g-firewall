@@ -130,6 +130,8 @@ def investigation(meta: dict, hit: dict, entry: dict) -> dict:
                                           ("hypothesis", "hypothesis"), ("impacts", "researchImpacts"), ("hardware", "experimentHardware"),
                                           ("doi", "doi"), ("license", "licenseIdentifier"), ("psi_version", "version"),
                                           ("publications", "publications"), ("files", "added"))},
+        "mission": meta.get("missionName") if isinstance(meta.get("missionName"), str) else "",
+        "proposal_title": meta.get("proposalTitle") if isinstance(meta.get("proposalTitle"), str) else "",
         "psi_url": "https://psi.nasa.gov/physci/repo/data/investigations/%s" % acc,
     }
 
@@ -148,6 +150,7 @@ def table(entry: dict, b: bytes) -> dict:
     rows = list(csv.reader(io.StringIO(text)))
     header = [h.strip() for h in rows[0]] if rows else []
     data = [[c.strip() for c in r] for r in rows[1:] if any(c.strip() for c in r)]
+    n_empty = sum(1 for r in rows[1:] if not any(c.strip() for c in r))
     width = max([len(header)] + [len(r) for r in data]) if rows else 0
     findings = []
     if enc != "utf-8":
@@ -156,13 +159,11 @@ def table(entry: dict, b: bytes) -> dict:
         findings.append({"kind": "ragged_rows", "detail": "%d data rows differ in length from the header" % sum(len(r) != len(header) for r in data)})
     if len(set(header)) != len(header):
         findings.append({"kind": "duplicate_headers", "detail": "some column headers repeat"})
-    if any(len(h) == 40 for h in header):
-        findings.append({"kind": "truncated_headers", "detail": "%d headers are exactly 40 characters long, which suggests truncation" % sum(len(h) == 40 for h in header)})
     return {
         "accession": entry.get("accession"), "file": entry.get("file_name"), "sha256": entry["sha256"],
         "ledger_seq": entry["seq"], "url": entry["url"], "psi_file_version": entry.get("psi_file_version"),
         "encoding": enc, "count_rule": "rows after the header that have at least one non-empty cell",
-        "n_rows": len(data), "n_cols": width, "columns": header, "rows": data, "findings": findings,
+        "n_rows": len(data), "n_lines": max(len(rows) - 1, 0), "n_empty_lines": n_empty, "n_cols": width, "columns": header, "rows": data, "findings": findings,
     }
 
 
@@ -202,6 +203,8 @@ def run(raw_dir: str, out_dir: str) -> dict:
             continue
         meta = json.loads(L.read(raw_dir, m_entry).decode("utf-8"))
         inv = investigation(meta, hit, m_entry)
+        inv["core_files"] = [{"file": e.get("file_name"), "bytes": e["size"], **L.ref(e)} for e in entries
+                             if e.get("kind") == "psi_file" and e.get("accession") == acc and e.get("selection") == "core" and by_key[e["key"]] is e]
         for e in entries:
             if e.get("kind") == "psi_file" and e.get("accession") == acc and e.get("role") == "experimental_table" and by_key[e["key"]] is e:
                 name = str(e.get("file_name", ""))
@@ -232,8 +235,24 @@ def run(raw_dir: str, out_dir: str) -> dict:
     resources[0]["used_in"] = [{"page": "/evidence", "what": "every investigation card and table"}]
     put("official_resources.json", {"klass": "literature", "note": "used_in and takeaways are filled as features that use each resource are built; "
                                     "the coverage counter counts a resource only when it has a receipt and at least one use", "items": resources}, "literature")
-    put("ledger.json", {"klass": "observed", "chain_ok": True, "head": entries[-1]["entry_hash"], "entries": L.public_view(entries)}, "observed")
-
+    with open(os.path.join(raw_dir, "ledger", "ledger.jsonl"), "rb") as fh:
+        raw_ledger = fh.read()
+    with open(os.path.join(out_dir, "ledger.jsonl"), "wb") as fh:
+        fh.write(raw_ledger)
+    written["ledger.jsonl"] = {"sha256": hashlib.sha256(raw_ledger).hexdigest(), "bytes": len(raw_ledger), "klass": "observed"}
+    kinds: dict[str, dict] = {}
+    for e in entries:
+        k = kinds.setdefault(e["kind"], {"entries": 0, "bytes": 0})
+        k["entries"] += 1
+        k["bytes"] += e["size"]
+    put("ledger_index.json", {"klass": "observed", "chain_ok": True, "head": entries[-1]["entry_hash"], "entries": len(entries),
+                              "first_utc": entries[0]["retrieved_at_utc"], "last_utc": entries[-1]["retrieved_at_utc"], "by_kind": kinds,
+                              "used": sorted(L.READ), "not_in_cache": sum(1 for e in entries if not os.path.exists(os.path.join(raw_dir, e["local_path"]))),
+                              "hash_rule": "entry_hash = SHA-256( prev_hash + the entry without entry_hash, as JSON with sorted keys and no spaces ); the first prev_hash is 64 zeros",
+                              "note": "Entries read by this build are marked. The others were fetched from NASA by the first run of the sync, which took more raw files than the site needs; they stay in the ledger and the site does not use them."}, "observed")
+    old = os.path.join(out_dir, "ledger.json")
+    if os.path.exists(old):
+        os.remove(old)
     in_scope = [i for i in investigations if i.get("scope", {}).get("in_scope")]
     nasa = {
         "synced_at_utc": max(e["retrieved_at_utc"] for e in entries),
@@ -248,6 +267,7 @@ def run(raw_dir: str, out_dir: str) -> dict:
     manifest.update({"schema": SCHEMA, "brand": BRAND, "team": TEAM, "mascot": MASCOT,
                      "built_at_utc": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "nasa": nasa})
     manifest.setdefault("artifacts", {}).update(written)
+    manifest["artifacts"].pop("ledger.json", None)
     with open(mpath, "w", encoding="utf-8") as fh:
         json.dump(manifest, fh, indent=1)
     return {"nasa": nasa, "artifacts": sorted(written)}

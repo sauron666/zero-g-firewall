@@ -1,6 +1,6 @@
 # Implementation status
 
-Updated: 14 November 2026, 13:07 Sofia time. Kept truthful: nothing is listed as working without a passing test or a visible result.
+Updated: 14 November 2026, 13:24 Sofia time. Kept truthful: nothing is listed as working without a passing test or a visible result.
 
 ## Working
 
@@ -8,6 +8,12 @@ Updated: 14 November 2026, 13:07 Sofia time. Kept truthful: nothing is listed as
 |---|---|
 | NASA sync script (`pipeline/sync_nasa.py`, 1.1) | Logic tested against a local mock of the endpoints: version fallback, signed links, caching, ledger chain, core selection, budgets, interrupt, pack-only. Run against NASA by the team on a laptop: version 1.0 worked but fetched far too many small files (over 300 MB); 1.1 limits the core set. **The cloud build environment itself has no route to nasa.gov.** |
 | Ledger tools and derivation stage 1 (`pipeline/zgf/ledger.py`, `derive_core.py`) | Chain verification, hash check on every read, investigations, tables as text, resource registry, public ledger, manifest. 3 tests on a throw-away fixture, including a changed byte and an edited ledger line. Run on the real cache of 14 November: 1,219 ledger entries with an intact chain, 26 investigations (24 in scope, 2 excluded with reasons), 25 experimental tables parsed (2,092 rows; 2,009 in scope). |
+| Derivation stage 2 (`pipeline/zgf/derive_evidence.py`) | Column profiles (what varied, what stayed constant), 40 curator findings by stated rules, 887 atmosphere points (746 with pressure), model check on 587 rows. 10 tests on synthetic tables. |
+| Flame model checked against NASA | Stoichiometric equilibrium temperature against NASA's own `Tad` column in four tables (PSI-10, PSI-159): mean difference 2.1 K over 587 rows; `Zst` to 1e-4. Found on the way: PSI-159's `Tad` matches a one-atmosphere calculation, not the row's pressure. |
+| Investigations page and record cards | 26 records with search and filters; each card shows NASA's text with receipts, what varied and what stayed constant, the table as written with row receipts, curator notes, files, people, publications. |
+| Atmosphere map | Real test rows in oxygen against pressure, crew atmospheres, the normoxic curve, historical points, a strip for rows without pressure, and counts of rows near each crew atmosphere. |
+| Evidence ledger page | Lists all 1,219 entries; re-computes the hash chain in the browser from the raw ledger (tested against the real ledger) and checks every data file against the manifest. |
+| Data and models page | Report for the PSI curators, the model check with a parity plot, and the list of data files with hashes. |
 | Closed-form physics and equilibrium thermochemistry | 16 Python tests reproduce the check values (LUCI spin, buoyant flow ranges, Coriolis fractions, normoxic curve, cabin bounds, methane flame temperatures). |
 | Tracer-transport solver, browser and Python | The TypeScript solver matches the Python reference on three golden cases to 1e-9; mass balance, positivity, walls and open ends are tested. 20 TypeScript tests. |
 | Model artifacts (`web/public/data/v1/model/*.json`) | Built by `pipeline/build_models.py`; listed with SHA-256 in `manifest.json`. |
@@ -19,7 +25,7 @@ Updated: 14 November 2026, 13:07 Sofia time. Kept truthful: nothing is listed as
 
 ## Data is in, pages not built yet (nothing is shown in their place)
 
-Investigations and cards, what varied, ranking with stability, compare, atmosphere map with real test points, gaps and plans, Myth vs Evidence with verified quotations, Official Resources Coverage, incident timeline, Earth applications, ledger page, validation of the flame model against NASA's own columns, tidy exports, curator report.
+Ranking with stability, compare, gaps and plans, Myth vs Evidence with verified quotations, Official Resources Coverage, incident timeline, Earth applications, sensor inventory, tidy CSV exports.
 
 ## Next in the build order
 

@@ -4,7 +4,7 @@
  */
 import type { Klass } from "./klass";
 
-/** Where a value, a row or a sentence comes from. Resolves to an entry of ledger.json. */
+/** Where a value, a row or a sentence comes from. Resolves to an entry of ledger.jsonl. */
 export interface SourceRef {
   ledger_seq: number;
   sha256: string;
@@ -78,6 +78,9 @@ export interface Investigation {
   derivations: Record<string, string>;   // derived field -> the rule that produced it
   refs: Record<string, SourceRef>;       // field -> where it came from
   psi_url: string;
+  mission?: string;
+  proposal_title?: string;
+  core_files?: (SourceRef & { file: string; bytes: number })[];
   missing?: string;
 }
 
@@ -100,6 +103,8 @@ export interface TableDoc {
   encoding: string;
   count_rule: string;
   n_rows: number;
+  n_lines?: number;
+  n_empty_lines?: number;
   n_cols: number;
   columns: string[];
   rows: string[][];
@@ -117,32 +122,168 @@ export interface OfficialResource {
   takeaways: { text: string; ref: SourceRef; quote_verified?: boolean }[];
 }
 
+/** One line of ledger.jsonl, exactly as sync_nasa.py wrote it. */
 export interface LedgerEntry {
   seq: number;
+  key: string;
   kind: string;
   url: string;
+  final_url?: string;
   sha256: string;
   size: number;
+  status?: number;
+  local_path?: string;
   retrieved_at_utc: string;
   entry_hash: string;
   prev_hash: string;
   accession?: string;
   file_name?: string;
   role?: string;
+  selection?: string;
   doc_id?: string;
   resource_id?: string;
+  official_resource?: string;
+  linked_from?: string;
   ntrs_id?: string;
   http_date?: string;
   last_modified?: string;
+  etag?: string;
   content_type?: string;
   psi_file_version?: number;
   psi_study_version?: number;
   doi?: string;
   term?: string;
 }
-export interface LedgerDoc {
+export interface LedgerIndex {
   klass: Klass;
   chain_ok: boolean;
   head: string;
-  entries: LedgerEntry[];
+  entries: number;
+  first_utc: string;
+  last_utc: string;
+  by_kind: Record<string, { entries: number; bytes: number }>;
+  used: number[];
+  not_in_cache: number;
+  hash_rule: string;
+  note: string;
+}
+
+/** profiles.json: what each column holds, and so what varied and what stayed constant. */
+export interface ColumnProfile {
+  name: string;
+  filled: number;
+  missing: number;
+  distinct: number;
+  kind: "number" | "quantity" | "text" | "empty";
+  role: "varied" | "constant" | "constant_where_given" | "identifier" | "when" | "notes" | "empty";
+  min?: number;
+  max?: number;
+  units?: string[];
+  top: [string, number][];
+}
+export interface TableProfile {
+  accession: string;
+  file: string;
+  n_rows: number;
+  columns: ColumnProfile[];
+  varied: string[];
+  constant: [string, string][];
+  rule: string;
+}
+export interface ProfilesDoc {
+  klass: Klass;
+  items: Record<string, TableProfile>;
+}
+
+/** curator_report.json: data-quality findings, each found by a stated rule. Nothing is corrected. */
+export interface CuratorFinding {
+  id: string;
+  rule: string;
+  level: "note" | "caution";
+  accession: string;
+  also?: string[];
+  file?: string;
+  table?: string;
+  column?: string;
+  rows?: number[];
+  n_rows?: number;
+  detail: string;
+  handling: string;
+  found_by: string;
+  in_scope: boolean;
+}
+export interface CuratorDoc {
+  klass: Klass;
+  note: string;
+  count: number;
+  by_rule: Record<string, number>;
+  items: CuratorFinding[];
+}
+
+/** envelope.json: every table row that states oxygen (and pressure, where the table gives it). */
+export interface EnvelopePoint {
+  s: string;           // series id
+  a: string;           // accession
+  t: string;           // table artifact
+  r: number;           // row index
+  x: number;           // oxygen mole fraction
+  p: number | null;    // kPa, null when the table gives no pressure
+  f: string;           // fuel or material, as written
+  o?: string;          // outcome, as written
+  approx?: string;     // the cell text, when the oxygen value was read from wording such as "~ 21.5"
+}
+export interface EnvelopeSeries {
+  id: string;
+  kind: "droplet" | "gas" | "solid";
+  gravity: "micro";
+  accessions: string[];
+  n: number;
+  n_with_pressure: number;
+  no_oxygen: number;
+  pressure_not_usable: number;
+  pressure_in_table: boolean;
+  oxygen_from: string;
+  oxygen_factor: number;
+  pressure_from: string | null;
+  pressure_factor: number | null;
+}
+export interface EnvelopeDoc {
+  klass: Klass;
+  note: string;
+  near_rule: string;
+  series: EnvelopeSeries[];
+  points: EnvelopePoint[];
+  near_presets: { id: string; label: string; x_o2: number; p_kpa: number; n_near: number; by_kind: Record<string, number> }[];
+  gravity_counts: { micro: number; partial: number; note: string };
+}
+
+/** validation.json: the equilibrium model against NASA's own Tad and Zst columns. */
+export interface ErrStats {
+  n: number;
+  mean_abs?: number;
+  median_abs?: number;
+  max_abs?: number;
+  bias?: number;
+}
+export interface ValidationDoc {
+  klass: Klass;
+  title: string;
+  method: string;
+  engine: string;
+  species: string[];
+  limits: string;
+  tables: {
+    accession: string;
+    file: string;
+    table: string;
+    n_rows: number;
+    n_compared: number;
+    skipped: Record<string, number>;
+    Tad: { row_pressure: ErrStats; one_atmosphere: ErrStats; closer: "row_pressure" | "one_atmosphere" };
+    Zst: { n: number; mean_abs?: number; max_abs?: number };
+    by_fuel: { fuel: string; row_pressure: ErrStats; one_atmosphere: ErrStats }[];
+    conditions: string;
+  }[];
+  points: { a: string; t: string; r: number; f: string; p: number; T: number; Tr: number; Ta: number; Z: number; Zm: number }[];
+  overall: { closer_convention_per_table: ErrStats; row_pressure: ErrStats; one_atmosphere: ErrStats };
 }

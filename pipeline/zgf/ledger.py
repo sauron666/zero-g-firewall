@@ -43,8 +43,12 @@ def latest(entries: list[dict]) -> dict[str, dict]:
     return {e["key"]: e for e in entries}
 
 
+READ: set[int] = set()      # sequence numbers of the entries a build has read
+
+
 def read(raw_dir: str, entry: dict) -> bytes:
     """Bytes of a stored file, checked against the hash recorded when it was fetched."""
+    READ.add(entry["seq"])
     path = os.path.join(raw_dir, entry["local_path"])
     if not os.path.exists(path):
         raise LedgerError("file missing from the raw cache: %s" % entry["local_path"])
@@ -53,16 +57,6 @@ def read(raw_dir: str, entry: dict) -> bytes:
     if sha256(b) != entry["sha256"]:
         raise LedgerError("file differs from its ledger entry: %s" % entry["local_path"])
     return b
-
-
-PUBLIC_FIELDS = ("seq", "kind", "url", "sha256", "size", "content_type", "http_date", "last_modified",
-                 "retrieved_at_utc", "accession", "file_name", "role", "psi_file_version", "psi_study_version",
-                 "doi", "resource_id", "doc_id", "ntrs_id", "term", "entry_hash", "prev_hash")
-
-
-def public_view(entries: list[dict]) -> list[dict]:
-    """What the site shows on the ledger page and in receipts."""
-    return [{k: e[k] for k in PUBLIC_FIELDS if k in e and e[k] not in ("", None)} for e in entries]
 
 
 def ref(entry: dict, **extra) -> dict:

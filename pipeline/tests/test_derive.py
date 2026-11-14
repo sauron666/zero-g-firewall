@@ -67,7 +67,14 @@ class Derive(unittest.TestCase):
             t = json.load(open(os.path.join(out, a["tables"][0]["artifact"]), encoding="utf-8"))
             self.assertEqual((t["n_rows"], t["n_cols"], t["encoding"]), (2, 3, "windows-1252"))
             self.assertEqual(t["rows"][0][2], "–")                    # the 'no value' dash stays a dash, never a zero
-            self.assertTrue(any(f["kind"] == "truncated_headers" for f in t["findings"]))
+            self.assertTrue(any(f["kind"] == "encoding" for f in t["findings"]))
+            idx = json.load(open(os.path.join(out, "ledger_index.json"), encoding="utf-8"))
+            self.assertEqual(idx["entries"], len(open(os.path.join(out, "ledger.jsonl"), encoding="utf-8").read().splitlines()))
+            self.assertIn(a["tables"][0]["ledger_seq"], idx["used"])           # the build records which files it read
+            from zgf import derive_evidence
+            ev = derive_evidence.run(out)                                       # the second stage runs on the first stage's output
+            self.assertIn("encoding", ev["findings"])
+            self.assertTrue(os.path.exists(os.path.join(out, "profiles.json")) and os.path.exists(os.path.join(out, "envelope.json")))
             self.assertEqual(res["nasa"]["table_rows"], 2); self.assertEqual(res["nasa"]["investigations_excluded"], 1)
             r = json.load(open(os.path.join(out, "official_resources.json"), encoding="utf-8"))["items"]
             self.assertTrue(r[3]["in_ledger"]); self.assertFalse(r[4]["in_ledger"])

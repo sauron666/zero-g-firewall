@@ -8,7 +8,7 @@ Stops with an error if the ledger chain is broken or a file no longer matches it
 """
 import argparse, json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from zgf import derive_core
+from zgf import derive_core, derive_evidence
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ap = argparse.ArgumentParser()
@@ -16,4 +16,5 @@ ap.add_argument("--raw", default=os.path.join(ROOT, "nasa_raw"))
 ap.add_argument("--out", default=os.path.join(ROOT, "web", "public", "data", "v1"))
 a = ap.parse_args()
 res = derive_core.run(a.raw, a.out)
-print(json.dumps(res, indent=1))
+res["evidence"] = derive_evidence.run(a.out)
+print(json.dumps(res, indent=1, default=str))

@@ -59,6 +59,11 @@ export interface Manifest {
     official_resources_total: number;
     ledger_head: string;
     ledger_chain_ok: boolean;
+    curator_findings?: number;
+    envelope_points?: number;
+    envelope_points_with_pressure?: number;
+    validation_rows?: number | null;
+    validation_mean_abs_K?: number | null;
   };
   artifacts: Record<string, { sha256: string; bytes: number; klass: string }>;
 }
@@ -68,7 +73,8 @@ export function fmtBytes(n: number): string {
   if (n < 1e3) return `${n} B`;
   if (n < 1e6) return `${(n / 1e3).toFixed(1)} kB`;
   if (n < 1e9) return `${(n / 1e6).toFixed(1)} MB`;
-  return `${(n / 1e9).toFixed(2)} GB`;
+  if (n < 1e12) return `${(n / 1e9).toFixed(1)} GB`;
+  return `${(n / 1e12).toFixed(2)} TB`;
 }
 export function fmtUtc(iso: string): string {
   const d = new Date(iso);

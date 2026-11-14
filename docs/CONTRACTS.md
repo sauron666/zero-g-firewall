@@ -24,7 +24,7 @@ Read files only through `ledger.read(raw_dir, entry)`: it re-checks the hash.
 - File records (`experimentalTable[]`, `added[]`): `file_name`, `file_size`, `version`, `remote_path` (`/Home/psi-data/<ACC>/<folder>/<file>`), `s3_path`, `restricted`, `visible`, sometimes `psi_legacy`, `subcategory`.
 - Contact e-mail addresses are in the records. They are not republished in our artifacts.
 
-## Artifacts that exist (stage 1)
+## Artifacts that exist
 
 | File | Type | Class | Notes |
 |---|---|---|---|
@@ -32,7 +32,11 @@ Read files only through `ledger.read(raw_dir, entry)`: it re-checks the hash.
 | `investigations.json` | `InvestigationsDoc` | observed | one item per search hit; `scope` says which are excluded and why; `refs` per field; `derivations` names each rule |
 | `tables/index.json`, `tables/<ACC>__<file>.json` | `TableSummary[]`, `TableDoc` | observed | cells are text exactly as in the file; row index is the row identity; `findings` feed the curator report |
 | `official_resources.json` | `OfficialResource[]` | literature | `used_in` and `takeaways` are filled as features use each resource; the "10 of 10" counter counts a resource only with a receipt and at least one use |
-| `ledger.json` | `LedgerDoc` | observed | public view of the ledger |
+| `ledger.jsonl`, `ledger_index.json` | `LedgerEntry` per line, `LedgerIndex` | observed | the raw ledger exactly as the sync wrote it (the browser re-computes the chain from it, see `lib/ledger.ts`); the index lists the head, counts and the entries this build read |
+| `profiles.json` | `ProfilesDoc` | derived | per table and column: filled, distinct, range, role (varied, constant, identifier, when, notes). This is "what varied, what stayed constant" |
+| `curator_report.json` | `CuratorDoc` | derived | findings by stated rule, each with table, column and rows; hand notes carry the cells they rest on and vanish if those cells change |
+| `envelope.json` | `EnvelopeDoc` | observed | one point per table row that states oxygen; `p` is null when the table gives no pressure (never assumed); `near_presets` counts rows near each crew atmosphere |
+| `validation.json` | `ValidationDoc` | model | equilibrium model against NASA's `Tad` and `Zst` (PSI-10, PSI-159), per row, at the row's pressure and at one atmosphere |
 | `model/atmospheres.json`, `scaling.json`, `platform.json`, `cabin.json` | see `pages/Physics.tsx` | model | built by `build_models.py` |
 
 ## Artifacts to add (names are fixed; shapes are yours to define, then record here)
@@ -40,15 +44,11 @@ Read files only through `ledger.read(raw_dir, entry)`: it re-checks the hash.
 | File | Purpose |
 |---|---|
 | `tables_canonical/<ACC>.json` | typed columns with units, conversions and the original header for each (FLEX: O2, N2, CO2 mole fractions; mmHg to kPa; burning-rate constant in mm²/s; "no value" stays null) |
-| `varied.json` | per investigation: which variables varied, which stayed constant, ranges, tested combinations against the possible grid |
-| `envelope.json` | one point per test row that has oxygen fraction and pressure: `x_o2`, `p_kpa`, `flow_cm_s`, gravity, fuel, `ref` |
 | `rank_features.json`, `rank_stability.json` | per investigation and mission lens: factor scores with the matched and unmatched items; share of seeded weight perturbations that keep it in the top five |
 | `gaps.json`, `planned_experiments.json` | untested regions; gap-to-plan map |
 | `sensors.json`, `hardware.json` | sensor and measurement inventory; hardware families |
 | `literature/passages.json` | text per page or section of each stored document, with `doc_id`, page, `sha256` |
 | `myths.json`, `incidents.json`, `earth_applications.json`, `detector_lineage.json`, `playbooks.json`, `matrix.json` | content built from the literature layer; every quotation carries `quote_verified` |
-| `validation/thermo.json` | model against NASA's `Tad` and `Zst` columns (PSI-10, PSI-159): per row and summary statistics |
-| `curator_report.json` | findings for PSI curators, each with file and location |
 | `index.json` | retrieval chunks for the evidence engine: `id`, `text`, `klass`, `ref` |
 | `trust/scenarios/*.json`, `trust/scorecard.json`, `eval/scorecard.json` | alarm scenarios and scorecards (synthetic) |
 | `ledger/release.sig`, `ledger/pubkey` | signed release of the manifest (Ed25519) |

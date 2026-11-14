@@ -5,6 +5,7 @@ import { useData, fmtUtc } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
 import { useWidth } from "../lib/hooks";
 import { useReceipt } from "../components/Receipt";
+import { ValidationPanel } from "../components/ValidationPanel";
 import { G0, cabinBound, centripetal, coriolisFraction, gravityGradient, omega } from "../physics/scaling";
 
 interface Atm {
@@ -265,12 +266,7 @@ export function Physics() {
         </div>
       </section>
 
-      <section className="empty">
-        <p className="empty__title">Checked against NASA's own numbers: waiting for the NASA sync</p>
-        <p style={{ marginTop: 8, maxWidth: "74ch" }}>
-          Two PSI tables (ACME Flame Design and CFI-G) carry NASA's computed flame temperature and stoichiometric mixture fraction for every test. Once the tables are fetched, this model is run on each row and the differences are shown here with the number of rows and the error.
-        </p>
-      </section>
+      <ValidationPanel />
     </div>
   );
 }
