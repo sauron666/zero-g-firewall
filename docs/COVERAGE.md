@@ -1,14 +1,14 @@
 # Coverage of the plan, feature by feature
 
-Checked on 14 November 2026 at 15:24 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
+Checked on 14 November 2026 at 15:27 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
 
 | Priority | Features | Done | Partial | Not built |
 |---|---|---|---|---|
-| P0 | 28 | 22 | 6 | 0 |
+| P0 | 28 | 23 | 5 | 0 |
 | P1 | 59 | 35 | 8 | 16 |
-| P2 | 38 | 1 | 10 | 27 |
+| P2 | 38 | 2 | 9 | 27 |
 | P3 | 5 | 0 | 0 | 5 |
-| All | 130 | 58 | 24 | 48 |
+| All | 130 | 60 | 22 | 48 |
 
 ## Definition of done (specification, section 0)
 
@@ -142,7 +142,7 @@ Checked on 14 November 2026 at 15:24 Sofia time against the 130 features of the 
 | I01 | P0 | done | Mission Overview with real counts only |  |
 | I02 | P0 | **partial** | About, Methods, Limitations, Scope, AI disclosure and Sources pages | Method and limits page with classes, limits and AI use; sources are on the Incidents page; no separate scope page |
 | I03 | P0 | done | Downloads with a data dictionary | Downloads on the Data page: 22 tidy tables, long file, conditions file, data dictionary, column map |
-| I04 | P0 | **partial** | Offline mode | runs with no key and no server; no offline cache for a second visit |
+| I04 | P0 | done | Offline mode | a service worker keeps the shell, the loaded scripts and fonts and every data file; tested by a second visit with the server stopped (home, an answer, a record) |
 | I05 | P1 | **not built** | English first |  |
 | I06 | P1 | **not built** | Demo mode with separately labelled real-data and synthetic flows |  |
 | I07 | P2 | **not built** | Glossary |  |
@@ -156,7 +156,7 @@ Checked on 14 November 2026 at 15:24 Sofia time against the 130 features of the 
 | K02 | P1 | **partial** | Hash-chained append-only log of ingest and transform events | the chain covers every fetch; transform steps are not logged |
 | K03 | P1 | **not built** | Signed release bundle (Ed25519), public key published, verification in the browser |  |
 | K04 | P1 | done | Provenance receipt on every chart and answer | receipts on map points, table rows, quotations, passages, model rows |
-| K05 | P2 | **partial** | Tamper demonstration | tested in code (a changed byte, a removed entry); no button on the page |
+| K05 | P2 | done | Tamper demonstration | three buttons on the ledger page change a copy in memory (one character, a removed entry, a forged entry with its hash recomputed) and show where the chain breaks |
 | K06 | P2 | **partial** | Reproducibility manifest (code version, parameters, model versions) | manifest with hashes, engine and species lists |
 | L01 | P0 | done | Tidy, unit-normalised, ML-ready exports with dictionary and provenance | tidy CSV per table, long format, conditions of 887 tests, dictionary, provenance on every row |
 | L02 | P1 | **not built** | Scenario → FDS input template (gravity vector, ambient oxygen, pressure, ventilation), labelled untested unless run |  |

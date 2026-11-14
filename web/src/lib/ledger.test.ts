@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { canonicalBody, parseLedger, verifyChain } from "./ledger";
+import { canonicalBody, parseLedger, tamper, verifyChain } from "./ledger";
 
 // the ledger the team's sync wrote on 14 November 2026, hashed by Python; the browser code must agree with it
 const text = readFileSync(new URL("../../../nasa_raw/ledger/ledger.jsonl", import.meta.url), "utf8");
@@ -27,6 +27,18 @@ describe("ledger chain, re-verified by the browser code", () => {
     const r = await verifyChain([...lines.slice(0, 3), ...lines.slice(4)]);
     expect(r.ok).toBe(false);
     expect(r.brokenAt).toBe(4);
+  });
+
+  it("the tamper demonstration breaks the chain where it says, in all three ways, and leaves the real lines alone", async () => {
+    const before = lines.join("\n");
+    const at = 600, seq = entries[at].seq;
+    const byte = await verifyChain((await tamper(lines, at, "byte")).lines);
+    expect(byte).toMatchObject({ ok: false, brokenAt: seq, reason: "the entry does not match its hash" });
+    const removed = await verifyChain((await tamper(lines, at, "remove")).lines);
+    expect(removed).toMatchObject({ ok: false, brokenAt: entries[at + 1].seq, reason: "the link to the previous entry does not hold" });
+    const rehash = await verifyChain((await tamper(lines, at, "rehash")).lines);          // the forged entry now passes; the next one gives it away
+    expect(rehash).toMatchObject({ ok: false, brokenAt: entries[at + 1].seq, reason: "the link to the previous entry does not hold" });
+    expect(lines.join("\n")).toBe(before);
   });
 
   it("keeps numbers in the form they were hashed in", () => {

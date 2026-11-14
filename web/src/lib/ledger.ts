@@ -59,3 +59,19 @@ export async function verifyChain(lines: string[], onProgress?: (done: number) =
   }
   return { ok: true, checked: lines.length, head: prev };
 }
+
+/** A copy of the ledger with one thing changed, for the demonstration on the ledger page. The real file is never touched. */
+export type Tamper = "byte" | "remove" | "rehash";
+export async function tamper(lines: string[], at: number, how: Tamper): Promise<{ lines: string[]; what: string }> {
+  const copy = [...lines];
+  const e = JSON.parse(copy[at]) as LedgerEntry;
+  if (how === "remove") { copy.splice(at, 1); return { lines: copy, what: `Entry ${e.seq} was removed from the copy.` }; }
+  const flipped = e.sha256.replace(/^./, (c) => (c === "0" ? "1" : "0"));
+  copy[at] = copy[at].replace(`"sha256": "${e.sha256}"`, `"sha256": "${flipped}"`).replace(`"sha256":"${e.sha256}"`, `"sha256":"${flipped}"`);
+  if (how === "byte") return { lines: copy, what: `One character of the file hash in entry ${e.seq} was changed in the copy.` };
+  // a careful forger also recomputes that entry's own hash; the next entry still points at the old one
+  const prev = at === 0 ? "0".repeat(64) : (JSON.parse(copy[at - 1]) as LedgerEntry).entry_hash;
+  const fresh = await sha256Hex(prev + canonicalBody(copy[at]));
+  copy[at] = copy[at].replace(e.entry_hash, fresh);
+  return { lines: copy, what: `One character of the file hash in entry ${e.seq} was changed, and the forger recomputed that entry's own hash.` };
+}

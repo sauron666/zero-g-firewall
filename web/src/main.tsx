@@ -13,3 +13,13 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </StrictMode>,
 );
+
+// After one visit with a connection the site opens with none. Not in development, and not where service workers are unavailable.
+if (import.meta.env.PROD && "serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").then(() => navigator.serviceWorker.ready).then((reg) => {
+      const loaded = performance.getEntriesByType("resource").map((e) => e.name).filter((u) => u.startsWith(location.origin));
+      reg.active?.postMessage({ cache: Array.from(new Set(loaded)) });
+    }).catch(() => { /* the site works without it */ });
+  });
+}

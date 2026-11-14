@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { fmtBytes, fmtInt, fmtUtc, useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
-import { canHash, ChainResult, parseLedger, verifyChain } from "../lib/ledger";
+import { canHash, ChainResult, parseLedger, Tamper, tamper, verifyChain } from "../lib/ledger";
 import { emit } from "../mascot/bus";
 import type { LedgerEntry, LedgerIndex } from "../lib/types";
 import { useReceipt } from "../components/Receipt";
@@ -34,6 +34,8 @@ export function Ledger({ route, manifest }: PageProps) {
   const [kind, setKind] = useState("all");
   const [q, setQ] = useState("");
   const [usedOnly, setUsedOnly] = useState(false);
+  const [forged, setForged] = useState<{ what: string; result: ChainResult; how: Tamper } | null>(null);
+  const [forging, setForging] = useState(false);
   const [page, setPage] = useState(0);
   const open = useReceipt();
 
@@ -66,6 +68,14 @@ export function Ledger({ route, manifest }: PageProps) {
     setProgress(null);
     setChain(r);
     if (r.ok) emit({ type: "SUCCESS", text: "The chain holds." });
+  };
+  const runTamper = async (how: Tamper) => {
+    if (!parsed) return;
+    setForging(true);
+    const at = Math.floor(parsed.lines.length / 2);                       // an entry in the middle, so that half the chain holds and half does not
+    const t = await tamper(parsed.lines, at, how);
+    setForged({ what: t.what, how, result: await verifyChain(t.lines) });
+    setForging(false);
   };
   const runFiles = async () => {
     if (!manifest) return;
@@ -138,6 +148,23 @@ export function Ledger({ route, manifest }: PageProps) {
           <p className="verdict-line" style={{ marginTop: 10 }} role="status">
             {files.bad.length === 0 ? <IconCheck size={20} /> : <IconWarn size={20} />}
             <span><b>{files.ok} of {files.total} data files match the hashes in the manifest{filesBusy ? " so far" : ""}.</b>{files.bad.length > 0 ? ` Not matching: ${files.bad.slice(0, 5).join(", ")}.` : ""}</span>
+          </p>
+        )}
+      </section>
+
+      <section className="panel" data-klass="synthetic">
+        <div className="panel__head"><div><h2 className="panel__title">Try to tamper with it</h2>
+          <p className="panel__sub">A copy of the ledger is changed in this browser's memory and checked again. The real ledger and NASA's files are not touched.</p></div><KlassBadge k="synthetic" note="a changed copy" /></div>
+        <div className="row" style={{ ["--gap" as string]: "10px" }}>
+          <button type="button" className="btn btn--quiet btn--sm" disabled={!parsed || forging || !canHash()} onClick={() => runTamper("byte")}>Change one character of a file hash</button>
+          <button type="button" className="btn btn--quiet btn--sm" disabled={!parsed || forging || !canHash()} onClick={() => runTamper("remove")}>Remove an entry</button>
+          <button type="button" className="btn btn--quiet btn--sm" disabled={!parsed || forging || !canHash()} onClick={() => runTamper("rehash")}>Change it and recompute that entry's hash</button>
+        </div>
+        {forged && (
+          <p className="verdict-line" style={{ marginTop: 14 }} role="status">
+            <IconWarn size={20} />
+            <span>{forged.what} <b>The chain breaks at entry {forged.result.brokenAt}:</b> {forged.result.reason}. {fmtInt(forged.result.checked)} entries before it still hold; the {parsed ? fmtInt(parsed.lines.length - forged.result.checked) : ""} after it are no longer anchored.
+              {forged.how === "rehash" ? " Recomputing one entry is not enough: every later entry would have to be rewritten too, and the head recorded in the site's manifest would no longer match." : ""}</span>
           </p>
         )}
       </section>
