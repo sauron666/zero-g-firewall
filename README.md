@@ -1,5 +1,7 @@
 # Zero-G Firewall
 
+**Live site:** https://sauron666.github.io/zero-g-firewall/ (built from `main` by GitHub Actions; works offline once loaded, needs no key and no server)
+
 **Kill the fans?** On the space station the first answer to a fire is to stop the ventilation, and when NASA cut the airflow under a flame in the BASS-II experiment, it went out within two seconds. NASA's own guide still lists "A fire will self-extinguish if ventilation is shut off" as a misconception, and on the Moon gravity keeps the air moving.
 
 Zero-G Firewall makes NASA's microgravity combustion evidence findable, ranked and checkable, and asks the next question: can you trust the alarm that shuts off your air?
