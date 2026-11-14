@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { MODEL_NEEDS, answer, columnLine, inventoryCsv, markOf, nearest, nearestSay, rawByKind, stating } from "./inventory";
+import { MODEL_NEEDS, SAYS_ENDING, WORD_LANES, answer, columnLine, inWords, inWordsSay, inventoryCsv, markOf, nearest, nearestSay, rawByKind, stack, stating, worded } from "./inventory";
 import type { InventoryDoc, RankDoc } from "./types";
 
 const load = <T,>(name: string) => JSON.parse(readFileSync(new URL(`../../public/data/v1/${name}`, import.meta.url), "utf8")) as T;
@@ -57,6 +57,39 @@ describe("what the tables state", () => {
       expect(groups.reduce((a, g) => a + g.records.length, 0)).toBe(doc.items.filter((it) => m.needs.filter((q) => !it.cells[q]).length === 1).length);
     }
     expect(nearest(doc, ["oxygen"])).toEqual([]);
+  });
+
+  it("reads how tests ended only from words that are in the table", () => {
+    const table = load<{ columns: string[]; rows: string[][] }>;
+    for (const w of doc.flow_words.tables) {
+      const t = table(w.table);
+      const heads = t.columns.map((h) => h.split(/\s+/).filter(Boolean).join(" "));
+      expect(w.rows.length + w.silent).toBe(w.n_rows);
+      expect(w.classes.reduce((a, c) => a + c.rows, 0)).toBe(w.rows.length);
+      for (const x of w.rows) {
+        for (const [name, text] of Object.entries(x.cells)) expect(t.rows[x.r][heads.indexOf(name)].split(/\s+/).filter(Boolean).join(" ")).toBe(text);
+        expect(new RegExp(w.classes.find((c) => c.id === x.class)!.pattern, "i").test(Object.values(x.cells).join(" | "))).toBe(true);
+      }
+      expect(worded(w).every((x) => SAYS_ENDING(x.class))).toBe(true);
+      expect(WORD_LANES.flatMap((l) => l.classes).sort()).toEqual(w.classes.map((c) => c.id).sort());       // every class has a lane, and only one
+    }
+  });
+
+  it("names the table that holds the ending in words when no table has a column for it", () => {
+    const fans = MODEL_NEEDS.find((m) => m.id === "fans")!.needs;
+    for (const w of inWords(doc, fans)) {
+      const it = doc.items.find((x) => x.accession === w.accession)!;
+      expect(it.cells.ending).toBeUndefined();
+      expect(inWordsSay(doc, fans)).toContain(`how ${worded(w).length} of its ${w.n_rows} tests ended`);
+    }
+    expect(inWords(doc, ["oxygen", "pressure"])).toEqual([]);
+  });
+
+  it("spreads dots at one oxygen level so none hides another", () => {
+    const placed = stack([{ o2: 20.8 }, { o2: 20.8 }, { o2: 20.84 }, { o2: 15 }, { o2: null }], (v) => v * 100, 10);      // 100 px to a percent, dots 10 px wide
+    expect(placed.map((p) => [p.row.o2, p.k])).toEqual([[15, 0], [20.8, 0], [20.8, 1], [20.84, 2]]);
+    expect(stack([{ o2: 20.8 }, { o2: 20.95 }], (v) => v * 100, 10).map((p) => p.k)).toEqual([0, 0]);                      // far enough apart to share a line
+    expect(stack([{ o2: 20.8 }, { o2: 20.95 }], (v) => v * 20, 10).map((p) => p.k)).toEqual([0, 1]);                       // on a narrow chart they no longer are
   });
 
   it("draws numbers as circles and words as squares", () => {

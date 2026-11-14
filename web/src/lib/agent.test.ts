@@ -137,6 +137,16 @@ describe("poisoned passage", () => {
     expect(fm2.answer.lines[0].text).toMatch(/^NASA plans \d+ burn tests of one fabric on the Moon/);
   });
 
+  it("adds the table's own words to NASA's sentence about cutting the flow", () => {
+    const w = load("inventory.json").flow_words.tables.find((t: any) => t.accession === "PSI-25");
+    const out = w.classes.find((c: any) => c.id === "went_out");
+    const lines = runAgent("What happened in the BASS-II test when the flow was cut?", kit).answer.lines.map((l) => l.text);
+    expect(lines.some((t) => t.includes("the flow was abruptly cut off and the flame was observed to extinguish within 2 s"))).toBe(true);
+    const said = lines.filter((t) => t.includes(`In ${out.rows} of the ${w.n_rows} BASS-II rows`));
+    expect(said.length).toBe(1);                                                                                          // said once, not once per passage
+    expect(said[0]).toContain(`${out.down_to} of them read 'down to ext'`);
+  });
+
   it("answers what the tables state from the same counts as the page that draws them", () => {
     const inv = load("inventory.json");
     const who = (q: string) => inv.items.filter((it: any) => it.cells[q]).map((it: any) => it.acronym || it.accession);

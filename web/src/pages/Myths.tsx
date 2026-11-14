@@ -35,19 +35,22 @@ export function Item({ it }: { it: MythItem }) {
   return (
     <div className="ev ev--data">
       <p style={{ maxWidth: "70ch" }}>{it.text}</p>
-      {it.rows && it.columns && (
-        <div className="table-wrap" style={{ marginTop: 8 }}>
-          <table className="datatable">
-            <thead><tr>{it.columns.map((c) => <th key={c}>{c}</th>)}</tr></thead>
-            <tbody>{it.rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j}>{c}</td>)}</tr>)}</tbody>
-          </table>
-        </div>
-      )}
+      {it.rows && it.columns && (() => {
+        const table = (
+          <div className="table-wrap" style={{ marginTop: 8 }}>
+            <table className="datatable">
+              <thead><tr>{it.columns.map((c) => <th key={c}>{c}</th>)}</tr></thead>
+              <tbody>{it.rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j}>{c}</td>)}</tr>)}</tbody>
+            </table>
+          </div>
+        );
+        return it.rows.length > 9 ? <details className="brief__how" style={{ marginTop: 6 }}><summary>Show the {it.rows.length} rows, as NASA wrote them</summary>{table}</details> : table;      // a long table waits behind one line
+      })()}
       <div className="ev__src">
         <KlassBadge k={it.klass} />
         {it.accession && <a href={href(`/evidence/${it.accession}`)}>{it.accession}</a>}
         {(it.also ?? []).map((a) => <a key={a} href={href(`/evidence/${a}`)}>{a}</a>)}
-        {it.link && <a href={href(it.link)}>{it.link === "/physics" ? "See the model" : it.link === "/envelope" ? "See the map" : it.link === "/data" ? "See the report" : "See the records"}</a>}
+        {it.link && <a href={href(it.link)}>{it.link === "/physics" ? "See the model" : it.link === "/envelope" ? "See the map" : it.link === "/data" ? "See the report" : it.link === "/evidence/measured" ? "See what was measured" : "See the records"}</a>}
         {it.sha256 && it.ledger_seq != null && it.accession && <SourceBtn title={`${it.accession}: table`} sref={{ ledger_seq: it.ledger_seq, sha256: it.sha256, url: `https://psi.nasa.gov/physci/repo/data/investigations/${it.accession}`, accession: it.accession }} label="receipt" />}
       </div>
     </div>

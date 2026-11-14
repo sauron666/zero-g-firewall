@@ -15,6 +15,7 @@ import os
 from . import ledger as L
 from . import physics as ph
 from .literature import Library
+from .inventory import endings_sentence
 
 GUIDE = "doc:researchers_guide"
 MIR = "doc:mir_fire_1997"
@@ -70,6 +71,7 @@ CARDS = [
              q(BASS2, "After the flame propagated across half the sample length at a steady spread rate of 2.2 mm/s, the flow was abruptly cut off and the flame was observed to extinguish within 2 s",
                "A BASS-II test on the space station"),
              {"kind": "data", "id": "bass2_rows"},
+             {"kind": "data", "id": "bass2_endings"},
          ]},
          {"side": "warns", "title": "NASA does not treat it as a rule", "items": [
              q(GUIDE, "This resulted in several critical misconceptions about potential fires in spacecraft", "The guide, before listing this belief as the second of three"),
@@ -173,6 +175,17 @@ def data_items(out_dir: str) -> dict[str, dict]:
         out["bass2_rows"] = {"klass": "observed", "accession": "PSI-25", "table": t["artifact"], "ledger_seq": t["ledger_seq"], "sha256": t["sha256"],
                              "text": "BASS-II in PSI: %d test rows, with oxygen at the start between %.1f%% and %.1f%%. The table records conditions and gas readings. "
                                      "It has no column saying whether each flame went out." % (d["n_rows"], min(o2), max(o2))}
+    ipath = os.path.join(out_dir, "inventory.json")
+    if os.path.exists(ipath):                                   # how some BASS-II tests ended, in the words of the table's own flow columns (read in inventory.py)
+        for w in json.load(open(ipath, encoding="utf-8")).get("flow_words", {}).get("tables", []):
+            if w["accession"] != "PSI-25":
+                continue
+            label = {c["id"]: c["label"] for c in w["classes"]}
+            out["bass2_endings"] = {
+                "klass": "derived", "accession": "PSI-25", "table": w["table"], "ledger_seq": w["ledger_seq"], "sha256": w["sha256"], "link": "/evidence/measured",
+                "text": endings_sentence(w),
+                "columns": ["Test", "What burned", "Oxygen at the start, %", "Flow columns, as NASA wrote them", "By the words"],
+                "rows": [[x["id"], x["fuel"], "" if x["o2"] is None else ("%g" % x["o2"]), "; ".join("%s: %s" % kv for kv in x["cells"].items()), label[x["class"]]] for x in w["rows"]]}
     t, d = _table(out_dir, "PSI-69")
     if d:
         ends: dict[str, int] = {}

@@ -1,4 +1,4 @@
-import type { InventoryCell, InventoryColumn, InventoryDoc, InventoryItem } from "./types";
+import type { FlowWordsTable, InventoryCell, InventoryColumn, InventoryDoc, InventoryItem } from "./types";
 
 /** Questions a model of a cabin fire asks of the data. Each is only a choice of columns; the answer is counted from NASA's tables. */
 export const MODEL_NEEDS: { id: string; ask: string; needs: string[] }[] = [
@@ -42,6 +42,41 @@ export function nearestSay(doc: InventoryDoc, ids: string[]): string {
   const g = nearest(doc, ids);
   if (!g.length) return "";
   return "Nearest: " + g.map((x) => `${x.records.length} record${x.records.length === 1 ? " lacks" : "s lack"} only ${x.lacks} (${x.records.map(name).join(", ")})`).join("; ") + ".";
+}
+
+/** Classes that say something about the flame. A display that reads 0 says nothing about it. */
+export const SAYS_ENDING = (cls: string) => cls !== "zero";
+/** Rows of a table whose flow columns say in words how the test ended. */
+export const worded = (w: FlowWordsTable) => w.rows.filter((x) => SAYS_ENDING(x.class));
+/** Tables that hold the ending in words although they have no column for it, for records that state everything else asked for. */
+export function inWords(doc: InventoryDoc, ids: string[]): FlowWordsTable[] {
+  if (!ids.includes("ending")) return [];
+  return doc.flow_words.tables.filter((w) => { const it = doc.items.find((x) => x.accession === w.accession); return !!it && !it.cells.ending && ids.every((q) => q === "ending" || it.cells[q]); });
+}
+export function inWordsSay(doc: InventoryDoc, ids: string[]): string {
+  return inWords(doc, ids).map((w) => `${w.acronym || w.accession} comes closest: it has no column for the ending, but its flow columns say in words how ${worded(w).length} of its ${w.n_rows} tests ended.`).join(" ");
+}
+
+/** Lanes of the strip chart: classes drawn together when they say the same kind of thing. */
+export const WORD_LANES: { id: string; label: string; classes: string[] }[] = [
+  { id: "went_out", label: "the flow columns say the flame went out", classes: ["went_out"] },
+  { id: "blowoff", label: "they say the flame blew off", classes: ["blowoff"] },
+  { id: "never", label: "they say it would not ignite, or would not stay lit", classes: ["no_ignition", "not_lit"] },
+  { id: "zero", label: "a display reads 0, with no word on the flame", classes: ["zero"] },
+];
+/**
+ * Dots of one lane placed so that none hides another: each takes the first level on which no dot already sits within
+ * `gap` of it, measured on the drawn axis. `at` gives a row's place on that axis.
+ */
+export function stack<T extends { o2: number | null }>(rows: T[], at: (o2: number) => number = (v) => v * 100, gap = 10): { row: T; k: number }[] {
+  const levels: number[][] = [];
+  return rows.filter((x) => x.o2 != null).sort((a, b) => a.o2! - b.o2!).map((row) => {
+    const x = at(row.o2!);
+    let k = 0;
+    while (levels[k]?.some((px) => Math.abs(px - x) < gap)) k++;
+    (levels[k] ??= []).push(x);
+    return { row, k };
+  });
 }
 
 export type Mark = "numbers" | "number" | "words" | "word";

@@ -167,7 +167,7 @@ def gaps(out_dir: str, searches: dict[str, int]) -> list[dict]:
         {"id": "outcomes", "title": "Most tables say what was set, fewer say what happened", "measure": str(len(with_outcome)), "unit": "of %d records with a table have an outcome column" % len(with_table),
          "why": "A table of conditions lets a reader find a test. Only an outcome lets a reader learn from it without opening the raw files, which for some records run to terabytes.",
          "evidence": [fact("Records whose table carries an outcome such as extinction, burn time, burn length or ignition: %s." % ", ".join(i["acronym"] or i["accession"] for i in with_outcome), link="/rank"),
-                      {"kind": "data", "id": "bass2_rows"}],
+                      {"kind": "data", "id": "bass2_rows"}, {"kind": "data", "id": "bass2_endings"}],
          "plans": [{"name": "What would close it", "state": "a request to the curators", "items": [
                        reading("One outcome column per experimental table (extinguished, burned out, flow at extinction) would turn the test matrices into data. It is the first line of the report for the PSI curators.")]}]},
         {"id": "large-scale", "title": "Half of the large-fire flights are in the repository", "measure": str(len(searches.get("Saffire") or [])), "unit": "of six Saffire flights are in PSI",

@@ -108,6 +108,24 @@ def inventory(d: dict, ledger: dict, load) -> int:
     c = d["counts"]
     if c["placed"] + c["set_aside"] + c["not_placed"] != c["columns"] or c["not_placed"] != len(d["not_placed"]):
         raise IntegrityError("inventory: placed, set aside and not placed do not add up to the columns read")
+    for w in (d.get("flow_words") or {}).get("tables", []):
+        # words about an ending are shown only as the table holds them: same row, same cell, and the word really there
+        if ledger.get(w["ledger_seq"]) != w["sha256"]:
+            raise IntegrityError("inventory: the table read for words in its flow columns has no matching ledger entry")
+        t = load(w["table"])
+        heads = [" ".join(str(h).split()) for h in t["columns"]]
+        pats = {k["id"]: re.compile(k["pattern"], re.I) for k in w["classes"]}
+        for x in w["rows"]:
+            row = t["rows"][x["r"]]
+            for name, text in x["cells"].items():
+                if " ".join(row[heads.index(name)].split()) != text:
+                    raise IntegrityError("inventory: a cell quoted from %s row %d is not what the table holds" % (w["accession"], x["r"] + 1))
+            if not pats[x["class"]].search(" | ".join(x["cells"].values())):
+                raise IntegrityError("inventory: row %d of %s is marked '%s', and its cells do not hold that word" % (x["r"] + 1, w["accession"], x["class"]))
+            n += 1
+        if sum(k["rows"] for k in w["classes"]) != len(w["rows"]) or len(w["rows"]) + w["silent"] != w["n_rows"] or w["n_rows"] != len(t["rows"]):
+            raise IntegrityError("inventory: the rows read for words in %s do not add up to its table" % w["accession"])
+        n += 1
     return n + 1
 
 

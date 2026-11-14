@@ -65,6 +65,16 @@ FILE_KINDS: list[tuple[str, str, tuple[str, ...]]] = [
     ("archives", "Archives", ("zip", "tar", "gz", "7z", "rar")),
     ("documents", "Documents", ("pdf", "docx", "doc", "pptx", "ppt", "rtf")),
 ]
+# Words about how a test ended, written inside a column of flow settings. Classes are tried in this order.
+# "off" is not a class: after a list of fan settings it may mean the fan.
+FLOW_WORDS: list[tuple[str, str, re.Pattern]] = [
+    ("blowoff", "the flame blew off", re.compile(r"blow ?off", re.I)),
+    ("no_ignition", "no ignition at any flow", re.compile(r"\bno ign", re.I)),
+    ("not_lit", "would not stay lit", re.compile(r"would not stay lit", re.I)),
+    ("went_out", "the flame went out", re.compile(r"(?<![A-Za-z])ext(?![A-Za-z])|extingu|(?<![A-Za-z])out(?![A-Za-z])", re.I)),
+    ("zero", "a display reads 0, with no word on the flame", re.compile(r"(?<![\d./])0(?![\d./])")),
+]
+DOWN_TO = re.compile(r"down to ext|decr to ext", re.I)          # NASA's own shorthand for a flow turned down until extinction
 RAW, ANALYSED = "Raw Data", "Analyzed Data"
 
 
@@ -110,18 +120,70 @@ def _files(listing: dict | None) -> dict:
     return out
 
 
+def flow_words(acc: str, acronym: str, rel: str, t: dict) -> dict | None:
+    """
+    Rows of one table whose flow columns say in words how the test ended, with the cells as NASA wrote them.
+    Returns None for a table whose flow columns hold no such word.
+    """
+    cols = [" ".join(str(c).split()) for c in t.get("columns") or []]
+    plain = re.compile(r"[+-]?(\d+\.?\d*|\.\d+)")
+    wordy = lambda j: any(row[j].strip() and not plain.fullmatch(row[j].strip()) for row in t.get("rows") or [] if j < len(row))
+    flow = [j for j, c in enumerate(cols) if place(c) == "flow" and wordy(j)]          # a column of plain numbers (a restrictor setting of 0, 1 or 2) holds no words
+    if not flow or not t.get("rows"):
+        return None
+    first = lambda q: next((j for j, c in enumerate(cols) if place(c) == q), None)
+    jo, jf = first("oxygen"), first("fuel")
+    jid = next((j for j, c in enumerate(cols) if ID_NAME.search(c)), None)
+    num = lambda v: float(v) if plain.fullmatch(v.strip()) else None
+    rows, silent = [], []
+    for r, row in enumerate(t["rows"]):
+        cells = {cols[j]: " ".join(row[j].split()) for j in flow if j < len(row) and row[j].strip()}
+        text = " | ".join(cells.values())
+        o2 = num(row[jo]) if jo is not None and jo < len(row) else None
+        klass = next((cid for cid, _, pat in FLOW_WORDS if pat.search(text)), None)
+        if klass is None:
+            silent.append(o2)
+            continue
+        rows.append({"r": r, "id": row[jid].strip() if jid is not None else str(r + 1), "fuel": " ".join(row[jf].split()) if jf is not None else "", "o2": o2,
+                     "cells": cells, "class": klass, "down_to": bool(DOWN_TO.search(text))})
+    if not rows:
+        return None
+    classes = []
+    for cid, label, pat in FLOW_WORDS:
+        mine = [x for x in rows if x["class"] == cid]
+        o2s = [x["o2"] for x in mine if x["o2"] is not None]
+        classes.append({"id": cid, "label": label, "pattern": pat.pattern, "rows": len(mine), "o2_min": min(o2s) if o2s else None, "o2_max": max(o2s) if o2s else None,
+                        "down_to": sum(1 for x in mine if x["down_to"])})
+    return {"accession": acc, "acronym": acronym, "table": rel, "file_name": t["file"], "kind": "psi_table", "ledger_seq": t["ledger_seq"], "sha256": t["sha256"], "url": t["url"],
+            "n_rows": len(t["rows"]), "flow_columns": [cols[j] for j in flow], "oxygen_column": cols[jo] if jo is not None else None, "fuel_column": cols[jf] if jf is not None else None,
+            "id_column": cols[jid] if jid is not None else None, "classes": classes, "rows": rows, "silent": len(silent), "silent_o2": sorted(x for x in silent if x is not None)}
+
+
+def endings_sentence(w: dict) -> str:
+    """What one table's flow columns say about endings, as the one sentence every page and the search index use."""
+    k = {c["id"]: c for c in w["classes"]}
+    pc = lambda v: ("%.1f" % v).rstrip("0").rstrip(".")
+    return ("In %d of the %d %s rows, at %s%% to %s%% oxygen, the flow columns themselves say in NASA's shorthand that the flame went out ('ext', 'out', 'extinguished'); "
+            "%d of them read 'down to ext'. In %d rows they say the flame blew off; in %d a display reads 0 and the row has no word on the flame."
+            % (k["went_out"]["rows"], w["n_rows"], w["acronym"] or w["accession"], pc(k["went_out"]["o2_min"]), pc(k["went_out"]["o2_max"]), k["went_out"]["down_to"], k["blowoff"]["rows"], k["zero"]["rows"]))
+
+
 def build_doc(inv: dict, profiles: dict, tables: dict[str, dict]) -> dict:
-    """tables: artifact path -> {sha256, ledger_seq, url, file} of the stored table."""
+    """tables: artifact path -> {sha256, ledger_seq, url, file} of the stored table, with columns and rows when the words in flow columns are to be read."""
     by_acc: dict[str, list[tuple[str, dict]]] = {}
     for rel, p in sorted(profiles["items"].items()):
         by_acc.setdefault(p["accession"], []).append((rel, p))
     items, unplaced_all, n_cols, n_placed, n_aside = [], [], 0, 0, 0
+    said: list[dict] = []
     for i in sorted((x for x in inv["items"] if x.get("scope", {}).get("in_scope")), key=lambda x: int(re.sub(r"\D", "", x["accession"]) or 0)):
         acc = i["accession"]
         cells: dict[str, list[dict]] = {}
         unplaced, refs, rows = [], [], 0
         for rel, p in by_acc.get(acc, []):
             t = tables[rel]
+            w = flow_words(acc, i.get("acronym") or "", rel, t)
+            if w:
+                said.append(w)
             refs.append({"artifact": rel, "file_name": t["file"], "accession": acc, "kind": "psi_table", "ledger_seq": t["ledger_seq"], "sha256": t["sha256"], "url": t["url"], "rows": p["n_rows"]})
             rows += p["n_rows"]
             for c in p["columns"]:
@@ -165,6 +227,14 @@ def build_doc(inv: dict, profiles: dict, tables: dict[str, dict]) -> dict:
                    "columns": n_cols, "placed": n_placed, "set_aside": n_aside, "not_placed": len(unplaced_all),
                    "raw_files": sum(it["files"]["raw_files"] for it in items), "raw_bytes": sum(it["files"]["raw_bytes"] for it in items)},
         "not_placed": unplaced_all,
+        "flow_words": {
+            "klass": "derived",
+            "rule": "A row is listed when a cell of its table's air-flow columns holds one of these words, tried in this order: 'blowoff'; 'no ign'; 'would not stay lit'; "
+                    "'ext', 'extinguished' or 'out'; or a 0 standing alone. Columns of plain numbers are not read, and the cells are shown as NASA wrote them. "
+                    "'ext' is read as extinction. 'off' is not counted: after a list of fan settings it may mean the fan. "
+                    "A 0 among the settings says what a display read, not that the air stood still.",
+            "tables": said,
+        },
     }
 
 
@@ -174,7 +244,7 @@ def build(out_dir: str) -> dict:
     tables = {}
     for rel in profiles["items"]:
         t = json.load(open(os.path.join(out_dir, rel), encoding="utf-8"))
-        tables[rel] = {k: t[k] for k in ("sha256", "ledger_seq", "url", "file")}
+        tables[rel] = {k: t[k] for k in ("sha256", "ledger_seq", "url", "file", "columns", "rows")}
     doc = build_doc(inv, profiles, tables)
     b = json.dumps(doc, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     with open(os.path.join(out_dir, "inventory.json"), "wb") as fh:
@@ -185,4 +255,5 @@ def build(out_dir: str) -> dict:
     manifest["nasa"]["columns_placed"] = doc["counts"]["placed"]
     with open(mpath, "w", encoding="utf-8") as fh:
         json.dump(manifest, fh, indent=1)
-    return {"written": True, "bytes": len(b), **{k: doc["counts"][k] for k in ("records", "with_table", "columns", "placed", "set_aside", "not_placed")}}
+    return {"written": True, "bytes": len(b), **{k: doc["counts"][k] for k in ("records", "with_table", "columns", "placed", "set_aside", "not_placed")},
+            "flow_words": {w["accession"]: {c["id"]: c["rows"] for c in w["classes"]} for w in doc["flow_words"]["tables"]}}

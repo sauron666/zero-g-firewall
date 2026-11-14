@@ -4,7 +4,8 @@ import { href } from "../app/router";
 import { fmtBytes, fmtInt, useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
 import type { BriefsDoc, CuratorDoc, CuratorFinding, InventoryDoc, Investigation, InvestigationsDoc, ProfilesDoc, RankDoc, RankFacets, TableDoc, TableProfile, TableSummary } from "../lib/types";
-import { MeasuredMatrix, RawHoldings } from "../viz/Inventory";
+import { FlowWords, MeasuredMatrix, RawHoldings } from "../viz/Inventory";
+import { worded } from "../lib/inventory";
 import { SourceBtn } from "../components/Source";
 import { useReceipt } from "../components/Receipt";
 import { IconArrow, IconWarn } from "../components/icons";
@@ -241,6 +242,20 @@ function Measured({ doc }: { doc: InventoryDoc }) {
         <div className="section__head"><h2 className="h2">What a model can take from the tables</h2><KlassBadge k="derived" note="columns placed by their headers, by stated rules" /></div>
         <MeasuredMatrix doc={doc} />
       </section>
+      {doc.flow_words.tables.map((w) => {
+        const out = w.classes.find((c) => c.id === "went_out");
+        return (
+          <section key={w.accession} className="panel" data-klass="derived" id="words">
+            <div className="section__head"><h2 className="h2">In NASA's words: how {worded(w).length} {w.acronym || w.accession} tests ended</h2><KlassBadge k="derived" note="words found in the table's flow columns, by a stated rule" /></div>
+            {out && out.rows > 0 && (
+              <p className="claim inv__answer" style={{ marginTop: 0, marginBottom: 12 }}>
+                In {out.rows} of {w.n_rows} rows the flow columns say the flame went out, at {out.o2_min}% to {out.o2_max}% oxygen; {out.down_to} of them read “down to ext”.
+              </p>
+            )}
+            <FlowWords w={w} rule={doc.flow_words.rule} />
+          </section>
+        );
+      })}
       <section className="panel" data-klass="observed" id="raw">
         <div className="section__head"><h2 className="h2">Behind the tables: the raw data PSI lists</h2><KlassBadge k="observed" note="PSI's own file listing of each record" /></div>
         <RawHoldings doc={doc} />

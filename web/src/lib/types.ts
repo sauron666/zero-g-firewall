@@ -554,4 +554,12 @@ export interface InventoryDoc {
   totals: Record<string, { records: number; varied: number; rows: number }>;
   counts: { records: number; with_table: number; tables: number; rows: number; columns: number; placed: number; set_aside: number; not_placed: number; raw_files: number; raw_bytes: number };
   not_placed: (InventoryColumn & { accession: string })[];
+  flow_words: { klass: "derived"; rule: string; tables: FlowWordsTable[] };
+}
+/** Rows of one table whose flow columns say in words how the test ended; cells are exactly as NASA wrote them. */
+export interface FlowWordsRow { r: number; id: string; fuel: string; o2: number | null; cells: Record<string, string>; class: string; down_to: boolean }
+export interface FlowWordsTable extends SourceRef {
+  acronym: string; table: string; n_rows: number; flow_columns: string[]; oxygen_column: string | null; fuel_column: string | null; id_column: string | null;
+  classes: { id: string; label: string; pattern: string; rows: number; o2_min: number | null; o2_max: number | null; down_to: number }[];
+  rows: FlowWordsRow[]; silent: number; silent_o2: number[];
 }

@@ -2,7 +2,7 @@
 
 ## Hand-off (14 November, evening): start here
 
-The site is live from `main` at https://sauron666.github.io/zero-g-firewall/. All 28 must-have features of `docs/COVERAGE.md` are done. Tests: 68 Python, 124 TypeScript, all passing; the integrity check runs 1,933 checks at each derivation.
+The site is live from `main` at https://sauron666.github.io/zero-g-firewall/. All 28 must-have features of `docs/COVERAGE.md` are done. Tests: 69 Python, 128 TypeScript, all passing; the integrity check runs 1,975 checks at each derivation.
 
 **Which raw cache.** Since 14 November 17:20 the site is built from the larger cache: 4,959 files, 330.9 MB, folder `nasa_raw2` on the team's machine, written by `sync_nasa_async.py` 2.0.0. The repository tracks that cache's ledger at `nasa_raw/ledger/ledger.jsonl` and its report at `nasa_raw/sync_report.json`. On the team's machine derive with `python pipeline/derive.py --raw nasa_raw2`, or rename the folders so that `nasa_raw2` becomes `nasa_raw`. The older, smaller folder no longer matches the tracked ledger.
 
@@ -34,7 +34,7 @@ Done with it: the Saffire-III recording on the Alarm page and the opening page (
 Not used yet, in order of value:
 
 - **SAME and SAME-R analysed data** (`PSI-101_Analyzed Data_SAME, SAME-R_Results.xlsx` and the per-run workbooks in PSI-101 and PSI-102): detector responses and particle sizes by material. This is the material for detector evidence cards (E01). The derivation uses the standard library only, so reading `.xlsx` needs a small reader or a new dependency in CI.
-- **BASS-II test matrices** (`PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx`): per test, the sequence of flow settings and the gas readings before and after, for example carbon monoxide at the start and the end. Some notes say a flow was lowered "to ext". Do not turn free-text notes into an outcome column without a rule that a reader can check.
+- **BASS-II test matrices** (`PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx`): the workbook holds the same sixteen columns as the experimental table, one sheet for each investigator. The words about endings ("5 down to ext", "10 blowoff") are in the experimental table too, and since 14 November 19:00 they are read from there by a word rule (`FLOW_WORDS` in `pipeline/zgf/inventory.py`). Still open: the fan calibration workbook (`PSI-25_Reference Data_Fan calibration data.xlsx`) could turn a pot setting into a flow speed, but only for rows whose text can be read without guessing.
 - **PSI-117 analysed CSV files** (burning histories, extinction diameters, average burning rates): a second check for the droplet panel. Keep experiment and simulation rows apart.
 - **Raw time series of CFI, CFI-G, s-Flame and Flame Design** (about 4,300 small text and CSV files): one trace per test point. A viewer on the record page would need a rule for which file belongs to which row of the experimental table.
 - **PSI-179, the Aerosol Sampling Experiment** (cabin dust on the station): outside the combustion search by NASA's own research area. It bears on false alarms; use its text only with that scope stated.

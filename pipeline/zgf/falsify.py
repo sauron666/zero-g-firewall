@@ -63,7 +63,7 @@ def claims(out_dir: str) -> list[dict]:
          "summary": "True as observed, for a flame whose only air came from the fan. Five kinds of condition are documented under which stopping the flow does not end the burning, and one whole regime, partial gravity, has no data.",
          "scope": ["free fall, on the space station", "a solid sample in a small wind tunnel", bass_o2, "forced flow as the flame's only air supply", "pressure not recorded in the table"],
          "holds": [q(BASS2, "After the flame propagated across half the sample length at a steady spread rate of 2.2 mm/s, the flow was abruptly cut off and the flame was observed to extinguish within 2 s", "The observation"),
-                   {"kind": "data", "id": "bass2_rows"}],
+                   {"kind": "data", "id": "bass2_rows"}, {"kind": "data", "id": "bass2_endings"}],
          "fails": FAILS,
          "untested": [UNTESTED_G, fact("The BASS-II and Saffire tables do not record pressure, so the result cannot be placed at a reduced-pressure, oxygen-rich atmosphere.", link="/envelope")],
          "next": [q(FM2, "Conduct the first-ever observations and measurements of flame spread on the Moon", "FM2, planned"),

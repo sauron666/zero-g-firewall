@@ -498,6 +498,21 @@ class Inventory(unittest.TestCase):
         self.assertEqual(f["other_extensions"], {"mdipsug": 1})                                                           # a format no kind names is kept under its own name
         self.assertEqual((self.by["PSI-2"]["in_ledger"], self.by["PSI-1"]["files"]["raw_files"]), (3, 0))
 
+    def test_words_inside_a_flow_column_are_read_by_rule_and_kept_as_written(self):
+        t = table(["Test #", "Flow restrictor", "Air display", "Calibrated initial O2 % by vol", "Fuel Sample Material"],
+                  [["P1", "2", "5  down to ext", "20.9", "rod"], ["P2", "0", "10   blowoff", "17.4", "film"], ["P3", "2", "5 2 0 11", "15.1", "rod"], ["P4", "2", "5 3 0.5 off", "18.5", "rod"],
+                   ["P5", "0", "5 3/0/2.7", "20.1", "slab"], ["P6", "2", "next 0.3ext", "18.8", "slab"], ["P7", "1", "no ign at any flow", "13.6", "rod"], ["P8", "2", "blowoff pot 5 out at fan 87", "15.4", "rod"]],
+                  acc="PSI-1", file="a.csv")
+        w = self.I.flow_words("PSI-1", "X", "tables/a.json", {**t, "sha256": "0" * 64, "ledger_seq": 1, "url": "https://psi.nasa.gov/x"})
+        self.assertEqual(w["flow_columns"], ["Air display"])                                     # the restrictor column holds plain numbers and is not read
+        self.assertEqual([(x["id"], x["class"], x["down_to"]) for x in w["rows"]],
+                         [("P1", "went_out", True), ("P2", "blowoff", False), ("P3", "zero", False), ("P6", "went_out", False), ("P7", "no_ignition", False), ("P8", "blowoff", False)])
+        self.assertEqual((w["silent"], w["n_rows"]), (2, 8))                                     # "off" may mean the fan; "3/0/2.7" is not a reading of zero
+        self.assertEqual(w["rows"][0]["cells"], {"Air display": "5 down to ext"})                # spaces as one, nothing else touched
+        out = next(c for c in w["classes"] if c["id"] == "went_out")
+        self.assertEqual((out["rows"], out["o2_min"], out["o2_max"], out["down_to"]), (2, 18.8, 20.9, 1))
+        self.assertIsNone(self.I.flow_words("PSI-2", "Y", "tables/b.json", {**table(["Air Flow (cm/s)", "Flow Direction"], [["20", "Concurrent"], ["20", "Opposed"]]), "sha256": "0" * 64, "ledger_seq": 2, "url": "u"}))
+
     def test_the_integrity_check_catches_a_column_under_the_wrong_quantity(self):
         from zgf import validate as V
         doc = self.doc

@@ -13,6 +13,7 @@ import re
 
 from . import ledger as L
 from .claims import M1, M2, M3
+from .inventory import endings_sentence
 from .literature import Library
 
 PAGES = [  # (ledger key, title, link on the site or None)
@@ -199,6 +200,8 @@ def build(raw_dir: str, out_dir: str) -> dict:
                 "No record's experimental table states oxygen, air flow and how the flame ended together: of the %d records with a table, %d state oxygen, %d state air flow and %d state the ending. "
                 "A model of whether a flame goes out when the fans stop would need all three in one table."
                 % (of, t["oxygen"]["records"], t["flow"]["records"], t["ending"]["records"]), "/evidence/measured")
+        for w in ivd.get("flow_words", {}).get("tables", []):       # the same sentence as on the fans card, so an answer says it once
+            add("inv:words:%s" % w["accession"], "derived", "How %s tests ended, in the words of the table's flow columns" % (w["acronym"] or w["accession"]), endings_sentence(w), "/evidence/measured")
         c = ivd["counts"]
         add("inv:raw", "derived", "Raw data that PSI lists behind the combustion records",
             "PSI lists %s raw data files, %.1f terabytes, behind the %d combustion records; this site fetched the experimental tables and the small files, not the video."
