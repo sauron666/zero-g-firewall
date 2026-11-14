@@ -1,14 +1,14 @@
 # Coverage of the plan, feature by feature
 
-Checked on 14 November 2026 at 17:02 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
+Checked on 14 November 2026 at 17:04 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
 
 | Priority | Features | Done | Partial | Not built |
 |---|---|---|---|---|
 | P0 | 28 | 28 | 0 | 0 |
-| P1 | 59 | 39 | 7 | 13 |
+| P1 | 59 | 40 | 7 | 12 |
 | P2 | 38 | 2 | 9 | 27 |
 | P3 | 5 | 0 | 0 | 5 |
-| All | 130 | 69 | 16 | 45 |
+| All | 130 | 70 | 16 | 44 |
 
 ## Definition of done (specification, section 0)
 
@@ -69,7 +69,7 @@ Checked on 14 November 2026 at 17:02 Sofia time against the 130 features of the 
 | B12 | P1 | **not built** | Hardware-family graph and knowledge graph (facilities, fuels, instruments, investigations) |  |
 | B13 | P1 | done | Controls view | on the fire matrix page: prevention, detection and suppression, each with its fire behaviours as marks for the station and the Moon, the NASA records that inform it (by the written pillar rules) and a link that opens those records |
 | B14 | P1 | done | Earth applications with NASA sources | three Spinoff articles; water mist is not in the ledger, so it is not shown |
-| B15 | P1 | **not built** | Report generator with citations, figures, methods, limitations, AI disclosure and a ledger receipt |  |
+| B15 | P1 | done | Report generator with citations, figures, methods, limitations, AI disclosure and a ledger receipt | on the ranking page: a brief for the chosen mission as Markdown, saved or copied: the five records to read first with the strongest factors and what each does not cover, the measured gaps, the weights and rules, limits, the ledger head and the data file's hash; assembled by code (4 tests) |
 | B16 | P2 | **not built** | Tension finder | partly covered by Myths and Try to refute it |
 | B17 | P2 | **not built** | Next-best-experiment suggestions from the gap matrix, labelled as suggestions |  |
 | B18 | P2 | **partial** | Shareable deep links and saved sessions | every page, record, mission and card has its own address |

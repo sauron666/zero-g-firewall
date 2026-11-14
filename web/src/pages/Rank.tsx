@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { href } from "../app/router";
 import { useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
+import { missionBrief } from "../lib/brief";
 import { comparability, normalise, rankAll, stability } from "../lib/rank";
-import type { RankDoc } from "../lib/types";
+import type { GapsDoc, RankDoc } from "../lib/types";
 import { emit } from "../mascot/bus";
 import { PageProps, stub } from "./stubs";
 
@@ -16,6 +17,8 @@ const share = (x: number) => (x === 1 ? "100%" : x > 0.995 ? `${(Math.floor(1000
 export function Rank({ route, manifest }: PageProps) {
   const ready = !!manifest?.nasa;
   const d = useData<RankDoc>(ready ? "rank_features.json" : null);
+  const gaps = useData<GapsDoc>(ready ? "gaps.json" : null);
+  const [copied, setCopied] = useState(false);
   const [lensId, setLensId] = useState(route.segs[1] ?? "lunar");
   const [weights, setWeights] = useState<Record<string, number> | null>(null);
   const [open, setOpen] = useState<string | null>(null);
@@ -38,6 +41,7 @@ export function Rank({ route, manifest }: PageProps) {
   const noneFull = lens.gravity === "partial";
   const cmp = ranked.filter((r) => picked.includes(r.item.accession));
   const changed = Object.keys(lens.weights).some((k) => Math.abs((w[k] ?? 0) - lens.weights[k]) > 1e-9);
+  const brief = () => missionBrief({ doc, lens, weights: w, ranked, stab, draws: DRAWS, gaps: gaps.data, manifest, changed });
 
   return (
     <div className="stack" style={{ ["--gap" as string]: "22px" }}>
@@ -56,6 +60,17 @@ export function Rank({ route, manifest }: PageProps) {
         {noneFull && " No record can score 1 on gravity here: PSI holds no test in lunar or Martian gravity."}
         {" "}<a href={`${href("/envelope")}?mission=${lens.id}`}>See {lens.atmospheres.length > 1 ? "these atmospheres" : "this atmosphere"} among the tests</a>
       </p>
+      <div className="row" style={{ ["--gap" as string]: "8px" }}>
+        <button type="button" className="btn btn--primary btn--sm" onClick={() => {
+          const url = URL.createObjectURL(new Blob([brief()], { type: "text/markdown" }));
+          const a = document.createElement("a");
+          a.href = url; a.download = `zgf_brief_${lens.id}.md`;
+          document.body.appendChild(a); a.click(); a.remove();
+          window.setTimeout(() => URL.revokeObjectURL(url), 2000);
+        }}>Save a brief for this mission</button>
+        <button type="button" className="btn btn--quiet btn--sm" onClick={() => { navigator.clipboard?.writeText(brief()).then(() => { setCopied(true); window.setTimeout(() => setCopied(false), 1800); }).catch(() => setCopied(false)); }}>{copied ? "Copied" : "Copy it"}</button>
+        <span className="note">Markdown: what to read first and why, what is unmeasured, the weights, the ledger head.</span>
+      </div>
 
       <div className="rankgrid">
         <section>
