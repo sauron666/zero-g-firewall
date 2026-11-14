@@ -183,15 +183,22 @@ def gaps(out_dir: str, searches: dict[str, int]) -> list[dict]:
     ]
 
 
-def incidents() -> list[dict]:
+def incidents(out_dir: str) -> list[dict]:
+    # the sentence about the map is counted, not asserted: rows near the historical point and near today's suit atmosphere
+    env = json.load(open(os.path.join(out_dir, "envelope.json"), encoding="utf-8"))
+    pad, dx, dp = ATM.BY_ID["apollo_pad"], env["near"]["dx"], env["near"]["dp"]
+    near_pad = sum(1 for p in env["points"] if p.get("p") is not None and abs(p["x"] - pad["x_o2"]) <= dx and abs(p["p"] - ATM.p_kpa(pad)) / ATM.p_kpa(pad) <= dp)
+    near_suit = next(n["n_near"] for n in env["near_presets"] if n["id"] == "suit")
+    rows = lambda n: "no PSI test row lies" if n == 0 else "%d PSI test row%s" % (n, " lies" if n == 1 else "s lie")
     return [
         {"id": "apollo-1", "when": "27 January 1967", "title": "Apollo 1: a flash fire in pure oxygen", "resource": "R5",
          "what": [q(A1, "The astronauts would be wearing spacesuits with the spacecraft’s hatches closed and the cabin pressurized with 100% oxygen", "The test"),
                   q(A1, "Because of the pure oxygen atmosphere, the fire spread quickly, causing a rapid rise in temperature and pressure that led to the rupture of the Command Module pressure vessel", ""),
                   q(A1, "Air Force pathologists concluded the astronauts perished from asphyxia from carbon monoxide and other toxic gases resulting from the fire", "What killed the crew"),
                   q(RB, "NASA’s long history of successes in testing and launching space vehicles with pure oxygen environments at 16.7 p.s.i. and lower pressures led to overconfidence and complacency", "The congressional summary of the review")],
-         "ties": [fact("Pure oxygen at 16.7 psi is on the atmosphere map as a historical point. No PSI test row lies anywhere near it, and none lies near today's suit atmosphere either.", link="/envelope"),
-                  reading("Gases, not flames, killed the crew. Saffire reached the same ordering sixty years later: carbon monoxide and carbon dioxide rose more than temperature and pressure.")]},
+         "ties": [fact("Pure oxygen at %g psi is on the atmosphere map as a historical point. %s near it, and %s near today's suit atmosphere (near means %s)."
+                       % (pad["p_psia"], rows(near_pad)[0].upper() + rows(near_pad)[1:], rows(near_suit), env["near_rule"]), link="/envelope"),
+                  reading("Gases, not flames, killed the crew. Saffire reached the same ordering more than fifty years later: carbon monoxide and carbon dioxide rose more than temperature and pressure.")]},
         {"id": "apollo-13", "when": "April 1970", "title": "Apollo 13: insulation burned inside an oxygen tank", "resource": "R6",
          "what": [q(A13, "During the final test on the launch pad, the heaters were left on for an extended period and reached temperatures around 1000 degrees Fahrenheit, degrading the Teflon insulation", "The cause, years before the flight"),
                   q(A13, "the explosion in tank number two also damaged tank number one, making use of the fuel cells impossible and threatening the eventual loss of all electrical power and water", "The consequence"),
@@ -244,7 +251,7 @@ def build(raw_dir: str, out_dir: str) -> dict:
         video = {"title": o.get("title"), "by": o.get("author_name"), "url": "https://www.youtube.com/watch?v=W1oXykoz9zg", "ref": lib.ref(VIDEO), "resource": "R3"}
     res = json.load(open(os.path.join(out_dir, "official_resources.json"), encoding="utf-8"))["items"]
     lessons = {"klass": "literature", "note": "Quotations are checked against the stored NASA pages. Sentences marked as readings are ours.",
-               "incidents": [card(c) for c in incidents()], "earth": [card(c) for c in earth()], "video": video,
+               "incidents": [card(c) for c in incidents(out_dir)], "earth": [card(c) for c in earth()], "video": video,
                "resources": [{k: x[k] for k in ("id", "title", "url", "type", "in_ledger", "used_in", "receipts")} for x in res]}
     scoped = [json.load(open(os.path.join(out_dir, tb["artifact"]), encoding="utf-8")) | {"artifact": tb["artifact"]}
               for i in json.load(open(os.path.join(out_dir, "investigations.json"), encoding="utf-8"))["items"] if i.get("scope", {}).get("in_scope") for tb in i["tables"]]

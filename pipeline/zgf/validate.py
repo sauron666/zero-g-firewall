@@ -76,6 +76,8 @@ def check(out_dir: str) -> dict:
         n += reported(load("reported.json"), ledger)
     if os.path.exists(os.path.join(out_dir, "inventory.json")):
         n += inventory(load("inventory.json"), ledger, load)
+    if os.path.exists(os.path.join(out_dir, "envelope.json")):
+        n += standing_sentences(load("envelope.json"))
     if os.path.exists(os.path.join(out_dir, "model", "atmospheres.json")):
         n += model_atmospheres(load("model/atmospheres.json"), load("reported.json") if os.path.exists(os.path.join(out_dir, "reported.json")) else None)
     return {"checks": n, "ok": True}
@@ -184,6 +186,17 @@ def reported(d: dict, ledger: dict) -> int:
             raise IntegrityError("the atmosphere %s has a receipt that leads to no stored sentence" % at["id"])
         n += 1
     return n + len(d["saffire"]["rows"]) + len(d["luci"]["rows"])
+
+
+def standing_sentences(env: dict) -> int:
+    """Some sentences of the site state a count of zero in words ("no row was taken in lunar or Martian gravity"). They may stand only while the count is zero."""
+    partial = env["gravity_counts"]["partial"]
+    if partial != 0:
+        raise IntegrityError("sentences of the site say that no PSI row was taken in lunar or Martian gravity; the tables now hold %d" % partial)
+    with_p = [s["id"] for s in env["series"] if s["kind"] == "solid" and s["n_with_pressure"]]
+    if with_p:
+        raise IntegrityError("sentences of the site say that the solid-fuel tables record no pressure; these series now do: %s" % ", ".join(with_p))
+    return 2
 
 
 def model_atmospheres(m: dict, d: dict | None) -> int:

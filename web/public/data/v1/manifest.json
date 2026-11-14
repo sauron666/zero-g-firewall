@@ -246,8 +246,8 @@
    "klass": "derived"
   },
   "lessons.json": {
-   "sha256": "126d36a8c1db296bf8fb5e00ecdf8b0a621c62ad841e9c5b4a3176a52040f7cc",
-   "bytes": 16594,
+   "sha256": "4eb476cd3cd31d5e3d0d5cc6bc30c55510a207ac3d0329f42ce26aead1ca478c",
+   "bytes": 16663,
    "klass": "literature"
   },
   "exports/PSI-22__PSI_22_Experimental_table_ACME_E_FIELD_Flames.csv": {
@@ -429,5 +429,5 @@
  "brand": "Zero-G Firewall",
  "team": "The Rule of Flame",
  "mascot": "ISKRA",
- "built_at_utc": "2026-11-14T18:01:44Z"
+ "built_at_utc": "2026-11-14T18:43:55Z"
 }

@@ -45,6 +45,13 @@ describe("counts written as words", () => {
     });
   }
 
+  it("the matrix describes the test runs of the alarm lab as the test file runs them", () => {
+    const said = /In the test runs, (\w+) seeds for each of (\w+) situations/.exec(JSON.stringify(data<MatrixDoc>("matrix.json")));
+    expect(said, "the sentence is no longer in the matrix; remove or update this test").not.toBeNull();
+    const seeds = /scorecard\(keys, \[([\d, ]+)\]\)/.exec(page("trust/lab.test.ts"))![1].split(",").length;
+    expect([said![1], said![2]]).toEqual([WORD[seeds], WORD[SCENARIOS.length]]);
+  });
+
   it("the scorecard runs every situation with every seed", () => {
     expect(new Set(SCORE_SEEDS).size).toBe(SCORE_SEEDS.length);
     expect(page("pages/Alarm.tsx")).toContain("SCENARIOS.length * SCORE_SEEDS.length");

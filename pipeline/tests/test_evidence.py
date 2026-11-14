@@ -490,6 +490,18 @@ class Atmospheres(unittest.TestCase):
             V.model_atmospheres(built, stated)
 
 
+class StandingSentences(unittest.TestCase):
+    ENV = {"gravity_counts": {"partial": 0}, "series": [{"id": "BASS-II solids", "kind": "solid", "n_with_pressure": 0}, {"id": "FLEX droplets", "kind": "droplet", "n_with_pressure": 273}]}
+
+    def test_a_sentence_that_says_none_stands_only_while_the_count_is_zero(self):
+        from zgf import validate as V
+        self.assertEqual(V.standing_sentences(self.ENV), 2)
+        with self.assertRaises(V.IntegrityError):                       # the day PSI publishes a row taken in lunar gravity, the build stops until the sentences change
+            V.standing_sentences({**self.ENV, "gravity_counts": {"partial": 3}})
+        with self.assertRaises(V.IntegrityError):
+            V.standing_sentences({**self.ENV, "series": [{"id": "BASS-II solids", "kind": "solid", "n_with_pressure": 4}]})
+
+
 class Holdings(unittest.TestCase):
     def test_folders_and_documents_of_a_record(self):
         from zgf import derive_core as C
