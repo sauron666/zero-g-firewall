@@ -1,6 +1,6 @@
 # Implementation status
 
-Updated: 14 November 2026, 13:24 Sofia time. Kept truthful: nothing is listed as working without a passing test or a visible result.
+Updated: 14 November 2026, 13:31 Sofia time. Kept truthful: nothing is listed as working without a passing test or a visible result.
 
 ## Working
 
@@ -13,6 +13,8 @@ Updated: 14 November 2026, 13:24 Sofia time. Kept truthful: nothing is listed as
 | Investigations page and record cards | 26 records with search and filters; each card shows NASA's text with receipts, what varied and what stayed constant, the table as written with row receipts, curator notes, files, people, publications. |
 | Atmosphere map | Real test rows in oxygen against pressure, crew atmospheres, the normoxic curve, historical points, a strip for rows without pressure, and counts of rows near each crew atmosphere. |
 | Evidence ledger page | Lists all 1,219 entries; re-computes the hash chain in the browser from the raw ledger (tested against the real ledger) and checks every data file against the manifest. |
+| Literature layer and quotation check (`pipeline/zgf/literature.py`, `claims.py`) | Text of the stored NASA documents by page or section; every quotation the site shows is searched in the stored text at build time. 25 of 25 found. |
+| Myths and evidence | NASA's three misconceptions (Researcher's Guide, p. 35), each against NASA's documents and PSI tables: where it held, where it may fail, what is open. Readings of our own are labelled. |
 | Data and models page | Report for the PSI curators, the model check with a parity plot, and the list of data files with hashes. |
 | Closed-form physics and equilibrium thermochemistry | 16 Python tests reproduce the check values (LUCI spin, buoyant flow ranges, Coriolis fractions, normoxic curve, cabin bounds, methane flame temperatures). |
 | Tracer-transport solver, browser and Python | The TypeScript solver matches the Python reference on three golden cases to 1e-9; mass balance, positivity, walls and open ends are tested. 20 TypeScript tests. |
@@ -25,7 +27,7 @@ Updated: 14 November 2026, 13:24 Sofia time. Kept truthful: nothing is listed as
 
 ## Data is in, pages not built yet (nothing is shown in their place)
 
-Ranking with stability, compare, gaps and plans, Myth vs Evidence with verified quotations, Official Resources Coverage, incident timeline, Earth applications, sensor inventory, tidy CSV exports.
+Ranking with stability, compare, gaps and plans, Official Resources Coverage (4 of 10 resources are used so far), incident timeline, Earth applications, sensor inventory, tidy CSV exports.
 
 ## Next in the build order
 
@@ -39,4 +41,5 @@ The flame windows (illustration), the Fan Paradox (model, relative units, prescr
 
 - The Fan Paradox prescribes buoyancy as a plume fixed above the source; it does not travel with the smoke. Smoke units and the alarm level are relative; the ensemble varies them.
 - Flame temperatures are equilibrium bounds for gaseous fuels. They say nothing about solid materials.
-- Literature statements on the opening page name their source and page; their ledger receipts arrive with the NASA sync.
+- The statement that BASS-II flames always went out when the fan stopped (ICES-2019-101) is not in the ledger. The site says only what the stored BASS-II Summary Report says: one test, flow cut, flame out within 2 s.
+- The equilibrium check covers gas flames only. Nothing on the site predicts what a solid material does.

@@ -93,3 +93,14 @@ class Envelope(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Quotations(unittest.TestCase):
+    def test_a_quotation_is_found_only_if_the_document_holds_it(self):
+        from zgf.literature import Library, norm
+        lib = Library("", {})
+        lib._cache["d"] = [{"loc": "p. 34", "page": 34, "text": "34\nfire safety. 2. A fire will self-extin-\nguish if ventila"}, {"loc": "p. 35", "page": 35, "text": "35\ntion is shut off. 3. B ecause the gravity"}]
+        self.assertEqual(lib.find("d", "A fire will self-extinguish if")["loc"], "p. 34")                       # line-end hyphenation is undone
+        self.assertEqual(lib.find("d", "Because the gravity")["match"], "ignoring spaces")                        # a word split by the PDF
+        self.assertIsNone(lib.find("d", "A fire will always self-extinguish"))                                    # a changed word is not a quotation
+        self.assertEqual(norm("“It’s  20–30 cm”"), '"it\'s 20-30 cm"')

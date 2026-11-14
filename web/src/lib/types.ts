@@ -287,3 +287,32 @@ export interface ValidationDoc {
   points: { a: string; t: string; r: number; f: string; p: number; T: number; Tr: number; Ta: number; Z: number; Zm: number }[];
   overall: { closer_convention_per_table: ErrStats; row_pressure: ErrStats; one_atmosphere: ErrStats };
 }
+
+/** myths.json: NASA's three misconceptions against NASA's own documents and tables. */
+export type MythItem =
+  | { kind: "quote"; quote: string; says: string; quote_verified: boolean; source: string; resource?: string | null; ref: SourceRef & { loc?: string; match?: string } }
+  | { kind: "reading"; text: string }
+  | { kind: "data" | "model"; klass: Klass; text: string; accession?: string; also?: string[]; table?: string; ledger_seq?: number; sha256?: string; link?: string; columns?: string[]; rows?: string[][] };
+export interface MythGroup {
+  side: "holds" | "warns" | "fails" | "open";
+  title: string;
+  items: MythItem[];
+}
+export interface MythCard {
+  id: string;
+  n: number;
+  myth: string;
+  myth_verified: boolean;
+  myth_ref: SourceRef & { loc?: string };
+  question: string;
+  answer: string;
+  groups: MythGroup[];
+}
+export interface MythsDoc {
+  klass: Klass;
+  note: string;
+  source: string;
+  quotes: number;
+  quotes_verified: number;
+  items: MythCard[];
+}

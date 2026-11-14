@@ -38,8 +38,8 @@ export interface Branch {
 export const BRANCHES: Record<BranchId, Branch> = {
   starved: {
     id: "starved", label: "The flame starves and goes out", floor: 0,
-    evidence: "In BASS-II, flames always quenched when the fan was turned off.",
-    source: "ICES-2019-101 (BASS-II); data set PSI-25", appliesTo: ["micro", "partial"],
+    evidence: "In a BASS-II test the flow was cut off under a spreading flame and the flame went out within 2 s.",
+    source: "BASS-II Summary Report (NTRS 20210011385); data set PSI-25", appliesTo: ["micro", "partial"],
   },
   diffusion: {
     id: "diffusion", label: "A weak flame lives on diffusion alone", floor: 0.15,
@@ -49,12 +49,12 @@ export const BRANCHES: Record<BranchId, Branch> = {
   selffed: {
     id: "selffed", label: "The fire has its own oxygen or a jet feeds it", floor: 1,
     evidence: "On Mir in 1997 an oxygen generator burned for several minutes; a suppressant jet entrains air and sustains a flame with ambient flow off.",
-    source: "NASA history page on the Mir fire; Researcher's Guide, p. 31-32", appliesTo: ["micro", "partial"],
+    source: "NASA history page on the Mir fire; Researcher's Guide, p. 31", appliesTo: ["micro", "partial"],
   },
   buoyant: {
     id: "buoyant", label: "Gravity keeps feeding the flame", floor: 0.9,
-    evidence: "In partial gravity buoyant flow persists when the fans stop; lunar gravity is near the most flammable condition. Not yet measured in PSI.",
-    source: "Ferkul et al. 2026 (NTRS 20260001966); BASS-II caution in ICES-2019-101", appliesTo: ["partial"],
+    evidence: "Buoyant flow needs no fan. Fabric and an acrylic rod burned for over two and a half minutes in simulated lunar gravity; solids burn most readily in a flow of about 10 cm/s. PSI holds no partial-gravity rows.",
+    source: "Lunar Combustion Investigation abstract (NTRS 20250010653); Researcher's Guide, p. 31", appliesTo: ["partial"],
   },
 };
 

@@ -29,7 +29,7 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
         <div className="stack" style={{ ["--gap" as string]: "26px" }}>
           <h1 className="claim claim--hero">Kill the fans?</h1>
           <p className="lede">
-            On the space station, the first answer to a fire is to stop the ventilation. In NASA's BASS-II tests every flame went out when the fan stopped.
+            On the space station, the first answer to a fire is to stop the ventilation. When NASA cut the airflow under a flame in the BASS-II experiment, it went out within two seconds.
             NASA's own guide still lists <q>A fire will self-extinguish if ventilation is shut off</q> as a misconception. And on the Moon, gravity is a fan nobody can switch off.
           </p>
           <div className="row" style={{ ["--gap" as string]: "12px" }}>
@@ -37,8 +37,8 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
             <a className="btn btn--quiet" href={href("/paradox")}>Run the two realities</a>
           </div>
           <p className="note" style={{ maxWidth: "62ch" }}>
-            Sources: ICES-2019-101 (BASS-II flammability limits); A Researcher's Guide to: Combustion Science, p. 35; Ferkul et al. 2026 (NTRS 20260001966).
-            {nasa ? " Each is stored in the ledger with its hash." : " Receipts appear here once the NASA sync has been derived."}
+            Sources: BASS-II Summary Report (NTRS 20210011385); A Researcher's Guide to: Combustion Science, p. 35; Lunar Combustion Investigation (NTRS 20250010653).
+            {nasa ? " Each is stored in the ledger with its hash, and every quotation is checked against the stored text." : " Receipts appear here once the NASA sync has been derived."}
           </p>
         </div>
 
@@ -54,7 +54,7 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
                 <p className="window-cap__state">
                   {fans
                     ? "Air moves past the fuel at about 10 cm/s. The flame burns blue and steady."
-                    : "The flame shrinks and goes out. Observed for the BASS-II samples. Not a rule."}
+                    : "The flame shrinks and goes out, as one did in BASS-II. Not a rule."}
                 </p>
               </figcaption>
             </figure>
