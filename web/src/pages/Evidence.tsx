@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { href } from "../app/router";
 import { fmtBytes, fmtInt, useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
-import type { CuratorDoc, CuratorFinding, Investigation, InvestigationsDoc, ProfilesDoc, TableDoc, TableProfile, TableSummary } from "../lib/types";
+import type { BriefsDoc, CuratorDoc, CuratorFinding, Investigation, InvestigationsDoc, ProfilesDoc, TableDoc, TableProfile, TableSummary } from "../lib/types";
 import { SourceBtn } from "../components/Source";
 import { useReceipt } from "../components/Receipt";
 import { IconArrow, IconWarn } from "../components/icons";
@@ -58,7 +58,7 @@ export function FindingRow({ f, link }: { f: CuratorFinding; link?: boolean }) {
 
 interface AreaDoc { listed: { name: string; status: string; roses_eligible: string; accession: string | null }[]; listed_n?: number; matched_n?: number; listed_not_in_search?: string[]; search_not_listed?: string[]; drift: { statement: string } }
 
-function Explorer({ doc, findings }: { doc: InvestigationsDoc; findings: CuratorFinding[] }) {
+function Explorer({ doc, findings, briefs }: { doc: InvestigationsDoc; findings: CuratorFinding[]; briefs: BriefsDoc | null }) {
   const area = useData<AreaDoc>("research_area.json");
   const [q, setQ] = useState("");
   const [scope, setScope] = useState<"in" | "all">("in");
@@ -96,6 +96,7 @@ function Explorer({ doc, findings }: { doc: InvestigationsDoc; findings: Curator
         NASA's PSI repository returns {doc.search_total} records for "combustion". {nIn} are combustion science.
         {out.length > 0 && <> {out.length === 1 ? "One is" : `${out.length} are`} not ({out.map((i) => i.accession).join(", ")}): the search matched a word, and each is kept here with the reason it is set aside.</>}
       </p>
+      {briefs && <p className="note" style={{ maxWidth: "88ch" }}>The line in serif under each title is an AI brief: this project's reading of the record, written with an AI model and checked by code against the record's own text and numbers. NASA's words are on each record's page.</p>}
       <div className="toolbar">
         <label className="search">
           <span className="sr">Search the records</span>
@@ -140,6 +141,7 @@ function Explorer({ doc, findings }: { doc: InvestigationsDoc; findings: Curator
                 <span>
                   <span className="rec__title">{i.acronym ? `${i.acronym}: ` : ""}{i.title}</span>
                   {!i.scope.in_scope && <span className="rec__sub" style={{ display: "block" }}>Set aside: {i.scope.reason}.</span>}
+                  {briefs?.items[i.accession] && <span className="rec__brief" title="AI brief: our reading, checked by code against the record">{briefs.items[i.accession].what}</span>}
                 </span>
                 <span className="hide-s rec__sub">{i.sub_research_area || "not stated"}</span>
                 <span className="hide-s rec__sub"><Gravity g={i.gravity} platform={i.platform} /></span>
@@ -291,7 +293,8 @@ function TableView({ t, inv, findings }: { t: TableSummary; inv: Investigation; 
   );
 }
 
-function Card({ inv, findings, profiles }: { inv: Investigation; findings: CuratorFinding[]; profiles: ProfilesDoc | null }) {
+function Card({ inv, findings, profiles, brief }: { inv: Investigation; findings: CuratorFinding[]; profiles: ProfilesDoc | null; brief: BriefsDoc | null }) {
+  const mineBrief = brief?.items[inv.accession];
   const mine = findings.filter((f) => f.accession === inv.accession || f.also?.includes(inv.accession));
   const folders = Object.entries(inv.files.by_folder).sort((a, b) => b[1].bytes - a[1].bytes);
   const [pubsAll, setPubsAll] = useState(false);
@@ -309,6 +312,16 @@ function Card({ inv, findings, profiles }: { inv: Investigation; findings: Curat
         <h1 className="claim claim--l">{inv.title}</h1>
         {inv.acronym && <p className="note" style={{ fontSize: 14 }}>{inv.acronym}{inv.sub_research_area ? ` · ${inv.sub_research_area}` : ""}</p>}
       </header>
+
+      {mineBrief && brief && (
+        <section className="brief" aria-label="AI brief">
+          <div className="brief__head"><span className="ev__tag">AI brief</span><span className="note">our reading, not NASA's words · checked by code against this record</span></div>
+          <p className="brief__what">{mineBrief.what}</p>
+          <p className="brief__why">{mineBrief.why}</p>
+          <details className="brief__how"><summary>How this brief was made and checked</summary>
+            <p>{brief.how}</p><p>Written by {brief.written_by}, {brief.when}. {brief.dropped.length === 0 ? "No brief was dropped in this build." : `${brief.dropped.length} briefs were dropped in this build.`}</p></details>
+        </section>
+      )}
 
       <section className="panel" data-klass="observed">
         <div className="grid cols-2" style={{ ["--gap" as string]: "10px 36px" }}>
@@ -425,6 +438,7 @@ export function Evidence({ route, manifest }: PageProps) {
   const inv = useData<InvestigationsDoc>(ready ? "investigations.json" : null);
   const cur = useData<CuratorDoc>(ready ? "curator_report.json" : null);
   const prof = useData<ProfilesDoc>(ready && route.segs[1] ? "profiles.json" : null);
+  const briefs = useData<BriefsDoc>(ready ? "briefs.json" : null);
   if (!ready) return <Waiting route={route} manifest={manifest} />;
   if (inv.error) return <div className="empty"><p className="empty__title">The investigations could not be loaded</p><p style={{ marginTop: 6 }}>{inv.error}</p></div>;
   if (!inv.data) return <p className="note">Loading the records fetched from NASA…</p>;
@@ -433,7 +447,7 @@ export function Evidence({ route, manifest }: PageProps) {
   if (acc) {
     const one = inv.data.items.find((i) => i.accession.toLowerCase() === acc.toLowerCase());
     if (!one) return <div className="empty"><p className="empty__title">No record {acc} in the combustion search</p><p style={{ marginTop: 6 }}><a href={href("/evidence")}>See all investigations</a></p></div>;
-    return <Card key={one.accession} inv={one} findings={findings} profiles={prof.data} />;
+    return <Card key={one.accession} inv={one} findings={findings} profiles={prof.data} brief={briefs.data} />;
   }
-  return <Explorer doc={inv.data} findings={findings} />;
+  return <Explorer doc={inv.data} findings={findings} briefs={briefs.data} />;
 }

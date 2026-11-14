@@ -394,10 +394,15 @@
    "sha256": "6b73d28892cf5958d383a62b27a2a0227e9b526cec399db1719162275aeb0b26",
    "bytes": 29607,
    "klass": "derived"
+  },
+  "briefs.json": {
+   "sha256": "fc82560d2a0972468ec663fe87a5da91d4390d20663edd59d9e4b72b472757d0",
+   "bytes": 6812,
+   "klass": "illustrative"
   }
  },
  "brand": "Zero-G Firewall",
  "team": "The Rule of Flame",
  "mascot": "ISKRA",
- "built_at_utc": "2026-11-14T12:52:55Z"
+ "built_at_utc": "2026-11-14T13:46:17Z"
 }

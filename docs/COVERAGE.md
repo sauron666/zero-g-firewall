@@ -1,6 +1,6 @@
 # Coverage of the plan, feature by feature
 
-Checked on 14 November 2026 at 15:27 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
+Checked on 14 November 2026 at 15:48 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
 
 | Priority | Features | Done | Partial | Not built |
 |---|---|---|---|---|
@@ -113,7 +113,7 @@ Checked on 14 November 2026 at 15:27 Sofia time against the 130 features of the 
 | E13 | P2 | **not built** | Live ISS telemetry integrity monitor (feed health on real data) |  |
 | E14 | P3 | **not built** | Threat model and trust-zone diagram |  |
 | E15 | P1 | **not built** | Detector lineage |  |
-| F01 | P0 | done | Build-time card generation with validators | build check with planted-row tests (pipeline/zgf/validate.py); every quotation searched in the stored text |
+| F01 | P0 | done | Build-time card generation with validators | a two-sentence AI brief for each of the 24 investigations, written during the build and checked by code (no number the record lacks, no verdict, no invented curator note); shown on the list and on each record, labelled as our reading |
 | F02 | P0 | done | Deterministic fallback with no key and no network |  |
 | F03 | P1 | done | Orchestrator with typed tools (search, card, compare, envelope, thermo, transport, triage) | a rule-based planner calls typed tools (screen, count near an atmosphere, rank for a mission, matrix coverage, curator notes, fetch a record, search, compose, check); counts and rankings are computed by code |
 | F04 | P1 | done | Validation agent | every sentence is checked against its cited passage; model answers also for numbers and verdicts |

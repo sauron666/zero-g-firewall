@@ -416,3 +416,11 @@ export interface MatrixDoc {
   words: Record<Coverage, string>;
   waiting_for_sync: { key: string; name: string }[];
 }
+
+/** briefs.json: two sentences per investigation, written with an AI model and checked by the pipeline. Our reading, never NASA's words. */
+export interface BriefsDoc {
+  klass: Klass; written_by: string; when: string; how: string; note: string;
+  items: Record<string, { what: string; why: string }>;
+  dropped: { accession: string; problems: string[] }[];
+  without_brief: string[];
+}

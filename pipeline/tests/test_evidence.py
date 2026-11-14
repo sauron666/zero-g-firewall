@@ -176,5 +176,36 @@ class Matrix(unittest.TestCase):
         self.assertEqual({c["phase"] for c in mx["cells"]}, {p["id"] for p in mx["phases"]})
 
 
+class Briefs(unittest.TestCase):
+    """An AI brief may not bring in a number the record does not hold, nor a verdict."""
+
+    def setUp(self):
+        from zgf import briefs as B
+        self.B = B
+        self.inv = {"accession": "PSI-0", "title": "Burning of solids", "acronym": "X", "objective": "Burn rods at 17 percent oxygen.", "approach": "", "hypothesis": "",
+                    "impacts": "", "hardware": "Glovebox", "platform": "ISS", "scope": {"in_scope": True, "reason": ""}, "tables": [{"artifact": "t", "rows": 129}]}
+        self.prof = {"t": {"columns": [{"name": "Flow (cm/s)", "role": "varied"}]}}
+
+    def test_a_brief_that_stays_inside_the_record_passes(self):
+        ok = {"what": "Rods burned at 17 percent oxygen.", "why": "Its 129 rows record flow."}
+        self.assertEqual(self.B.check("PSI-0", ok, self.inv, self.prof, set()), [])
+
+    def test_a_number_the_record_does_not_hold_is_caught(self):
+        bad = {"what": "Rods burned at 21 percent oxygen.", "why": "Its 129 rows record flow."}
+        self.assertIn("holds a number the record does not hold: 21", self.B.check("PSI-0", bad, self.inv, self.prof, set()))
+
+    def test_a_verdict_is_caught(self):
+        bad = {"what": "Rods burned at 17 percent oxygen.", "why": "The material is safe in a cabin."}
+        self.assertTrue(any("verdict" in p for p in self.B.check("PSI-0", bad, self.inv, self.prof, set())))
+
+    def test_unknown_or_excluded_records_and_invented_curator_notes_are_caught(self):
+        ok = {"what": "Rods burned.", "why": "The curator report flags its dates."}
+        self.assertEqual(self.B.check("PSI-9", ok, None, self.prof, set()), ["no such record"])
+        self.assertIn("leans on a curator note that does not exist for this record", self.B.check("PSI-0", ok, self.inv, self.prof, set()))
+        self.assertEqual(self.B.check("PSI-0", ok, self.inv, self.prof, {"PSI-0"}), [])
+        out = dict(self.inv, scope={"in_scope": False, "reason": ""})
+        self.assertEqual(self.B.check("PSI-0", ok, out, self.prof, set()), ["the record is set aside as not combustion science"])
+
+
 if __name__ == "__main__":
     unittest.main()

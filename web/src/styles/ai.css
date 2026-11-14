@@ -48,3 +48,12 @@
 @media (max-width: 760px) { .score { grid-template-columns: repeat(2, minmax(0, 1fr)); } .verdicts thead { display: none; } .verdicts td { display: block; border-top: 0; padding: 4px 10px; } .verdicts tr { display: block; border-top: 1px solid var(--hairline); padding: 6px 0; } }
 .linklike { border: 0; background: none; padding: 0; font: inherit; color: var(--ink); text-align: left; cursor: pointer; text-decoration: underline; text-decoration-color: var(--axis); text-underline-offset: 3px; }
 .linklike:hover { text-decoration-color: var(--ink); }
+
+/* AI brief on an investigation: drawn as an illustration (dotted), never as NASA data. */
+.brief { padding: 14px 18px 12px; border: 1px dotted var(--axis); border-left: 3px dotted var(--ink-2); border-radius: var(--radius); background: var(--raised); display: grid; gap: 8px; }
+.brief__head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.brief__what { font-family: var(--font-claim); font-size: 1.22rem; line-height: 1.4; color: var(--ink); max-width: 70ch; }
+.brief__why { font-family: var(--font-claim); font-size: 1.08rem; line-height: 1.45; color: var(--ink-2); max-width: 70ch; }
+.brief__how { font-size: var(--t-12); color: var(--ink-3); }
+.brief__how summary { cursor: pointer; }
+.brief__how p { margin-top: 6px; max-width: 86ch; }
