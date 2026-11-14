@@ -74,7 +74,41 @@ def check(out_dir: str) -> dict:
         n += recorded(load("recorded.json"), ledger)
     if os.path.exists(os.path.join(out_dir, "reported.json")):
         n += reported(load("reported.json"), ledger)
+    if os.path.exists(os.path.join(out_dir, "inventory.json")):
+        n += inventory(load("inventory.json"), ledger, load)
     return {"checks": n, "ok": True}
+
+
+def inventory(d: dict, ledger: dict, load) -> int:
+    """Every cell of the inventory names columns that exist in a stored table, under a pattern that matches the header,
+    and every count beside the chart can be counted again from the cells."""
+    import re
+    pat = {q["id"]: re.compile(q["pattern"], re.I) for q in d["quantities"]}
+    n = 0
+    for it in d["items"]:
+        heads = {}
+        for t in it["tables"]:
+            if ledger.get(t["ledger_seq"]) != t["sha256"]:
+                raise IntegrityError("inventory: the table of %s has no matching ledger entry" % it["accession"])
+            heads[t["artifact"]] = [" ".join(str(c).split()) for c in load(t["artifact"])["columns"]]      # as the profiles name a header: runs of spaces as one
+        for q, cell in it["cells"].items():
+            for c in cell["columns"]:
+                if " ".join(c["name"].split()) not in heads.get(c["table"], []):
+                    raise IntegrityError("inventory: %s names a column that is not in its table: %s" % (it["accession"], c["name"]))
+                if not pat[q].search(c["name"].strip()):
+                    raise IntegrityError("inventory: column '%s' sits under %s, whose pattern does not match it" % (c["name"], q))
+                if not (0 < c["filled"] <= c["of"]):
+                    raise IntegrityError("inventory: column '%s' of %s is counted in more rows than its table has, or in none" % (c["name"], it["accession"]))
+                n += 1
+    for q, tot in d["totals"].items():
+        have = [it for it in d["items"] if q in it["cells"]]
+        if tot["records"] != len(have) or tot["rows"] != sum(it["cells"][q]["rows"] for it in have):
+            raise IntegrityError("inventory: the total for %s is not the sum of its cells" % q)
+        n += 1
+    c = d["counts"]
+    if c["placed"] + c["set_aside"] + c["not_placed"] != c["columns"] or c["not_placed"] != len(d["not_placed"]):
+        raise IntegrityError("inventory: placed, set aside and not placed do not add up to the columns read")
+    return n + 1
 
 
 def recorded(d: dict, ledger: dict) -> int:

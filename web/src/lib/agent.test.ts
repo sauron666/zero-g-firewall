@@ -136,4 +136,16 @@ describe("poisoned passage", () => {
     const fm2 = runAgent("What will FM2 test on the Moon?", kit);
     expect(fm2.answer.lines[0].text).toMatch(/^NASA plans \d+ burn tests of one fabric on the Moon/);
   });
+
+  it("answers what the tables state from the same counts as the page that draws them", () => {
+    const inv = load("inventory.json");
+    const who = (q: string) => inv.items.filter((it: any) => it.cells[q]).map((it: any) => it.acronym || it.accession);
+    const co = runAgent("Which records measured carbon monoxide?", kit);
+    expect(co.answer.lines[0].text).toContain(`${who("gases_after").length} of the ${inv.counts.with_table} combustion records`);
+    for (const name of who("gases_after")) expect(co.answer.lines[0].text).toContain(name);
+    const end = runAgent("Which records recorded how the flame ended?", kit);
+    expect(end.answer.lines[0].text.startsWith(`${who("ending").length} of the ${inv.counts.with_table} combustion records`)).toBe(true);
+    for (const name of who("ending")) expect(end.answer.lines[0].text).toContain(name);
+    expect(runAgent("Will a fire go out if the fans are stopped?", kit).answer.lines[0].text).toContain("Misconception 2");      // the new passages do not displace the two-sided answer
+  });
 });

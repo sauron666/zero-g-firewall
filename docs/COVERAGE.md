@@ -1,14 +1,14 @@
 # Coverage of the plan, feature by feature
 
-Checked on 14 November 2026 at 18:13 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
+Checked on 14 November 2026 at 18:45 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
 
 | Priority | Features | Done | Partial | Not built |
 |---|---|---|---|---|
 | P0 | 28 | 28 | 0 | 0 |
-| P1 | 59 | 41 | 6 | 12 |
+| P1 | 59 | 42 | 6 | 11 |
 | P2 | 38 | 2 | 9 | 27 |
 | P3 | 5 | 0 | 0 | 5 |
-| All | 130 | 71 | 15 | 44 |
+| All | 130 | 72 | 15 | 43 |
 
 ## Definition of done (specification, section 0)
 
@@ -65,7 +65,7 @@ Checked on 14 November 2026 at 18:13 Sofia time against the 130 features of the 
 | B08 | P0 | done | Mission lens | five missions re-rank; choosing one (or arriving from the ranking page) marks its atmosphere on the map with the window that counts as near; a spacecraft in transit is read under the station or the rover and lander lens |
 | B09 | P0 | done | Evidence Q&A with claim-level citations, abstention and deterministic fallback | offline engine, checker, local, cloud and hybrid modes |
 | B10 | P1 | **not built** | Audience lens (student, researcher, engineer) |  |
-| B11 | P1 | **not built** | Sensor and measurement inventory across investigations | each record page lists what the ledger holds of it by NASA's folders; no inventory of measured quantities across records |
+| B11 | P1 | done | Sensor and measurement inventory across investigations | second view of the Investigations page (What was measured): 17 quantities placed by header patterns, a picker for what a model needs, PSI's raw-data listing by kind of file, CSV, receipts |
 | B12 | P1 | **not built** | Hardware-family graph and knowledge graph (facilities, fuels, instruments, investigations) |  |
 | B13 | P1 | done | Controls view | on the fire matrix page: prevention, detection and suppression, each with its fire behaviours as marks for the station and the Moon, the NASA records that inform it (by the written pillar rules) and a link that opens those records |
 | B14 | P1 | done | Earth applications with NASA sources | three Spinoff articles; water mist is not in the ledger, so it is not shown |

@@ -534,3 +534,24 @@ export interface DropletDoc {
   assumptions: string[];
   limits: string;
 }
+
+/* ---- inventory.json: what each record's table states, and what PSI lists for it as files ---- */
+export interface InventoryColumn { table: string; name: string; kind: string; filled: number; distinct: number; of: number; min?: number; max?: number; example?: string }
+export interface InventoryCell { state: "varied" | "single"; as_text: boolean; rows: number; columns: InventoryColumn[] }
+export interface InventoryTable extends SourceRef { artifact: string; rows: number }
+export interface InventoryFiles { raw: Record<string, { files: number }>; raw_files: number; raw_bytes: number; analysed_files: number; analysed_bytes: number; other_extensions: Record<string, number> }
+export interface InventoryItem {
+  accession: string; acronym: string; title: string; gravity: "micro" | "ground" | "unknown"; hardware: string;
+  tables: InventoryTable[]; rows: number; cells: Record<string, InventoryCell>; not_placed: number; files: InventoryFiles; in_ledger: number;
+}
+export interface InventoryQuantity { id: string; group: string; label: string; phrase: string; about: string; pattern: string }
+export interface InventoryDoc {
+  klass: "derived"; rule: string; files_rule: string;
+  groups: { id: string; label: string }[];
+  quantities: InventoryQuantity[];
+  file_kinds: { id: string; label: string; extensions: string[] }[];
+  items: InventoryItem[];
+  totals: Record<string, { records: number; varied: number; rows: number }>;
+  counts: { records: number; with_table: number; tables: number; rows: number; columns: number; placed: number; set_aside: number; not_placed: number; raw_files: number; raw_bytes: number };
+  not_placed: (InventoryColumn & { accession: string })[];
+}

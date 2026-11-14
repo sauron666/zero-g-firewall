@@ -2,7 +2,7 @@
 
 ## Hand-off (14 November, evening): start here
 
-The site is live from `main` at https://sauron666.github.io/zero-g-firewall/. All 28 must-have features of `docs/COVERAGE.md` are done. Tests: 62 Python, 114 TypeScript, all passing; the integrity check runs 1,758 checks at each derivation.
+The site is live from `main` at https://sauron666.github.io/zero-g-firewall/. All 28 must-have features of `docs/COVERAGE.md` are done. Tests: 68 Python, 124 TypeScript, all passing; the integrity check runs 1,933 checks at each derivation.
 
 **Which raw cache.** Since 14 November 17:20 the site is built from the larger cache: 4,959 files, 330.9 MB, folder `nasa_raw2` on the team's machine, written by `sync_nasa_async.py` 2.0.0. The repository tracks that cache's ledger at `nasa_raw/ledger/ledger.jsonl` and its report at `nasa_raw/sync_report.json`. On the team's machine derive with `python pipeline/derive.py --raw nasa_raw2`, or rename the folders so that `nasa_raw2` becomes `nasa_raw`. The older, smaller folder no longer matches the tracked ledger.
 
@@ -13,7 +13,8 @@ Do next, in this order:
 0. **Add `sync_nasa_async.py` to `pipeline/` and commit it.** The ledger and the sync report name it (version 2.0.0, script SHA-256 `1bdb439dd71390b6715abc849e8001835504d86c3957aa1ac343bf6c9bb898d8`), and a reader who follows a receipt should find the tool that fetched the file. Then change rule 1 of `CLAUDE.md` and the README to name both scripts.
 1. **On the machine that holds the cache (it has NASA access):** run `python pipeline/sync_nasa.py --out nasa_raw2` once (version 1.2.0 adds NASA's fire protection brief and one NTRS record; it appends to the same ledger), then `python pipeline/derive.py --raw nasa_raw2`. Look at `matrix.waiting_for_sync` in the output: it must be empty. Open the stored text of `doc:std3001_fire_protection_brief` and compare it with the three quotations declared for `BRIEF` in `pipeline/zgf/matrix.py`; they were typed from a web summary and may not match word for word. Correct them until `quotes_verified` equals `quotes`. The opening page then states the station's own procedure with a receipt (the logic is already in `web/src/pages/Home.tsx`). Commit the new ledger, sync report and data files together.
 2. Done on 14 November, evening, and live: the controls view on the Fire matrix page (B13), the nearest tests to a design point with a CSV on the Atmosphere map (B23), and the brief for a mission on the ranking page (B15).
-3. Still open, by value: a sensor and measurement inventory across the records (B11: which table states oxygen, pressure, flow, temperature, gases, particle size; the column profiles in `profiles.json` hold what is needed); a signed release (K03); detector evidence cards for SAME, SAME-R and DAFT (E01). ISS live telemetry (M01) only if it can be tested against the real feed.
+3. Done on 14 November, 18:45: the measurement inventory (B11) as a second view of the Investigations page, `#evidence--measured` (`pipeline/zgf/inventory.py`, `web/src/viz/Inventory.tsx`, `web/src/lib/inventory.ts`). To add a quantity, add one line to `QUANTITIES` in `inventory.py`; the page, the CSV and ISKRA's passages follow.
+   Still open, by value: a signed release (K03); detector evidence cards for SAME, SAME-R and DAFT (E01). ISS live telemetry (M01) only if it can be tested against the real feed.
 4. Polish worth doing if time remains: readings at the head of the remaining pages (`Readings` and `Tile` in `web/src/dash/widgets.tsx`), and a pass over long paragraphs on the Alarm, Ledger and Data pages: lead with the result, fold the rest.
 
 Deliverables that must follow the site: the 30-second video (`node tools/video/record.mjs web/dist out_dir`, about four minutes for all ten scenes; `--only=3,6` renders single scenes again; captions read their numbers from the build), the pitch slides and the jury questions (links are with the team). Re-record after any change a viewer would see. Sunday: freeze around 11:00, video due 14:00, submit before 22:00.
@@ -45,7 +46,7 @@ Not used yet, in order of value:
 3. The same question in the evidence Q&A, every sentence cited to a row or a page. *(done: Ask ISKRA, and the conversation on every page)*
 4. Atmosphere map: real test points, the lunar-habitat region, the empty partial-gravity cell, the Apollo 1 historical point, the ISS point live when the feed is up. *(done, except the live point)*
 5. Ranking for a lunar habitat with the breakdown and the stability figure. *(done)*
-6. What varied in one investigation, and the sensor inventory. *(what varied: done on every record card)*
+6. What varied in one investigation, and the sensor inventory. *(done: what varied on every record card; the inventory under Investigations, "What was measured")*
 7. Parity plot of the flame model against NASA's own `Tad` column, with N and error. *(done: 587 rows, 2.1 K mean)*
 8. "A fan you cannot switch off". *(done: Flame physics page)*
 9. Alarm trust lab: a spoofed reading flagged, the detector-lineage chart, the cost of acting.

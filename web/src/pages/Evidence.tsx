@@ -3,7 +3,8 @@ import { useMemo, useState } from "react";
 import { href } from "../app/router";
 import { fmtBytes, fmtInt, useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
-import type { BriefsDoc, CuratorDoc, CuratorFinding, Investigation, InvestigationsDoc, ProfilesDoc, RankDoc, RankFacets, TableDoc, TableProfile, TableSummary } from "../lib/types";
+import type { BriefsDoc, CuratorDoc, CuratorFinding, InventoryDoc, Investigation, InvestigationsDoc, ProfilesDoc, RankDoc, RankFacets, TableDoc, TableProfile, TableSummary } from "../lib/types";
+import { MeasuredMatrix, RawHoldings } from "../viz/Inventory";
 import { SourceBtn } from "../components/Source";
 import { useReceipt } from "../components/Receipt";
 import { IconArrow, IconWarn } from "../components/icons";
@@ -108,7 +109,7 @@ function Explorer({ doc, findings, briefs, rank, pillar }: { doc: Investigations
 
   return (
     <div className="stack" style={{ ["--gap" as string]: "22px" }}>
-      <h1 className="page-title">Investigations</h1>
+      <Views at="records" />
       <Readings>
         <Tile label="Combustion records" value={nIn} of={`of ${doc.search_total}`} sub="returned by PSI for &quot;combustion&quot;" />
         <Tile label="Test rows" value={doc.items.filter((i) => i.scope.in_scope).reduce((a, i) => a + i.tables.reduce((b, t) => b + (t.rows ?? 0), 0), 0)} sub="in the experimental tables" />
@@ -206,6 +207,44 @@ function Explorer({ doc, findings, briefs, rank, pillar }: { doc: Investigations
         <KlassBadge k="observed" note="PSI metadata and tables, fetched from NASA" /> Test rows are counted as rows after the header with at least one filled cell.
         "Files in PSI" is the record's own file list; the site downloads the experimental tables and a few named summaries, not the raw video. Colour marks the gravity regime only.
       </p>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ what was measured */
+
+/** The title of the page with its two views: the records one by one, and all of them by what their tables state. */
+function Views({ at }: { at: "records" | "measured" }) {
+  return (
+    <div className="row" style={{ justifyContent: "space-between", ["--gap" as string]: "10px 18px" }}>
+      <h1 className="page-title">Investigations</h1>
+      <nav className="seg seg--links" aria-label="View">
+        <a href={href("/evidence")} aria-current={at === "records" ? "page" : undefined}>Records</a>
+        <a href={href("/evidence/measured")} aria-current={at === "measured" ? "page" : undefined}>What was measured</a>
+      </nav>
+    </div>
+  );
+}
+
+function Measured({ doc }: { doc: InventoryDoc }) {
+  const t = doc.totals, of = `of ${doc.counts.with_table}`;
+  return (
+    <div className="stack" style={{ ["--gap" as string]: "22px" }}>
+      <Views at="measured" />
+      <Readings>
+        <Tile label="Tables state oxygen" value={t.oxygen.records} of={of} sub={`${t.pressure.records} of them state pressure too`} />
+        <Tile label="State the air flow" value={t.flow.records} of={of} sub="speed, direction or a fan setting" />
+        <Tile label="Say how the flame ended" value={t.ending.records} of={of} sub="by itself, by the test, or at what size" tone="flame" />
+        <Tile label="Raw files behind them" value={doc.counts.raw_files} sub={`${fmtBytes(doc.counts.raw_bytes)} listed in PSI, not fetched`} />
+      </Readings>
+      <section className="panel" data-klass="derived" id="measured">
+        <div className="section__head"><h2 className="h2">What a model can take from the tables</h2><KlassBadge k="derived" note="columns placed by their headers, by stated rules" /></div>
+        <MeasuredMatrix doc={doc} />
+      </section>
+      <section className="panel" data-klass="observed" id="raw">
+        <div className="section__head"><h2 className="h2">Behind the tables: the raw data PSI lists</h2><KlassBadge k="observed" note="PSI's own file listing of each record" /></div>
+        <RawHoldings doc={doc} />
+      </section>
     </div>
   );
 }
@@ -484,14 +523,20 @@ export function Evidence({ route, manifest }: PageProps) {
   const ready = !!manifest?.nasa;
   const inv = useData<InvestigationsDoc>(ready ? "investigations.json" : null);
   const cur = useData<CuratorDoc>(ready ? "curator_report.json" : null);
-  const prof = useData<ProfilesDoc>(ready && route.segs[1] ? "profiles.json" : null);
+  const prof = useData<ProfilesDoc>(ready && route.segs[1] && route.segs[1] !== "measured" ? "profiles.json" : null);
   const briefs = useData<BriefsDoc>(ready ? "briefs.json" : null);
   const rank = useData<RankDoc>(ready ? "rank_features.json" : null);
+  const measured = route.segs[1] === "measured";
+  const inventory = useData<InventoryDoc>(ready && measured ? "inventory.json" : null);
   if (!ready) return <Waiting route={route} manifest={manifest} />;
   if (inv.error) return <div className="empty"><p className="empty__title">The investigations could not be loaded</p><p style={{ marginTop: 6 }}>{inv.error}</p></div>;
   if (!inv.data) return <p className="note">Loading the records fetched from NASA…</p>;
   const findings = cur.data?.items ?? [];
   const acc = route.segs[1];
+  if (measured) {
+    if (inventory.error) return <div className="empty"><p className="empty__title">The inventory could not be loaded</p><p style={{ marginTop: 6 }}>{inventory.error}</p></div>;
+    return inventory.data ? <Measured doc={inventory.data} /> : <p className="note">Loading what the tables state…</p>;
+  }
   if (acc) {
     const one = inv.data.items.find((i) => i.accession.toLowerCase() === acc.toLowerCase());
     if (!one) return <div className="empty"><p className="empty__title">No record {acc} in the combustion search</p><p style={{ marginTop: 6 }}><a href={href("/evidence")}>See all investigations</a></p></div>;

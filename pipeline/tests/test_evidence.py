@@ -440,3 +440,72 @@ class PagedText(unittest.TestCase):
         x = '<html><body><div class="page"><p>First page,\n</p><p>two lines.</p></div>\n<div class="page"><p>Second &amp; last.</p></div></body></html>'
         self.assertEqual(tika_pages(x), ["First page,\ntwo lines.", "Second & last."])
         self.assertEqual(tika_pages("plain text of an older report"), [])
+
+
+class Inventory(unittest.TestCase):
+    """What a table states, by its headers alone. Synthetic tables; the patterns are the ones the build uses."""
+
+    def setUp(self):
+        from zgf import inventory as I
+        self.I = I
+        a = table(["Test #", "GMT ignition", "Calibrated initial O2 % by vol", "Initial CO2 % by vol", "Final CO (ppm)", "Fan display", "Camera 1", "Mesh Polarity", "Notes"],
+                  [["B1", "10:01:02", "21.0", "0.1", "12", "55", "S1C1", "positive", ""], ["B2", "10:09:40", "17.5", "0.2", "40", "20", "S1C2", "negative", "x"]], acc="PSI-1", file="a.csv")
+        b = table(["Material", "Percent O2 (Note 1)", "Air Flow (cm/s)", "Test end"], [["Fabric", "~ 22.1", "20", "Extinction"], ["Fabric", "~ 22.1", "20", "Burned out"], ["Fabric", "", "20", ""]], acc="PSI-2", file="b.csv")
+        prof = {"items": {"tables/a.json": E.profile_table(a), "tables/b.json": E.profile_table(b)}}
+        inv = {"items": [{"accession": "PSI-2", "title": "Two", "gravity": "micro", "scope": {"in_scope": True}, "in_ledger": {"files": 3},
+                          "files": {"by_folder": {"Raw Data": {"count": 9, "bytes": 900, "extensions": {"mp4": 4, "zip": 3, "csv": 1, "mdipsug": 1}}, "Analyzed Data": {"count": 2, "bytes": 20, "extensions": {"xls": 2}}}}},
+                         {"accession": "PSI-1", "title": "One", "gravity": "ground", "scope": {"in_scope": True}},
+                         {"accession": "PSI-3", "title": "No table", "gravity": "micro", "scope": {"in_scope": True}},
+                         {"accession": "PSI-9", "title": "Set aside", "gravity": "micro", "scope": {"in_scope": False}}]}
+        refs = {rel: {"sha256": "0" * 64, "ledger_seq": k, "url": "https://psi.nasa.gov/x", "file": rel} for k, rel in enumerate(prof["items"], 1)}
+        self.doc = I.build_doc(inv, prof, refs)
+        self.by = {it["accession"]: it for it in self.doc["items"]}
+
+    def test_a_header_is_placed_by_its_words_and_carbon_dioxide_is_not_oxygen(self):
+        place = self.I.place
+        self.assertEqual([place(h) for h in ("Calibrated initial O2 % by vol", "Initial CO2 % by vol", "Final CO (ppm)", "XO2 (init)", "O initial ambient composition; mole fraction")],
+                         ["oxygen", "gases_after", "gases_after", "oxygen", "oxygen"])
+        self.assertEqual([place(h) for h in ("mO2 (mg/s)", "O2 flow rate (mg/s)", "pinit (atm)", "Self -ext or flow term", "Tad (K)")], ["supply", "supply", "pressure", "ending", "computed"])
+        self.assertIsNone(place("Mesh Polarity"))
+
+    def test_a_time_of_day_is_set_aside_and_an_instrument_is_not(self):
+        place = self.I.place
+        self.assertEqual(place("GMT ignition"), "aside")            # a clock time, not an ignition reading
+        self.assertEqual(place("Test #"), "aside")
+        self.assertEqual(place("Camera 1"), "cameras")              # an identifier by its values, an instrument by its name
+        self.assertEqual(place("Percent O2 (Note 1)"), "oxygen")    # the header mentions a note and still states oxygen
+
+    def test_cells_say_whether_a_column_varies_and_whether_it_holds_numbers(self):
+        one, two = self.by["PSI-1"]["cells"], self.by["PSI-2"]["cells"]
+        self.assertEqual((one["oxygen"]["state"], one["oxygen"]["as_text"], one["oxygen"]["rows"]), ("varied", False, 2))
+        self.assertEqual([c["name"] for c in one["gases_after"]["columns"]], ["Initial CO2 % by vol", "Final CO (ppm)"])
+        self.assertEqual((two["oxygen"]["state"], two["oxygen"]["as_text"], two["oxygen"]["rows"]), ("single", True, 2))      # "~ 22.1" is words to a calculator
+        self.assertEqual((two["flow"]["state"], two["flow"]["as_text"]), ("single", False))
+        self.assertEqual((two["ending"]["state"], two["ending"]["rows"]), ("varied", 2))
+
+    def test_every_column_is_placed_set_aside_or_listed(self):
+        c = self.doc["counts"]
+        self.assertEqual((c["records"], c["with_table"], c["tables"], c["columns"]), (3, 2, 2, 13))
+        self.assertEqual(c["placed"] + c["set_aside"] + c["not_placed"], c["columns"])
+        self.assertEqual([(u["accession"], u["name"]) for u in self.doc["not_placed"]], [("PSI-1", "Mesh Polarity")])
+        self.assertEqual([it["accession"] for it in self.doc["items"]], ["PSI-1", "PSI-2", "PSI-3"])                      # in record order; the record set aside is not listed
+        self.assertEqual(self.doc["totals"]["oxygen"], {"records": 2, "varied": 1, "rows": 4})
+
+    def test_files_are_counted_from_the_listing_by_extension(self):
+        f = self.by["PSI-2"]["files"]
+        self.assertEqual((f["raw_files"], f["raw_bytes"], f["analysed_files"]), (9, 900, 2))
+        self.assertEqual({k: v["files"] for k, v in f["raw"].items() if v["files"]}, {"video": 4, "archives": 3, "numbers": 1})
+        self.assertEqual(f["other_extensions"], {"mdipsug": 1})                                                           # a format no kind names is kept under its own name
+        self.assertEqual((self.by["PSI-2"]["in_ledger"], self.by["PSI-1"]["files"]["raw_files"]), (3, 0))
+
+    def test_the_integrity_check_catches_a_column_under_the_wrong_quantity(self):
+        from zgf import validate as V
+        doc = self.doc
+        load = lambda rel: {"columns": {"tables/a.json": ["Test #", "GMT ignition", "Calibrated initial O2 % by vol", "Initial CO2 % by vol", "Final CO (ppm)", "Fan display", "Camera 1", "Mesh Polarity", "Notes"],
+                                        "tables/b.json": ["Material", "Percent O2 (Note 1)", "Air Flow (cm/s)", "Test end"]}[rel]}
+        ledger = {t["ledger_seq"]: t["sha256"] for it in doc["items"] for t in it["tables"]}
+        self.assertGreater(V.inventory(doc, ledger, load), 10)
+        moved = self.by["PSI-1"]["cells"]["gases_after"]["columns"].pop()
+        self.by["PSI-1"]["cells"]["oxygen"]["columns"].append(moved)
+        with self.assertRaises(V.IntegrityError):
+            V.inventory(doc, ledger, load)

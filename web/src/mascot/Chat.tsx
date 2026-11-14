@@ -14,7 +14,7 @@ export const SUGGEST: Record<string, string[]> = {
   "/": ["Will a fire go out if the fans are stopped?", "Has anything been burned in lunar gravity?", "Rank the investigations for a lunar habitat"],
   "/paradox": ["Will a fire go out if the fans are stopped?", "What happened in the BASS-II test when the flow was cut?", "Why can a detector in the duct miss a fire?"],
   "/myths": ["Are materials that pass the test on Earth acceptable in space?", "Will a fire go out if the fans are stopped?", "What did the Mir fire show?"],
-  "/evidence": ["What did BASS-II study?", "Which records measure smoke particles?", "What problems are there in NASA's tables?"],
+  "/evidence": ["What did BASS-II study?", "Which records recorded how the flame ended?", "Which records measured carbon monoxide?"],
   "/rank": ["Rank the investigations for a lunar habitat", "Rank the investigations for a spacesuit", "What did FLEX study?"],
   "/envelope": ["How many tests are near 30% oxygen at 10.2 psia?", "How many tests are near 34% oxygen at 8.2 psia?", "Was anything burned above 40% oxygen?"],
   "/gaps": ["How fast does a flame spread in lunar gravity?", "What will FM2 test on the Moon?", "What is the most oxygen any solid material was burned at?"],

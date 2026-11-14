@@ -179,6 +179,30 @@ def build(raw_dir: str, out_dir: str) -> dict:
             "The reading was above %g for %g s during the fire and for %g s after the wire; before both it had stayed at or below %g for %d minutes. "
             "It peaked %g s after the igniter fired, and the radiometers were back at baseline at %g s. The file gives no units and no alarm level."
             % (sc["fire"]["peak"], sc["wire"]["peak"], round(sc["mark"], 2), sc["fire"]["above_mark_s"], sc["wire"]["above_mark_s"], sc["quiet"]["max"], sc["quiet"]["minutes"], sc["fire"]["peak_s"], fl["until_t"]), "/alarm")
+    ipath = os.path.join(out_dir, "inventory.json")
+    if os.path.exists(ipath):                                   # what the tables state, quantity by quantity: counted in inventory.py, only worded here
+        ivd = json.load(open(ipath, encoding="utf-8"))
+        of = ivd["counts"]["with_table"]
+        who = lambda its: ", ".join(it["acronym"] or it["accession"] for it in its)
+        for q in ivd["quantities"]:
+            have = [it for it in ivd["items"] if q["id"] in it["cells"]]
+            if not have:
+                continue
+            cols = sorted({c["name"] for it in have for c in it["cells"][q["id"]]["columns"]})
+            add("inv:%s" % q["id"], "derived", "Which experimental tables state %s" % q["phrase"],
+                "%d of the %d combustion records with an experimental table %s a column for %s: %s. The columns, as NASA wrote them: %s%s."
+                % (len(have), of, "has" if len(have) == 1 else "have", q["about"], who(have), "; ".join(cols[:12]), " and %d more" % (len(cols) - 12) if len(cols) > 12 else ""), "/evidence/measured")
+        fans = ["oxygen", "flow", "ending"]
+        if not [it for it in ivd["items"] if all(q in it["cells"] for q in fans)]:
+            t = ivd["totals"]
+            add("inv:fans", "derived", "No experimental table holds all that a fans-off model needs",
+                "No record's experimental table states oxygen, air flow and how the flame ended together: of the %d records with a table, %d state oxygen, %d state air flow and %d state the ending. "
+                "A model of whether a flame goes out when the fans stop would need all three in one table."
+                % (of, t["oxygen"]["records"], t["flow"]["records"], t["ending"]["records"]), "/evidence/measured")
+        c = ivd["counts"]
+        add("inv:raw", "derived", "Raw data that PSI lists behind the combustion records",
+            "PSI lists %s raw data files, %.1f terabytes, behind the %d combustion records; this site fetched the experimental tables and the small files, not the video."
+            % ("{:,}".format(c["raw_files"]), c["raw_bytes"] / 1e12, c["records"]), "/evidence/measured")
     if val:
         o = val["overall"]["closer_convention_per_table"]
         add("val:summary", "model", "Model check against NASA's Tad column",

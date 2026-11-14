@@ -8,7 +8,7 @@ Stops with an error if the ledger chain is broken or a file no longer matches it
 """
 import argparse, json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from zgf import briefs, canonical, claims, derive_core, derive_evidence, droplets, falsify, index, lessons, matrix, rank, reconcile, recorded, reported, validate
+from zgf import briefs, canonical, claims, derive_core, derive_evidence, droplets, falsify, index, inventory, lessons, matrix, rank, reconcile, recorded, reported, validate
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ap = argparse.ArgumentParser()
@@ -19,6 +19,7 @@ res = derive_core.run(a.raw, a.out)
 res["evidence"] = derive_evidence.run(a.out)
 res["exports"] = canonical.build(a.out)
 res["rank"] = rank.build(a.out)
+res["inventory"] = inventory.build(a.out)          # what each table states, quantity by quantity, and what PSI lists as files
 res["recorded"] = recorded.build(a.raw, a.out)      # one raw data file: a fire as the vehicle's own sensors recorded it
 res["reported"] = reported.build(a.raw, a.out)      # numbers NASA reported outside PSI, read from the stored documents
 res["claims"] = claims.build(a.raw, a.out)

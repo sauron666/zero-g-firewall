@@ -19,6 +19,7 @@
   "validation_rows": 587,
   "validation_mean_abs_K": 2.12,
   "export_files": 28,
+  "columns_placed": 155,
   "recorded_readings": 8974,
   "files_read": 88,
   "quotes": 139,
@@ -26,7 +27,7 @@
   "reported_values_checked": 13,
   "droplet_rows_checked": 195,
   "droplet_rows_within_10pct": 152,
-  "passages": 555
+  "passages": 574
  },
  "artifacts": {
   "model/atmospheres.json": {
@@ -230,8 +231,8 @@
    "klass": "derived"
   },
   "index.json": {
-   "sha256": "c5ed1c2cdfd318bcae551f6bd697a37449bc9a2116d3b067ac03e8713b76e53e",
-   "bytes": 461157,
+   "sha256": "e6bb7662da8b832504e228fe4477fcc99e4c3d960e0c1b621d95f4eb14837ea6",
+   "bytes": 469530,
    "klass": "derived"
   },
   "falsify.json": {
@@ -418,10 +419,15 @@
    "sha256": "e3c130726b30d565c4ad8a89126751e37a30a53159cc25439e1fc187fa9435e6",
    "bytes": 20945,
    "klass": "literature"
+  },
+  "inventory.json": {
+   "sha256": "d13ae7060d2c01868c67d3ed0c6905d5cb91b0d8809957f3f79bf612f6b882b4",
+   "bytes": 62288,
+   "klass": "derived"
   }
  },
  "brand": "Zero-G Firewall",
  "team": "The Rule of Flame",
  "mascot": "ISKRA",
- "built_at_utc": "2026-11-14T16:00:09Z"
+ "built_at_utc": "2026-11-14T16:42:56Z"
 }

@@ -19,6 +19,8 @@ export function Palette({ open, onClose, ready }: { open: boolean; onClose: () =
 
   const entries = useMemo<Entry[]>(() => {
     const e: Entry[] = ALL_ITEMS.map((i) => ({ key: "p" + i.path, label: i.label, about: i.about, kind: "Page", to: href(i.path), icon: i.icon, hay: `${i.label} ${i.about}`.toLowerCase() }));
+    e.push({ key: "p/evidence/measured", label: "What was measured", about: "Every record by what its table states: oxygen, pressure, air flow, how the flame ended", kind: "Page", to: href("/evidence/measured"), icon: "Stack",
+      hay: "what was measured inventory sensors measurements columns quantities oxygen pressure air flow carbon monoxide raw data video cameras" });
     for (const i of inv.data?.items ?? []) {
       if (!i.scope.in_scope) continue;
       e.push({ key: "i" + i.accession, label: i.acronym ? `${i.acronym} (${i.accession})` : i.accession, about: i.title, kind: "Investigation", to: href(`/evidence/${i.accession}`), icon: "Stack", hay: `${i.acronym} ${i.accession} ${i.title} ${i.hardware} ${i.platform}`.toLowerCase() });
