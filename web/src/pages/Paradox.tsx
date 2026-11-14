@@ -317,7 +317,7 @@ export function Paradox() {
                   <p className="choice__ev">
                     In NASA's own table of that experiment, {bassOut.rows} of {bass.n_rows} rows say in the flow columns that the flame went out, {bassOut.down_to} of them “down to ext”, at {bassOut.o2_min}% to {bassOut.o2_max}% oxygen.
                     {bassZero && bassZero.rows > 0 && <> In {bassZero.rows} rows a display reads 0 and the row has no word on the flame.</>}{" "}
-                    <a href={href("/evidence/measured")}>See the rows</a>
+                    <a href={`${href("/evidence/measured")}?at=words`}>See the rows</a>
                   </p>
                 )}
                 {b.id === "buoyant" && fabric && (

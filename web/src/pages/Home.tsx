@@ -90,7 +90,7 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
               </p>
               {words && wOut && wOut.rows > 0 && (
                 <p className="hero__fact">
-                  <a href={href("/evidence/measured")}>The table of that experiment</a>: {wOut.rows} of {words.n_rows} rows say the flame went out{wZero && wZero.rows > 0 ? <>; in {wZero.rows} a display reads 0 and the row has no word on the flame</> : null}.
+                  <a href={`${href("/evidence/measured")}?at=words`}>The table of that experiment</a>: {wOut.rows} of {words.n_rows} rows say the flame went out{wZero && wZero.rows > 0 ? <>; in {wZero.rows} a display reads 0 and the row has no word on the flame</> : null}.
                 </p>
               )}
               <p className="hero__ask">

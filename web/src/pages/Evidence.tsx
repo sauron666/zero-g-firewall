@@ -1,5 +1,5 @@
 import { Readings, Tile } from "../dash/widgets";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { href } from "../app/router";
 import { fmtBytes, fmtInt, useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
@@ -227,8 +227,9 @@ function Views({ at }: { at: "records" | "measured" }) {
   );
 }
 
-function Measured({ doc }: { doc: InventoryDoc }) {
+function Measured({ doc, at }: { doc: InventoryDoc; at?: string | null }) {
   const t = doc.totals, of = `of ${doc.counts.with_table}`;
+  useEffect(() => { if (at) document.getElementById(at)?.scrollIntoView({ block: "start" }); }, [at]);      // a link from another page may point at one panel
   return (
     <div className="stack" style={{ ["--gap" as string]: "22px" }}>
       <Views at="measured" />
@@ -550,7 +551,7 @@ export function Evidence({ route, manifest }: PageProps) {
   const acc = route.segs[1];
   if (measured) {
     if (inventory.error) return <div className="empty"><p className="empty__title">The inventory could not be loaded</p><p style={{ marginTop: 6 }}>{inventory.error}</p></div>;
-    return inventory.data ? <Measured doc={inventory.data} /> : <p className="note">Loading what the tables state…</p>;
+    return inventory.data ? <Measured doc={inventory.data} at={route.query.get("at")} /> : <p className="note">Loading what the tables state…</p>;
   }
   if (acc) {
     const one = inv.data.items.find((i) => i.accession.toLowerCase() === acc.toLowerCase());
