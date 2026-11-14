@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { atmosphereIn, oxygenRange, recordsIn, runAgent, unknownNames } from "./agent";
+import { atmosphereIn, oxygenRange, recordsIn, runAgent, sectionLines, sectionOn, unknownNames } from "./agent";
 import { EVAL, runEval } from "./evalset";
 import { poisonDemo } from "./poison";
 import { buildIndex } from "./search";
@@ -84,6 +84,31 @@ describe("evidence agent", () => {
     expect(run.steps.map((s) => s.tool)).toEqual(["screen_question", "rank_for_mission", "search_passages", "compose_answer", "check_answer"]);
     expect(run.steps.every((s) => s.out.length > 0 && s.ms >= 0)).toBe(true);
     expect(run.hits[0].passage.id).toBe("tool:rank:lunar");
+  });
+});
+
+describe("a question about what a term means", () => {
+  it("is answered from the section of NASA's guide that opens with the term", () => {
+    const run = runAgent("What is a cool flame?", kit);
+    expect(run.steps.map((s) => s.tool)).toContain("find_section");
+    expect(run.hits[0].passage.id).toMatch(/^guide:pdf33/);
+    expect(run.answer.lines[1].text).toContain("cool flame that forms after visible flame extinction");
+    for (const l of run.answer.lines) expect(run.hits[l.cite - 1].passage.x).toContain(l.text);            // every line is a sentence of the passage it cites
+  });
+  it("is left to the search when no section opens with the term, and to the record when the term is one", () => {
+    expect(runAgent("What is the smoke point of a flame?", kit).steps.map((s) => s.tool)).not.toContain("find_section");
+    expect(runAgent("What is BASS-II?", kit).steps.map((s) => s.tool)).toEqual(expect.arrayContaining(["get_investigation"]));
+    expect(sectionOn("warp drive", kit.index)).toBeUndefined();
+    expect(sectionLines("Cool Flames A first sentence. Nothing here. A cool flame burns. A cut sentence about a cool flame that", "cool flames")).toEqual(["Cool Flames A first sentence.", "A cool flame burns."]);
+  });
+});
+
+describe("a count of fire behaviours", () => {
+  it("comes from the matrix, for the habitat the question names", () => {
+    const iss = runAgent("How many fire behaviours have been measured on the space station?", kit);
+    expect(iss.steps.map((s) => s.tool)).toContain("matrix_coverage");
+    expect(iss.answer.lines[0].text).toContain(`${kit.matrix.coverage.iss.evidence} have been measured in free fall`);
+    expect(runAgent("Which fire behaviours are measured on the Moon?", kit).answer.lines[0].text).toContain("none has been measured on the Moon");
   });
 });
 

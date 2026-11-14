@@ -120,7 +120,7 @@ Checked on 14 November 2026 at 18:58 Sofia time against the 130 features of the 
 | F05 | P1 | done | Agent activity pane (tool trace, sources, duration, errors) | the trace under each answer lists every tool call with arguments, result and time, as it ran |
 | F06 | P1 | done | Structured outputs and a fail-closed citation resolver |  |
 | F07 | P1 | done | Prompt-injection defences and a poisoned-document demonstration | on the Ask page: a planted note, two gates, the checker, and what the checker alone would have let through; can be sent to a connected model |
-| F08 | P1 | done | Evaluation harness | 36 questions (gold, computed, abstention, adversarial; 7 held out) run in the browser and in the test suite; 35 pass, held out 6 of 7 |
+| F08 | P1 | done | Evaluation harness | 60 questions (gold, computed, abstention, adversarial; 29 held out) run in the browser and in the test suite; 58 pass, held out 27 of 29 |
 | F09 | P2 | **not built** | MCP server exposing the evidence tools to any assistant |  |
 | F10 | P2 | **partial** | Multi-provider adapter, cost telemetry, response cache labelled as cached | Anthropic, OpenAI, Gemini, OpenAI-compatible and local endpoints; no cost telemetry or cache; not run against live services |
 | F11 | P2 | **not built** | Narration with captions, disclosed as AI-generated |  |

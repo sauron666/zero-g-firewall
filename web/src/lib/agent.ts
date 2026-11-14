@@ -10,7 +10,7 @@ import type { EnvelopeDoc, MatrixDoc, Passage, RankDoc } from "./types";
  * With no model connected the planner is a set of rules. A connected model may rephrase the passages the
  * tools return; it never calls a tool by itself and never produces a number.
  */
-export type ToolName = "screen_question" | "count_tests_near" | "oxygen_range" | "rank_for_mission" | "matrix_coverage" | "outside_psi" | "curator_notes" | "get_investigation" | "search_passages" | "compose_answer" | "check_answer";
+export type ToolName = "screen_question" | "count_tests_near" | "oxygen_range" | "rank_for_mission" | "matrix_coverage" | "outside_psi" | "curator_notes" | "get_investigation" | "find_section" | "search_passages" | "compose_answer" | "check_answer";
 export interface Step { tool: ToolName; why: string; args: Record<string, string | number>; out: string; found: number; ms: number }
 export interface Kit { index: Index; envelope?: EnvelopeDoc | null; rank?: RankDoc | null; matrix?: MatrixDoc | null }
 export interface AgentRun { question: string; steps: Step[]; hits: Hit[]; answer: Answer; computed: number; ms: number; planner: "rules"; notes: string[]; refused: boolean }
@@ -24,6 +24,7 @@ export const TOOLS: Record<ToolName, { title: string; reads: string }> = {
   rank_for_mission: { title: "Rank the investigations for a mission", reads: "rank_features.json" },
   matrix_coverage: { title: "Look up what is measured in a habitat", reads: "matrix.json" },
   get_investigation: { title: "Fetch an investigation record", reads: "index.json" },
+  find_section: { title: "Find the section of NASA's guide on a term", reads: "index.json" },
   search_passages: { title: "Search the stored passages", reads: "index.json" },
   compose_answer: { title: "Compose the answer from sentences of the evidence", reads: "the passages found" },
   check_answer: { title: "Check every sentence against its source", reads: "the answer and its passages" },
@@ -34,6 +35,7 @@ const NEAR = { x: 0.03, p: 0.15 };                       // the same rule as the
 const LENS: [RegExp, string][] = [[/\b(moon|lunar)\b/i, "lunar"], [/\b(mars|martian)\b/i, "mars"], [/\b(rover|lander)\b/i, "rover"], [/\b(suit|spacesuit|eva)\b/i, "suit"], [/\b(iss|station|orbit|free ?fall)\b/i, "iss"]];
 const RANK = /\b(rank|ranking|ranked|most relevant|most useful|priorit|top (three|five|ten|\d+)|which (investigations?|experiments?|studies|records?) (matter|are most|should|is most))/i;
 const GAP = /\b(gap|gaps|unknown|not (yet |been |ever )*(measured|tested|studied|burned)|never been|nobody|no one|missing|what is not known|has (anything|anyone|nasa)|have (they|we|nasa) (ever )?(measured|tested|burned)|ever been (burned|tested|measured))\b/i;
+const BEHAVIOURS = /\b(how many|which|what)\b[^.?!]{0,60}\bbehaviou?rs?\b/i;
 const QUALITY = /\b(data quality|problems?|errors?|mistakes?|wrong|artefacts?|artifacts?|inconsisten\w*|anomal\w*|typos?|curat\w*)\b/i;
 const TABLES = /\b(tables?|columns?|data|datasets?|records?|files?|spreadsheets?|cells?)\b/i;
 /** A question about how much oxygen the tests reached, or whether any went past a stated level. */
@@ -179,6 +181,22 @@ function curator(q: string, index: Index): Passage[] {
 }
 
 const first = (text: string) => text.split(/(?<=[.!?])\s+(?=[A-Z("“])/)[0];
+const sentences = (text: string) => text.split(/(?<=[.!?])\s+(?=[A-Z("“])/);
+/** "What is a cool flame?" names a term. The guide's section on it opens with the term as its heading. */
+const DEFINE = /^\s*what\s+(is|are)\s+(an?\s+|the\s+)?([a-z][a-z0-9 -]{2,40}?)\s*\??\s*$/i;
+export function sectionOn(term: string, index: Index): Passage | undefined {
+  const t = term.toLowerCase().replace(/s$/, "");
+  const page = (id: string) => { const m = /^guide:pdf(\d+):(\d+)/.exec(id); return m ? Number(m[1]) * 100 + Number(m[2]) : 1e9; };
+  return index.passages.filter((p) => p.id.startsWith("guide:") && new RegExp(`^${t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}s?\\s+[A-Z(]`, "i").test(p.x))
+    .sort((a, b) => page(a.id) - page(b.id))[0];
+}
+/** Of a section, the sentence it opens with and then those that use the term: what a reader asking "what is it?" needs first. */
+export function sectionLines(text: string, term: string, max = 3): string[] {
+  const t = term.toLowerCase().replace(/s$/, "");
+  const all = sentences(text).filter((x) => /[.!?]$/.test(x.trim()));                // the last sentence of a page may be cut off; a cut sentence is not shown
+  const rest = all.slice(1).filter((x) => x.toLowerCase().includes(t));
+  return [all[0], ...rest.slice(-(max - 1))].filter(Boolean);
+}
 
 export function runAgent(question: string, kit: Kit): AgentRun {
   const t0 = performance.now();
@@ -223,9 +241,10 @@ export function runAgent(question: string, kit: Kit): AgentRun {
     computed.push(timed("rank_for_mission", lens ? "the question asks which investigations matter for a mission" : "the question asks for a ranking and names no mission, so the station is used", { mission: id },
       () => rankFor(kit.rank!, id), (p) => [p.x.split("in order: ")[1]?.split(". A ranking")[0] ?? "", 5]));
   }
-  if (GAP.test(question) && kit.matrix) {
-    const hab = lens === "lunar" || lens === "mars" || lens === "rover" ? "lunar" : lens === "iss" ? "iss" : "lunar";
-    computed.push(timed("matrix_coverage", "the question asks what is not known or not measured", { habitat: hab },
+  const counts = BEHAVIOURS.test(question);                       // "how many fire behaviours are measured on the station?" is a count from the matrix, like the question about gaps
+  if ((GAP.test(question) || counts) && kit.matrix) {
+    const hab = lens === "lunar" || lens === "mars" || lens === "rover" ? "lunar" : lens === "iss" ? "iss" : counts ? "iss" : "lunar";
+    computed.push(timed("matrix_coverage", counts && !GAP.test(question) ? "the question asks how many fire behaviours are measured" : "the question asks what is not known or not measured", { habitat: hab },
       () => coverage(kit.matrix!, hab), (p) => [first(p.x), kit.matrix!.coverage[hab].gap]));
   }
   // A count from NASA's tables is not the whole of what NASA has done. Where a paper or a flight outside PSI bears on the
@@ -245,6 +264,9 @@ export function runAgent(question: string, kit: Kit): AgentRun {
     named.push(...timed("get_investigation", "the question names a record in NASA's repository", { record: recs.map((r) => r.id.split(":")[1]).join(", ") },
       () => recs, (r) => [r.map((p) => p.t.replace(": record", "")).join("; "), r.length]));
   }
+  const term = !recs.length && !computed.length ? DEFINE.exec(question)?.[3]?.trim() : undefined;
+  const section = term ? sectionOn(term, kit.index) : undefined;
+  if (section && term) named.push(...timed("find_section", "the question asks what a term means, and a section of NASA's guide opens with it", { term }, () => [section], (r) => [first(r[0].x), 1]));
   const found = timed("search_passages", "always: find the passages that speak to the question", { query: question, top: 8 },
     () => kit.index.search(question, 8), (h) => [h.length ? `best match: ${h[0].passage.t}` : "nothing matched", h.length]);
 
@@ -266,7 +288,7 @@ export function runAgent(question: string, kit: Kit): AgentRun {
   const answer = timed("compose_answer", "no sentence is written here: computed facts first, then sentences taken from the passages", { passages: hits.length }, (): Answer => {
     const base = extractive(question, rest, kit.index, 5);
     const lines: Line[] = [
-      ...lead.slice(0, 4).map((h, i) => ({ text: first(h.passage.x), cite: i + 1 })),          // what a tool fetched or computed leads the answer
+      ...lead.slice(0, 4).flatMap((h, i) => (section && term && h.passage.id === section.id ? sectionLines(h.passage.x, term) : [first(h.passage.x)]).map((text) => ({ text, cite: i + 1 }))),          // what a tool fetched or computed leads the answer
       ...base.lines.slice(0, Math.max(2, 5 - lead.length)).map((l) => ({ text: l.text, cite: l.cite + lead.length })),
     ];
     return lines.length ? { lines, abstained: false } : { lines: [], abstained: true, why: base.why };

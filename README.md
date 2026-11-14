@@ -12,7 +12,7 @@ Zero-G Firewall makes NASA's microgravity combustion data findable, ranked and c
 - **Explore.** 24 combustion investigations from NASA's PSI repository with their tables, a receipt on every row and curator notes; an atmosphere map of 887 test rows by oxygen and pressure; the nearest real tests to a design point, as a CSV; a coverage chart showing that solid-material rows stop at 22.2% oxygen, that no row states more than 40%, and that none was taken in lunar or Martian gravity, with marks for the tests NASA reports outside PSI or plans (Saffire IV to VI, the LUCI flight in simulated lunar gravity, the four FM2 tests on the Moon); six measured gaps beside the experiments NASA plans; every record by what its table states, where the reader picks what a model needs and the records that state all of it are counted (oxygen, air flow and how the flame ended together: none), and how 26 BASS-II tests ended in the words of the table's own flow columns.
 - **Compare.** A ranking for five missions from ten stated factors, with a check of its stability and a brief for the chosen mission; NASA's three misconceptions with both sides; a fire behaviour matrix (22 behaviours, 17 measured in free fall, none on the Moon), the controls each record informs, and a response playbook taken from NASA documents.
 - **Simulate.** A flame-temperature model checked against NASA's own column (587 rows, mean gap 2.1 K); the d² law checked against four columns of the FLEX table (152 of 195 tests within 10%, nothing fitted); a transport model of one cabin with the fans on and off; an alarm trust lab that opens with a real recording, the smoke detector of a cargo vehicle during the Saffire-III fire (raw data of PSI-100), and NASA's reported numbers for five larger fires, then nine synthetic situations with signed readings.
-- **Search.** ISKRA, the companion, answers questions in plain words on every page: numbers are computed from NASA's tables and every sentence carries its source. No key, no network. A public scorecard reports 35 of 36 questions passed.
+- **Search.** ISKRA, the companion, answers questions in plain words on every page: numbers are computed from NASA's tables and every sentence carries its source. No key, no network. A public scorecard reports 58 of 60 questions passed, 27 of the 29 that were never tuned against.
 - **Verify.** 4,959 files fetched from NASA in a hash-chained ledger that the browser recomputes; a tamper test; a page that attacks the site's own conclusions with NASA's evidence. Every cabin atmosphere the models use opens the NASA sentence that states it, and the build stops if the numbers part ways. Each record has a citation that names the version and the SHA-256 of the file that was read.
 - **Accessible, by measurement.** `node tools/a11y/audit.mjs web/dist` checks every page in both themes and at two widths with axe-core (WCAG 2.2, levels A and AA): no rule violated on 14 November. What a machine cannot tell is in [`docs/ACCESSIBILITY.md`](docs/ACCESSIBILITY.md).
 
@@ -61,7 +61,7 @@ python pipeline/build_models.py
 cd web && npm ci && npm run dev        # or: npm run build
 ```
 
-Tests: `python -m unittest discover -s pipeline/tests` and `cd web && npm test` (75 and 161 tests on 14 November). The derivation ends with an integrity check of its own output (1,992 checks).
+Tests: `python -m unittest discover -s pipeline/tests` and `cd web && npm test` (75 and 164 tests on 14 November). The derivation ends with an integrity check of its own output (1,992 checks).
 
 ## Data, credit and licence
 

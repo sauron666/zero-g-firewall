@@ -28,6 +28,6 @@ Two defences stand in front of the checker and are demonstrated on the page with
 
 Each investigation carries an **AI brief**: two sentences written by the AI assistant during the build, from the record's stored text and this site's own table profiles (`pipeline/briefs/briefs.json`). The pipeline checks every brief at every build and drops any that holds a number the record does not hold, gives a verdict, or leans on a curator note that does not exist. A brief is labelled on the page as our reading, not NASA's words.
 
-A scorecard of 36 questions with written pass rules runs in the browser and in the test suite (`web/src/lib/evalset.ts`). It reports held-out questions separately from the ones the engine was improved against.
+A scorecard of 60 questions with written pass rules runs in the browser and in the test suite (`web/src/lib/evalset.ts`). It reports held-out questions separately from the ones the engine was improved against.
 
 State: the offline agent, the checker, the scorecard and the demonstration are tested and run on the site. The cloud and local connectors are tested against each service's request and reply format. The in-browser model is tested with stand-ins shaped like the published interfaces. None of the model modes was run against a live model in the build environment.

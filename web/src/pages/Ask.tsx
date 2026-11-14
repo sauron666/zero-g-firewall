@@ -5,7 +5,7 @@ import { askModel, callModel, loadSettings, Mode, ModelConfig, ModelRun, ping, s
 import { smallTalk, Talk } from "../lib/smalltalk";
 import { connected } from "../mascot/Chat";
 import { AgentRun, runAgent } from "../lib/agent";
-import { EvalKind, EvalReport, runEval } from "../lib/evalset";
+import { EVAL, EvalKind, EvalReport, runEval } from "../lib/evalset";
 import { PLANTED, poisonDemo } from "../lib/poison";
 import { BrowserModelConfig, callBrowserModel, choose, Probe, probe } from "../lib/browserModel";
 import { useKit } from "../ai/kit";
@@ -299,7 +299,7 @@ export function Ask({ manifest, route }: PageProps) {
 
       <section className="stack" style={{ ["--gap" as string]: "12px" }}>
         <div className="section__head" style={{ marginBottom: 0 }}>
-          <h2 className="h2">Scorecard: {report ? report.n : "36"} questions with known answers</h2>
+          <h2 className="h2">Scorecard: {report ? report.n : EVAL.length} questions with known answers</h2>
           <button type="button" className="btn btn--quiet btn--sm" disabled={!kit} onClick={() => kit && setReport(runEval(kit))}>{report ? "Run again" : "Run the evaluation"}</button>
         </div>
         {!report ? (
