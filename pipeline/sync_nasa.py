@@ -30,6 +30,10 @@ Safe to interrupt with Ctrl+C and to run again: finished files are kept and reus
 files for the ACME and FLEX records. The core sync now takes the experimental table of each
 record plus at most a few named summary files, under hard budgets.
 
+1.2.0: two more NASA documents: the NASA-STD-3001 technical brief on fire protection (the station's
+fire response and NASA's list of open gaps) and the NTRS overview of the station's fire detection
+and suppression system. A second run in the same folder fetches only what is new.
+
 Created during NASA Space Apps Challenge 2026 (14-15 November 2026).
 AI-assisted code (Claude); reviewed by the team.
 """
@@ -49,7 +53,7 @@ import urllib.parse
 import urllib.request
 import zipfile
 
-SCRIPT_VERSION = "1.1.0"
+SCRIPT_VERSION = "1.2.0"
 UA = ("Mozilla/5.0 (compatible; ZeroG-Firewall-Sync/%s; NASA Space Apps Challenge 2026 team "
       "project; +https://github.com/sauron666)" % SCRIPT_VERSION)
 
@@ -84,10 +88,14 @@ EXTRAS = [
      "https://science.nasa.gov/wp-content/uploads/2024/11/psi-database-guide.pdf"),
     ("X3", "psi_investigations_by_research_area", "html",
      "https://www.nasa.gov/physical-sciences-informatics-psi/psi-investigations-by-research-area/"),
+    # NASA-STD-3001 Technical Brief on fire protection: the station's fire response, step by step, and NASA's own list of gaps
+    ("X4", "std3001_fire_protection_brief", "pdf",
+     "https://www.nasa.gov/wp-content/uploads/2023/12/ochmo-tb-008-fire-protection.pdf"),
 ]
 # Anchor reports on the NASA Technical Reports Server.
 NTRS_IDS = ["20210011385", "20130010991", "20260001966", "20260000646", "20250010653",
-            "20240002981", "20030011406", "20150023456", "20200000557"]
+            "20240002981", "20030011406", "20150023456", "20200000557",
+            "20030053429"]      # Overview of the station's US fire detection and suppression system
 # Extra PSI searches: has PSI added records for these since the dossier was written?
 EXTRA_TERMS = ["Saffire", "LUCI", "FM2", "SoFIE", "flammability", "fire safety", "smoke"]
 
