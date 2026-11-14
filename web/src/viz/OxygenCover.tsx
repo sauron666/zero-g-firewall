@@ -228,7 +228,7 @@ export function OxygenCover({ c, reported }: { c: CoverageBlock; reported?: Repo
         </div>
       )}
 
-      {view === "chart" && boxW > 0 && !pressable && <p className="note" style={{ marginTop: 10 }}>On this screen the squares are small: the table view lists the same counts, with the records behind each.</p>}
+      {view === "chart" && boxW > 0 && !pressable && <p className="note" style={{ marginTop: 10 }}>The table view lists the same counts, with the records behind each.</p>}
       <p className="note" style={{ marginTop: 12, maxWidth: "96ch" }}>
         {c.rule} {fmtInt(c.placed)} of {fmtInt(c.total)} rows are placed. Not placed:{" "}
         {c.not_placed.map((x, i) => <span key={x.id}>{i ? "; " : ""}{fmtInt(x.rows)} because {x.why} ({x.records.join(", ")})</span>)}.

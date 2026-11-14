@@ -13,7 +13,8 @@ Zero-G Firewall makes NASA's microgravity combustion data findable, ranked and c
 - **Compare.** A ranking for five missions from ten stated factors, with a check of its stability and a brief for the chosen mission; NASA's three misconceptions with both sides; a fire behaviour matrix (22 behaviours, 17 measured in free fall, none on the Moon), the controls each record informs, and a response playbook taken from NASA documents.
 - **Simulate.** A flame-temperature model checked against NASA's own column (587 rows, mean gap 2.1 K); the d² law checked against four columns of the FLEX table (152 of 195 tests within 10%, nothing fitted); a transport model of one cabin with the fans on and off; an alarm trust lab that opens with a real recording, the smoke detector of a cargo vehicle during the Saffire-III fire (raw data of PSI-100), and NASA's reported numbers for five larger fires, then nine synthetic situations with signed readings.
 - **Search.** ISKRA, the companion, answers questions in plain words on every page: numbers are computed from NASA's tables and every sentence carries its source. No key, no network. A public scorecard reports 35 of 36 questions passed.
-- **Verify.** 4,959 files fetched from NASA in a hash-chained ledger that the browser recomputes; a tamper test; a page that attacks the site's own conclusions with NASA's evidence.
+- **Verify.** 4,959 files fetched from NASA in a hash-chained ledger that the browser recomputes; a tamper test; a page that attacks the site's own conclusions with NASA's evidence. Every cabin atmosphere the models use opens the NASA sentence that states it, and the build stops if the numbers part ways. Each record has a citation that names the version and the SHA-256 of the file that was read.
+- **Accessible, by measurement.** `node tools/a11y/audit.mjs web/dist` checks every page in both themes and at two widths with axe-core (WCAG 2.2, levels A and AA): no rule violated on 14 November. What a machine cannot tell is in [`docs/ACCESSIBILITY.md`](docs/ACCESSIBILITY.md).
 
 NASA Space Apps Challenge 2026, Sofia. Challenge: *Flame in Freefall: SI-Powered Fire Safety Insights from Microgravity Combustion Data*. Team: The Rule of Flame.
 
@@ -33,7 +34,8 @@ pipeline/zgf/             physics, transport reference solver, model artifacts, 
 pipeline/tests/           check values for every model
 web/                      static site (Vite, React, TypeScript); works offline, no key, no server
 web/public/data/v1/       every artifact the site shows, with a manifest of SHA-256 hashes
-docs/                     decisions, status, official resources, AI use
+docs/                     decisions, status, official resources, AI use, accessibility audit
+tools/                    the film recorder and the accessibility audit (both need Playwright)
 ```
 
 Rules the code enforces:
@@ -59,7 +61,7 @@ python pipeline/build_models.py
 cd web && npm ci && npm run dev        # or: npm run build
 ```
 
-Tests: `python -m unittest discover -s pipeline/tests` and `cd web && npm test`.
+Tests: `python -m unittest discover -s pipeline/tests` and `cd web && npm test` (75 and 161 tests on 14 November). The derivation ends with an integrity check of its own output (1,992 checks).
 
 ## Data, credit and licence
 

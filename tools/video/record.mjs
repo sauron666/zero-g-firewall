@@ -181,8 +181,9 @@ await scene("coverage", 108, async () => {
   await putAt(".cov", 150);
   await cap("Every test row in NASA's tables, by oxygen.");
   await pointer(900, 220);
-  const [x, y] = await centre(page.locator("button.cov__cell--4").first());
-  const [x2, y2] = await centre(page.locator("button.cov__cell:has(.cov__lit--planned)").last());
+  // a square is a button only on a screen wide enough to press it; at the film's width it answers the pointer without being one
+  const [x, y] = await centre(page.locator(".cov__row .cov__cell--4").first());
+  const [x2, y2] = await centre(page.locator(".cov__row .cov__cell:has(.cov__lit--planned)").last());
   return [glide(x, y, 14, 36), glide(x2, y2 + 4, 56, 80)];
 }, async (i) => {
   if (i === 52) await cap(`Solid rows stop at ${SOLID_TOP}% oxygen. In lunar gravity: none yet. Diamonds: ${PLANNED} tests NASA plans on the Moon.`);
