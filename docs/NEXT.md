@@ -2,17 +2,16 @@
 
 ## Hand-off (14 November, evening): start here
 
-The site is live from `main` at https://sauron666.github.io/zero-g-firewall/. All 28 must-have features of `docs/COVERAGE.md` are done. Tests: 53 Python, 98 TypeScript, all passing; the integrity check runs 1,683 checks at each derivation.
+The site is live from `main` at https://sauron666.github.io/zero-g-firewall/. All 28 must-have features of `docs/COVERAGE.md` are done. Tests: 53 Python, 106 TypeScript, all passing; the integrity check runs 1,683 checks at each derivation.
 
 **Direction set by the team on 14 November, 16:25. Keep to it.** Show the engineering, demonstrate the science, let the results speak. The look is a flight deck (`docs/DESIGN.md`, `web/src/styles/deck.css`): mission control as the opening page, readings at the head of a page, ISKRA as a conversation on every page. The interface does not talk about how it was built: one sentence on the Method page, details in `docs/AI_USE.md`. Lead with results; state a real limit once, beside the result; fold explanations of the machinery into "How it works". Reference pages for engineers stay last in the navigation.
 
 Do next, in this order:
 
 1. **On the machine that holds `nasa_raw/` (it has NASA access):** run `python pipeline/sync_nasa.py` once (version 1.2.0 adds NASA's fire protection brief and one NTRS record), then `python pipeline/derive.py --raw nasa_raw`. Look at `matrix.waiting_for_sync` in the output: it must be empty. Open the stored text of `doc:std3001_fire_protection_brief` and compare it with the three quotations declared for `BRIEF` in `pipeline/zgf/matrix.py`; they were typed from a web summary and may not match word for word. Correct them until `quotes_verified` equals `quotes`. The opening page then states the station's own procedure with a receipt (the logic is already in `web/src/pages/Home.tsx`). Commit the new data files and the ledger.
-2. **Controls view (B13):** on the Fire matrix page, a section that lists, for prevention, detection and suppression, the PSI records that inform each (the pillar marks are already in `rank_features.json`, `facets.pillars`, with their written rules) beside the count of behaviours measured on the station and in lunar gravity. This is the challenge's own sentence: "research that informs next-generation fire-safety controls".
-3. **Nearest tests to a design point (B23):** on the Atmosphere map, a visitor enters oxygen and pressure (or clicks the map) and gets the nearest test rows with their distance, fuel and outcome, and a CSV of them. All data is in `envelope.json`.
-4. **Report for a mission (B15):** on the ranking page, a button that writes a cited brief (Markdown) for the chosen mission: the five records to read first with the reason for each, the gaps, the limits, the ledger head.
-5. Smaller: export of the alarm lab's audit log (E08); a signed release (K03); a sensor and measurement inventory (B11). ISS live telemetry (M01) only if it can be tested against the real feed.
+2. Done on 14 November, evening, and live: the controls view on the Fire matrix page (B13), the nearest tests to a design point with a CSV on the Atmosphere map (B23), and the brief for a mission on the ranking page (B15).
+3. Still open, by value: export of the alarm lab's audit log (E08, small); a sensor and measurement inventory across the records (B11: which table states oxygen, pressure, flow, temperature, gases, particle size; the column profiles in `profiles.json` hold what is needed); a signed release (K03); detector evidence cards for SAME, SAME-R and DAFT (E01). ISS live telemetry (M01) only if it can be tested against the real feed.
+4. Polish worth doing if time remains: readings at the head of the remaining pages (`Readings` and `Tile` in `web/src/dash/widgets.tsx`), and a pass over long paragraphs on the Alarm, Ledger and Data pages: lead with the result, fold the rest.
 
 Deliverables that must follow the site: the 30-second video (`node tools/video/record.mjs web/dist out_dir`, about four minutes; captions read their numbers from the build), the pitch slides and the jury questions (links are with the team). Re-record after any change a viewer would see. Sunday: freeze around 11:00, video due 14:00, submit before 22:00.
 
