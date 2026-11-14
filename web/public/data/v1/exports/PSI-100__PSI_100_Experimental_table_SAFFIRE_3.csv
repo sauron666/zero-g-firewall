@@ -1,0 +1,3 @@
+psi_record,source_file,row,sample_number,material,sample_thickness,sample_length,sample_width,air_flow,direction,camera_1,camera_2,source_sha256,ledger_entry
+PSI-100,PSI-100_Experimental table_SAFFIRE-3.csv,1,S1,SIBAL Fabric,.33 cm,94 cm,40.6 cm,30 cm/s,Concurrent,S1C1,S1C2,4d3c717ec20dd0247db670b2784a9fd7d746788bc54a936f80693e48eb8cd117,1148
+PSI-100,PSI-100_Experimental table_SAFFIRE-3.csv,2,S2,SIBAL Fabric,.33 cm,94 cm,40.6 cm,30 cm/s,Opposed,S2C1,S2C2,4d3c717ec20dd0247db670b2784a9fd7d746788bc54a936f80693e48eb8cd117,1148

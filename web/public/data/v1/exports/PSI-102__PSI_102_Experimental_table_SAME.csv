@@ -1,0 +1,9 @@
+psi_record,source_file,row,sample_number,sample_material,air_flow,weight_loss_rate,aging_duration,source_sha256,ledger_entry
+PSI-102,PSI-102_Experimental table_SAME.csv,1,1,Teflon,5,2,1,268d1e121d2f211b124407dd32b9475617bd269ede2c2d1749441da3e949a2af,1154
+PSI-102,PSI-102_Experimental table_SAME.csv,2,2,Teflon,5,1,1,268d1e121d2f211b124407dd32b9475617bd269ede2c2d1749441da3e949a2af,1154
+PSI-102,PSI-102_Experimental table_SAME.csv,3,3,Teflon,5,2,20,268d1e121d2f211b124407dd32b9475617bd269ede2c2d1749441da3e949a2af,1154
+PSI-102,PSI-102_Experimental table_SAME.csv,4,4,Teflon,10,2,1,268d1e121d2f211b124407dd32b9475617bd269ede2c2d1749441da3e949a2af,1154
+PSI-102,PSI-102_Experimental table_SAME.csv,5,5,Kapton: same conditions as 1-4,,,,268d1e121d2f211b124407dd32b9475617bd269ede2c2d1749441da3e949a2af,1154
+PSI-102,PSI-102_Experimental table_SAME.csv,6,6,Silicone Rubber: same conditions as 1-4,,,,268d1e121d2f211b124407dd32b9475617bd269ede2c2d1749441da3e949a2af,1154
+PSI-102,PSI-102_Experimental table_SAME.csv,7,7,Lampwick: same conditions as 1-4,,,,268d1e121d2f211b124407dd32b9475617bd269ede2c2d1749441da3e949a2af,1154
+PSI-102,PSI-102_Experimental table_SAME.csv,8,8,Dibutyl Phthalate: same conditions as 1-4,,,,268d1e121d2f211b124407dd32b9475617bd269ede2c2d1749441da3e949a2af,1154

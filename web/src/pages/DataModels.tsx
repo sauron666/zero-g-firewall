@@ -32,6 +32,7 @@ const RULE: Record<string, string> = {
 export function DataModels({ route, manifest }: PageProps) {
   const ready = !!manifest?.nasa;
   const cur = useData<CuratorDoc>(ready ? "curator_report.json" : null);
+  const ex = useData<{ files: { file: string; record: string; source: string; rows: number; columns: number }[]; long_rows: number; condition_rows: number; dictionary_rows: number }>(ready ? "exports/index.json" : null);
   const [level, setLevel] = useState<"caution" | "all">("caution");
   const [rule, setRule] = useState("all");
   const [scopeAll, setScopeAll] = useState(false);
@@ -40,7 +41,7 @@ export function DataModels({ route, manifest }: PageProps) {
   const all = cur.data?.items ?? [];
   const rules = Array.from(new Set(all.map((f) => f.rule)));
   const nCaution = all.filter((f) => f.level === "caution" && f.in_scope).length;
-  const arts = Object.entries(manifest?.artifacts ?? {}).sort((a, b) => a[0].localeCompare(b[0]));
+  const arts = Object.entries(manifest?.artifacts ?? {}).filter(([n]) => !n.startsWith("exports/")).sort((a, b) => a[0].localeCompare(b[0]));
   return (
     <div className="stack" style={{ ["--gap" as string]: "26px" }}>
       <h1 className="page-title">Data and models</h1>
@@ -69,6 +70,35 @@ export function DataModels({ route, manifest }: PageProps) {
           {items.map((f) => <FindingRow key={f.id} f={f} link />)}
           {items.length === 0 && <p className="note">Nothing matches these filters.</p>}
         </div>
+      </section>
+
+      <section id="downloads">
+        <div className="section__head"><h2 className="h2">Downloads: tidy tables with a data dictionary</h2><KlassBadge k="observed" note="NASA's cells, renamed columns, nothing corrected" /></div>
+        <p className="note" style={{ maxWidth: "92ch", marginBottom: 10 }}>
+          One CSV per experimental table, one row per test, with oxygen as a mole fraction and pressure in kPa where the table states them, and the NASA file's hash and ledger entry on every row.
+          Ready for a notebook or a model. Pressure stays empty where NASA's table gives none.
+        </p>
+        <div className="row" style={{ ["--gap" as string]: "8px", marginBottom: 12 }}>
+          <a className="btn btn--primary btn--sm" href="./data/v1/exports/test_conditions.csv" target="_blank" rel="noreferrer">Conditions of every test with oxygen{ex.data ? ` (${fmtInt(ex.data.condition_rows)} rows)` : ""}</a>
+          <a className="btn btn--quiet btn--sm" href="./data/v1/exports/tests_long.csv" target="_blank" rel="noreferrer">Every filled cell, long format{ex.data ? ` (${fmtInt(ex.data.long_rows)} lines)` : ""}</a>
+          <a className="btn btn--quiet btn--sm" href="./data/v1/exports/data_dictionary.csv" target="_blank" rel="noreferrer">Data dictionary{ex.data ? ` (${ex.data.dictionary_rows} columns)` : ""}</a>
+          <a className="src-btn" href="./data/v1/exports/column_map.json" target="_blank" rel="noreferrer">Column map</a>
+          <a className="src-btn" href="./data/v1/exports/README.txt" target="_blank" rel="noreferrer">Read me</a>
+        </div>
+        {ex.data && (
+          <details className="fold">
+            <summary>The {ex.data.files.length} tables, one file each</summary>
+            <div className="table-wrap" style={{ marginTop: 8 }}>
+              <table className="table">
+                <thead><tr><th>Record</th><th>NASA's file</th><th className="r">Tests</th><th className="r">Columns</th><th>CSV</th></tr></thead>
+                <tbody>{ex.data.files.map((f) => (
+                  <tr key={f.file}><td>{f.record}</td><td className="note" style={{ overflowWrap: "anywhere" }}>{f.source}</td><td className="r num">{fmtInt(f.rows)}</td><td className="r num">{f.columns}</td>
+                    <td><a href={`./data/v1/${f.file}`} target="_blank" rel="noreferrer">open</a></td></tr>
+                ))}</tbody>
+              </table>
+            </div>
+          </details>
+        )}
       </section>
 
       <ValidationPanel />

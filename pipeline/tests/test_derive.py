@@ -98,3 +98,43 @@ class Derive(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Integrity(unittest.TestCase):
+    def test_a_planted_untraceable_row_fails_the_build(self):
+        from zgf import derive_evidence, validate
+        with tempfile.TemporaryDirectory() as raw, tempfile.TemporaryDirectory() as out:
+            make_cache(raw)
+            derive_core.run(raw, out)
+            derive_evidence.run(out)
+            self.assertTrue(validate.check(out)["ok"])
+            p = os.path.join(out, "envelope.json")
+            env = json.load(open(p, encoding="utf-8"))
+            env["points"].append({"s": "planted", "a": "PSI-9001", "t": "tables/none.json", "r": 0, "x": 0.21, "p": 101.3, "f": "x"})
+            json.dump(env, open(p, "w", encoding="utf-8"))
+            with self.assertRaises(validate.IntegrityError):         # first because the file no longer matches the manifest
+                validate.check(out)
+            m = os.path.join(out, "manifest.json")
+            man = json.load(open(m, encoding="utf-8"))
+            import hashlib
+            man["artifacts"]["envelope.json"]["sha256"] = hashlib.sha256(open(p, "rb").read()).hexdigest()
+            json.dump(man, open(m, "w", encoding="utf-8"))
+            with self.assertRaisesRegex(validate.IntegrityError, "does not exist"):   # and then because the row cannot be traced
+                validate.check(out)
+
+    def test_a_table_without_a_ledger_entry_fails_the_build(self):
+        from zgf import validate
+        with tempfile.TemporaryDirectory() as raw, tempfile.TemporaryDirectory() as out:
+            make_cache(raw)
+            derive_core.run(raw, out)
+            p = os.path.join(out, "tables", "index.json")
+            idx = json.load(open(p, encoding="utf-8"))
+            idx["items"][0]["ledger_seq"] = 99999
+            json.dump(idx, open(p, "w", encoding="utf-8"))
+            m = os.path.join(out, "manifest.json")
+            man = json.load(open(m, encoding="utf-8"))
+            import hashlib
+            man["artifacts"]["tables/index.json"]["sha256"] = hashlib.sha256(open(p, "rb").read()).hexdigest()
+            json.dump(man, open(m, "w", encoding="utf-8"))
+            with self.assertRaisesRegex(validate.IntegrityError, "no matching ledger entry"):
+                validate.check(out)

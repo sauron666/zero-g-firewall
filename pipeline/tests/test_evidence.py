@@ -104,3 +104,26 @@ class Quotations(unittest.TestCase):
         self.assertEqual(lib.find("d", "Because the gravity")["match"], "ignoring spaces")                        # a word split by the PDF
         self.assertIsNone(lib.find("d", "A fire will always self-extinguish"))                                    # a changed word is not a quotation
         self.assertEqual(norm("“It’s  20–30 cm”"), '"it\'s 20-30 cm"')
+
+
+class Canonical(unittest.TestCase):
+    def test_names_and_units_from_headers(self):
+        from zgf.canonical import canonical, cell_number
+        self.assertEqual(canonical("Air Flow (cm/s)"), ("air_flow", "cm/s"))
+        self.assertEqual(canonical("Ambient pressure; mmHg"), ("ambient_pressure", "mmHg"))
+        self.assertEqual(canonical("XO2 (init)"), ("xo2_init", None))                      # "init" is not a unit
+        self.assertEqual(canonical("Radiometer gain (1000 250 50 10)"), ("radiometer_gain_1000_250_50_10", None))
+        self.assertEqual(canonical("Calibrated  initial O2 % by vol "), ("calibrated_initial_o2_percent_by_vol", None))
+        self.assertEqual(cell_number("0.5 atm"), (0.5, "atm"))
+        self.assertEqual(cell_number("–"), (None, None))                                     # a dash is not a number
+        self.assertEqual(cell_number("#DIV/0!"), (None, None))
+        self.assertEqual(cell_number("Completion"), (None, None))
+
+    def test_units_are_normalised_where_the_table_states_them(self):
+        flex = table(["Fuel", "Ambient pressure; mmHg", "O initial ambient composition; mole fraction"], [["Heptane", "760", "0.21"]], acc="PSI-69", file="FLEX.csv")
+        cfi = table(["Fuel", "Pressure", "Oxygen"], [["C12H26", "0.5 atm", "0.17"]], acc="PSI-39", file="CFI.csv")
+        cfig = table(["Fuel", "approx p (bar)", "XO2 before test"], [["ethane", "2.0266", "0.39"]], acc="PSI-159", file="CFI-G_Normal Flames.csv")
+        pts = {p["a"]: p for p in E.envelope({"a": flex, "b": cfi, "c": cfig})["points"]}
+        self.assertAlmostEqual(pts["PSI-69"]["p"], 101.33, places=1)       # mmHg
+        self.assertAlmostEqual(pts["PSI-39"]["p"], 50.66, places=1)        # atm, written in the cell
+        self.assertAlmostEqual(pts["PSI-159"]["p"], 202.66, places=1)      # bar

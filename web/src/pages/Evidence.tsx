@@ -56,7 +56,10 @@ export function FindingRow({ f, link }: { f: CuratorFinding; link?: boolean }) {
 
 /* ------------------------------------------------------------------ the list */
 
+interface AreaDoc { listed: { name: string; status: string; roses_eligible: string; accession: string | null }[]; listed_n?: number; matched_n?: number; listed_not_in_search?: string[]; search_not_listed?: string[]; drift: { statement: string } }
+
 function Explorer({ doc, findings }: { doc: InvestigationsDoc; findings: CuratorFinding[] }) {
+  const area = useData<AreaDoc>("research_area.json");
   const [q, setQ] = useState("");
   const [scope, setScope] = useState<"in" | "all">("in");
   const [grav, setGrav] = useState<"all" | "micro" | "ground">("all");
@@ -149,6 +152,13 @@ function Explorer({ doc, findings }: { doc: InvestigationsDoc; findings: Curator
           {rows.length === 0 && <div className="empty" style={{ marginTop: 16 }}><p className="empty__title">No record matches</p><p style={{ marginTop: 6 }}>Clear the search or widen the filters.</p></div>}
         </div>
       </div>
+      {area.data && area.data.listed_n != null && (
+        <p className="note" style={{ maxWidth: "96ch" }}>
+          Cross-check: NASA's own "investigations by research area" page lists {area.data.listed_n} combustion investigations, and {area.data.matched_n} of them are among these records
+          {(area.data.listed_not_in_search ?? []).length > 0 ? ` (missing from the search: ${area.data.listed_not_in_search!.join(", ")})` : ""}.
+          {(area.data.search_not_listed ?? []).length > 0 ? ` ${area.data.search_not_listed!.length} records come back from the search but are not on that page: ${area.data.search_not_listed!.join(", ")}.` : ""} {area.data.drift.statement}
+        </p>
+      )}
       <p className="note">
         <KlassBadge k="observed" note="PSI metadata and tables, fetched from NASA" /> Test rows are counted as rows after the header with at least one filled cell.
         "Files in PSI" is the record's own file list; the site downloads the experimental tables and a few named summaries, not the raw video. Colour marks the gravity regime only.

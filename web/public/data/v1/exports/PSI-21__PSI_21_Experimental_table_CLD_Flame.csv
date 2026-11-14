@@ -1,0 +1,33 @@
+psi_record,source_file,row,test_type,test_day,fuel_mfc,n2_mfc,fuel_bottle,fuel_conc_range,flames_ignited,notes,source_sha256,ledger_entry
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,1,Methane based test,17319,0.1,0.1,40% CH4,30%-40%,10,"Test Day - includes the year as the first two digits followed by the 3-digit day of the year (where any late-hour transition to the next day is neglected). MFC - identifies the maximum flow rate of the specified ACME Mass Flow Controller (MFC) in slpm on a nitrogen basis. Fuel conc. - (as diluted with nitrogen on a volume basis) was varied between tests and sometimes during tests where the listing here accounts for both. However, it does not account for extinction that sometimes occurred before the flame fully reached the lowest concentration. Flames ignited is the number ignited on that test day.",9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,2,Methane based test,17324,0.1,0.1,40% CH5,30%-40%,5,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,3,Methane based test,17342,0.1,0.1,40% CH6,40%,8,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,4,Methane based test,17356,0.1,0.1,40% CH7,30%-40%,3,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,5,Methane based test,18003,0.1,0.1,40% CH8,25%-40%,9,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,6,Methane based test,18005,0.1,0.1,40% CH9,30%-40%,7,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,7,Methane based test,18008,0.1,0.1,40% CH10,25%-40%,8,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,8,Methane based test,18011,0.1,0.1,40% CH11,25%-40%,14,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,9,Methane based test,18022,0.1,0.1,40% CH12,30%-40%,3,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,10,Methane based test,18026,0.1,0.1,40% CH13,25%-40%,16,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,11,Methane based test,18032,0.1,0.1,40% CH14,30%-40%,13,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,12,Methane based test,18039,0.1,0.05,100% CH4,50%-80%,8,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,13,Methane based test,18043,0.1,0.05,100% CH5,50%-100%,10,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,14,Methane based test,18053,0.1,0.02,100% CH6,30%-40%,16,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,15,Ethylene based test,18145,0.2,0.1,100% C2H4,80%-100%,3,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,16,Ethylene based test,18151,0.2,0.1,100% C2H5,100%,2,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,17,Ethylene based test,18177,0.2,0.1,100% C2H6,80%-100%,9,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,18,Ethylene based test,18186,0.2,0.1,100% C2H7,60%-100%,14,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,19,Ethylene based test,18192,0.2,0.1,100% C2H8,50%-60%,10,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,20,Ethylene based test,18199,0.2,0.1,100% C2H9,40%-100%,16,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,21,Ethylene based test,18214,0.2,0.05,100% C2H10,100%,13,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,22,Ethylene based test,18218,0.2,0.05,100% C2H11,80%,18,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,23,Ethylene based test,18235,0.2,0.1,50% C2H4,50%,16,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,24,Ethylene based test,18239,0.2,0.1,50% C2H5,40%,14,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,25,Ethylene based test,18241,0.1,0.2,50% C2H6,10%-20%,6,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,26,Ethylene based test,18249,0.1,0.2,50% C2H7,10%-30%,12,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,27,Ethylene based test,18253,0.1,0.2,50% C2H8,15%-30%,14,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,28,Ethylene based test,18257,0.1,0.2,50% C2H9,15%-20%,15,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,29,Improved coflow tests,21041,0.2,0.2,30% C2H4,0%-30%,9,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,30,Improved coflow tests,21046,0.2,0.2,30% C2H5,15%-20%,16,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,31,Improved coflow tests,21050,0.2,0.2,40% CH4,20%-40%,16,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
+PSI-21,PSI-21_Experimental table_CLD Flame.csv,32,Improved coflow tests,21062,0.2,0.2,40% CH5,30%-40%,11,,9fafbc5b3dddaf715ce8025ed9154ce297803f7b69a935f077ec26c8249e44c0,1104
