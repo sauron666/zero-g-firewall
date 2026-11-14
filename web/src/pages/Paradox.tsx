@@ -8,6 +8,9 @@ import { KlassBadge } from "../lib/klass";
 import { IconPause, IconPlay, IconReset, IconInfo } from "../components/icons";
 import { usePrefersReducedMotion, useWidth } from "../lib/hooks";
 import { useReceipt } from "../components/Receipt";
+import { useData } from "../lib/data";
+import type { ReportedDoc } from "../lib/types";
+import { DocBtn } from "../viz/Reported";
 
 type BodyId = "iss" | "moon" | "mars";
 type Mode = "start" | "alarm";
@@ -68,6 +71,9 @@ function RangeRows({ a, ens, width }: { a: Reality; ens: Ensemble | null; width:
 }
 
 export function Paradox() {
+  const reported = useData<ReportedDoc>("reported.json");                      // what NASA measured in simulated lunar gravity; absent in a build without those documents
+  const fabric = reported.data?.luci.rows.find((r) => r.id === "fabric_base");
+  const longer = reported.data?.quotes.luci.find((q) => q.kind === "quote" && q.quote.includes("sooner than partial-g"));
   const [body, setBody] = useState<BodyId>("iss");
   const [mode, setMode] = useState<Mode>("start");
   const g = BODIES[body].g;
@@ -303,6 +309,13 @@ export function Paradox() {
               <span>
                 <span className="choice__title">{b.label}</span>
                 <p className="choice__ev">{b.evidence}</p>
+                {b.id === "buoyant" && fabric && (
+                  <p className="choice__ev">
+                    Measured in that flight, as NASA's slides give it: the flame base on the fabric moved at {fabric.lunar} {fabric.unit}, against {fabric.earth} in the same test on Earth.
+                    {longer && longer.kind === "quote" && longer.quote_verified && <> “{longer.quote}”.</>}{" "}
+                    <DocBtn r={fabric.ref} title="Flame spread in simulated lunar gravity, against Earth (LUCI)" />
+                  </p>
+                )}
                 <p className="choice__src">{b.source}{g > 0 && b.id !== "selffed" ? ". In partial gravity: may, not measured." : ""}</p>
               </span>
             </label>
