@@ -3,7 +3,7 @@ import { ALL_ITEMS, NAV } from "../app/nav";
 import { href } from "../app/router";
 import { Manifest, fmtBytes, fmtInt, fmtUtc, useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
-import type { DropletDoc, GapsDoc, MatrixDoc, MythsDoc, RankDoc, ValidationDoc, RecordedDoc } from "../lib/types";
+import type { DropletDoc, GapsDoc, InventoryDoc, MatrixDoc, MythsDoc, RankDoc, ValidationDoc, RecordedDoc } from "../lib/types";
 import { FlameCanvas } from "../components/FlameCanvas";
 import { Porthole } from "../components/Porthole";
 import { FanSwitch } from "../components/FanSwitch";
@@ -44,6 +44,9 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
   const val = useData<ValidationDoc>(nasa ? "validation.json" : null);
   const drops = useData<DropletDoc>(nasa ? "droplets.json" : null);
   const rec = useData<RecordedDoc>(manifest?.artifacts["recorded.json"] ? "recorded.json" : null);
+  const inv = useData<InventoryDoc>(manifest?.artifacts["inventory.json"] ? "inventory.json" : null);      // what the BASS-II table itself says, in words, about how its tests ended
+  const words = inv.data?.flow_words.tables.find((w) => w.accession === "PSI-25");
+  const wOut = words?.classes.find((c) => c.id === "went_out"), wZero = words?.classes.find((c) => c.id === "zero");
   const [q, setQ] = useState("");
   const ask = (text: string) => { const t = text.trim(); if (t) { emit({ type: "ASK", q: t }); setQ(""); } };
 
@@ -85,6 +88,11 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
                 In microgravity, airflow can decide how a flame burns.{brief ? " On the space station, a fire alarm stops the ventilation in the affected module." : ""}{" "}
                 <b>In NASA's BASS-II experiment, a flame went out within two seconds once its airflow was cut.</b>
               </p>
+              {words && wOut && wOut.rows > 0 && (
+                <p className="hero__fact">
+                  <a href={href("/evidence/measured")}>The table of that experiment</a>: {wOut.rows} of {words.n_rows} rows say the flame went out{wZero && wZero.rows > 0 ? <>; in {wZero.rows} a display reads 0 and the row has no word on the flame</> : null}.
+                </p>
+              )}
               <p className="hero__ask">
                 Does the same hold for other fuels, atmospheres and gravity levels?
                 {myth?.myth_verified ? <> NASA's own guide files <q>{myth.myth.replace(/\.$/, "")}</q> under misconceptions.</> : " NASA's own guide files that belief under misconceptions."}

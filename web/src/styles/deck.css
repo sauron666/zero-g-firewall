@@ -141,6 +141,8 @@ a.tile:hover { border-color: var(--tone, var(--g-micro)); transform: translateY(
 .iskra-hero:hover { transform: scale(1.06); }
 .hero__lede { font-family: var(--font-claim); font-size: clamp(1.05rem, 1.25vw, 1.2rem); line-height: 1.5; color: var(--ink-2); max-width: 46ch; }
 .hero__lede b { color: var(--ink); font-weight: 500; }
+.hero__fact { margin-top: 8px; max-width: 52ch; font-size: var(--t-13); line-height: 1.45; color: var(--ink-2); }
+.hero__fact a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--axis); text-underline-offset: 3px; }
 .hero__ask { font-family: var(--font-claim); font-size: clamp(1.05rem, 1.25vw, 1.2rem); line-height: 1.45; color: var(--ink); max-width: 46ch; margin-top: 10px; }
 .hero__cta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .hero__src { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 14px; font-size: var(--t-12); color: var(--ink-3); }
