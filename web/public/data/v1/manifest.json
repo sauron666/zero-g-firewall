@@ -221,7 +221,7 @@
    "klass": "observed"
   },
   "myths.json": {
-   "sha256": "9511fadcf6f40a3755672092eed26e30350f86fdaa24ef3e8e0e9d2f7231365e",
+   "sha256": "de66fb1e65651637a6fdd0f56dc53eaeb71344ec9d6b6199757ebe7ae6358097",
    "bytes": 28944,
    "klass": "literature"
   },
@@ -231,17 +231,17 @@
    "klass": "derived"
   },
   "index.json": {
-   "sha256": "ccc2ba1a25ffab350f7f5df225d7e39bfe7d643efee73b218933330944da892a",
+   "sha256": "26877f8d2ea9aeef22ad5f092dc757fd24cf4d729fe8530d0ed78db334ae2a28",
    "bytes": 470408,
    "klass": "derived"
   },
   "falsify.json": {
-   "sha256": "26a6d3c7ec5b8b15a39c6b834a7533e09bde6e5a5076cc4d08edc36bfa1615d1",
+   "sha256": "980ffe9ffaa82e155b2927cce1204bc4b1962471a7612e10bc550a7953a468a6",
    "bytes": 34862,
    "klass": "derived"
   },
   "gaps.json": {
-   "sha256": "9b7008088c1ee5f96bbaa05f9e9e5cb3b996aa02c9fd5e94b5cf43da6d4c2e6b",
+   "sha256": "1f322316cedaffc3cad89373a3a1f41e8c8820028db111de1392035a0372ea3c",
    "bytes": 27257,
    "klass": "derived"
   },
@@ -421,13 +421,13 @@
    "klass": "literature"
   },
   "inventory.json": {
-   "sha256": "cf929eba63440115500038ae0dc6592f9f652052be6f8bb88eabc043e8886bda",
-   "bytes": 71733,
+   "sha256": "5d196ad4898d15def10d6a08542b5e7f1bc21ead6dfed20f7af96ca4c380a622",
+   "bytes": 71734,
    "klass": "derived"
   }
  },
  "brand": "Zero-G Firewall",
  "team": "The Rule of Flame",
  "mascot": "ISKRA",
- "built_at_utc": "2026-11-14T16:57:05Z"
+ "built_at_utc": "2026-11-14T17:13:12Z"
 }

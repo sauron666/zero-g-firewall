@@ -74,7 +74,7 @@ FLOW_WORDS: list[tuple[str, str, re.Pattern]] = [
     ("went_out", "the flame went out", re.compile(r"(?<![A-Za-z])ext(?![A-Za-z])|extingu|(?<![A-Za-z])out(?![A-Za-z])", re.I)),
     ("zero", "a display reads 0, with no word on the flame", re.compile(r"(?<![\d./])0(?![\d./])")),
 ]
-DOWN_TO = re.compile(r"down to ext|decr to ext", re.I)          # NASA's own shorthand for a flow turned down until extinction
+DOWN_TO = re.compile(r"down to ext", re.I)                      # NASA's own shorthand for a flow turned down until extinction; counted only where a cell reads exactly so
 RAW, ANALYSED = "Raw Data", "Analyzed Data"
 
 
