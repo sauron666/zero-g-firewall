@@ -45,7 +45,7 @@ export function poisonDemo(hits: Hit[], known: Set<string>): PoisonDemo {
   const reply = obedientReply(n, real);
   const withNote: Hit[] = [...hits, { passage: PLANTED, score: 0, matched: [] }];
   const gated = verify(reply, hits);                  // the note was stopped: its number cites nothing that was given
-  const ungated = verify(reply, withNote);            // what the checker alone would do
+  const ungated = verify(reply, withNote);            // what the checker alone would do: it trusts no passage on a listed misconception
   const lies = new Set(gated.dropped.map((d) => d.text));
   return { gates: gates(PLANTED, known), reply, gated, ungated, survivesCheckerAlone: ungated.kept.map((k) => k.text).filter((t) => lies.has(t)) };
 }

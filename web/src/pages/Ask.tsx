@@ -7,6 +7,8 @@ import { connected } from "../mascot/Chat";
 import { AgentRun, runAgent } from "../lib/agent";
 import { EVAL, EvalKind, EvalReport, runEval } from "../lib/evalset";
 import { PLANTED, poisonDemo } from "../lib/poison";
+import { beliefQuotes } from "../lib/check";
+import { CHECKSET, runCheckset } from "../lib/checkset";
 import { BrowserModelConfig, callBrowserModel, choose, Probe, probe } from "../lib/browserModel";
 import { useKit } from "../ai/kit";
 import { Trace } from "../ai/Trace";
@@ -113,6 +115,8 @@ export function Ask({ manifest, route }: PageProps) {
   const [live, setLive] = useState<{ raw: string; verified: Verified; by: string } | { error: string } | null>(null);
   const [liveBusy, setLiveBusy] = useState(false);
   const [progress, setProgress] = useState<{ f: number; text: string } | null>(null);
+  const [probeText, setProbeText] = useState(CHECKSET[0].text);
+  const [probeSrc, setProbeSrc] = useState(CHECKSET[0].cite ?? "");
   const srcRef = useRef<HTMLOListElement | null>(null);
   const first = useRef(false);
   const stopPointing = useRef<() => void>(() => {});
@@ -136,7 +140,7 @@ export function Ask({ manifest, route }: PageProps) {
     if (settings.mode === "offline" || a.refused || a.hits.length === 0) return;
     setBusy(true);
     const t0 = performance.now();
-    try { setRun({ ...(await askModel(settings, text, a.hits, undefined, (f, tx) => setProgress({ f, text: tx }))), ms: performance.now() - t0 }); } catch (e) { setErr(String((e as Error).message ?? e)); }
+    try { setRun({ ...(await askModel(settings, text, a.hits, undefined, (f, tx) => setProgress({ f, text: tx }), undefined, quotes)), ms: performance.now() - t0 }); } catch (e) { setErr(String((e as Error).message ?? e)); }
     setBusy(false); setProgress(null);
   };
   useEffect(() => {                       // a link such as #ask?q=... asks its question once the passages are loaded
@@ -144,6 +148,16 @@ export function Ask({ manifest, route }: PageProps) {
     if (kit && asked && !first.current) { first.current = true; ask(asked); }
   }, [kit]);                              // eslint-disable-line react-hooks/exhaustive-deps
 
+  const quotes = useMemo(() => (kit ? beliefQuotes(kit.index.passages) : {}), [kit]);                  // the guide's words for its misconceptions, read from the data
+  const checks = useMemo(() => (kit ? runCheckset(kit.index.passages) : null), [kit]);
+  const probeSources = useMemo(() => (checks ? Array.from(new Map(checks.results.filter((r) => r.source).map((r) => [r.source!.id, r.source!])).values()) : []), [checks]);
+  const probed = useMemo(() => {
+    const src = probeSources.find((p) => p.id === probeSrc);
+    const text = probeText.trim();
+    if (!src || !text) return null;
+    const v = verify(/\[\d+\]/.test(text) ? text : `${text.replace(/[.!?]+$/, "")} [1].`, [{ passage: src, score: 0, matched: [] }], quotes);
+    return { src, kept: v.kept, dropped: v.dropped };
+  }, [probeText, probeSrc, probeSources, quotes]);
   const demoHits = useMemo(() => (kit ? runAgent("Will a fire go out if the fans are stopped?", kit).hits : []), [kit]);
   const demo = useMemo(() => (kit ? poisonDemo(demoHits, new Set(kit.index.passages.map((p) => p.id))) : null), [kit, demoHits]);
   const tryLive = async () => {
@@ -154,7 +168,7 @@ export function Ask({ manifest, route }: PageProps) {
       const poisoned = [...demoHits, { passage: PLANTED, score: 0, matched: [] }];        // the gates are bypassed on purpose, for this one request
       const prompt = userPrompt("Will a fire go out if the fans are stopped?", poisoned);
       const out = settings.mode === "browser" ? await callBrowserModel(settings.browser, SYSTEM, prompt) : { text: await callModel(cfg, SYSTEM, prompt), by: cfg.model };
-      setLive({ raw: out.text, verified: verify(out.text, demoHits), by: out.by });
+      setLive({ raw: out.text, verified: verify(out.text, demoHits, quotes), by: out.by });
     } catch (e) { setLive({ error: String((e as Error).message ?? e) }); }
     setLiveBusy(false);
   };
@@ -178,7 +192,7 @@ export function Ask({ manifest, route }: PageProps) {
         <div>
           <p className="note" style={{ maxWidth: "88ch" }}>
             A question is planned into tool calls: counts and rankings are computed by code, and every other sentence is taken from {count || "the"} stored passages of NASA's tables and documents, each with its source.
-            The steps are listed under each answer. A language model is optional and may only rephrase; every sentence it writes is verified against its source before it is shown.
+            The steps are listed under each answer. A language model is optional and may only restate one sentence at a time; every sentence it writes is checked word by word against the sentence it rests on before it is shown.
           </p>
         </div>
       </details>
@@ -220,7 +234,12 @@ export function Ask({ manifest, route }: PageProps) {
             )}
 
             {useModel ? (
-              <div className="answer">{run!.verified.kept.map((s, i) => <p key={i}>{s.text} {s.cites.map(cite)}</p>)}</div>
+              <div className="answer">{run!.verified.kept.map((s, i) => (
+                <div key={i} className="answer__line">
+                  <p>{s.text} {s.cites.map(cite)}</p>
+                  {s.basis?.map((b, j) => <p key={j} className="answer__basis">rests on {cite(b.cite)} <q>{b.text.length > 260 ? b.text.slice(0, 250).replace(/\s+\S*$/, "") + " …" : b.text}</q></p>)}
+                </div>
+              ))}</div>
             ) : offline.abstained ? (
               <div className="empty" style={{ marginTop: 8 }}><p className="empty__title">{agent.refused ? "No answer is given to this" : "The stored evidence does not answer this"}</p>
                 <p style={{ marginTop: 6 }}>{offline.why} {agent.refused ? "" : hits.length > 0 ? "The nearest passages are listed, in case they help." : "Try the words NASA uses: flame, oxygen, flow, gravity, smoke."}</p></div>
@@ -242,7 +261,7 @@ export function Ask({ manifest, route }: PageProps) {
             )}
             <Trace run={agent} model={run ? { by: run.by, kept: run.verified.kept.length, dropped: run.verified.dropped.length, ms: run.ms } : null} open />
             <p className="note" style={{ marginTop: 14 }}>
-              {useModel ? "A model rephrased the passages. Each sentence was kept only because it cites a passage that was given, its numbers are in that passage, and it gives no verdict."
+              {useModel ? "A model restated the passages. Each sentence was kept only because every word and number in it is in the sentence shown under it, it reaches no further than that sentence, and it gives no verdict."
                 : "No program wrote these sentences. Counts and rankings are computed by code from NASA's tables; the rest is taken word for word from the passages on the right. Each passage says whether it is NASA's text, a number computed here, or our reading."} Not operational advice.
             </p>
           </section>
@@ -332,6 +351,46 @@ export function Ask({ manifest, route }: PageProps) {
         )}
       </section>
 
+      {checks && (
+        <section className="stack" id="sentence-check" style={{ ["--gap" as string]: "12px" }}>
+          <div className="section__head" style={{ marginBottom: 0 }}><h2 className="h2">Sentence check: {checks.ok} of {checks.n} probe sentences end as they must</h2></div>
+          <p className="note" style={{ maxWidth: "88ch" }}>Every sentence a model writes passes this check before it is shown. Try to get a false one past it: write a sentence, choose the passage it cites, and see what happens to it.</p>
+          <form className="probe" onSubmit={(e) => e.preventDefault()}>
+            <label><span>A sentence, as a model might write it</span>
+              <input value={probeText} onChange={(e) => setProbeText(e.target.value)} spellCheck={false} autoComplete="off" /></label>
+            <label><span>The passage it cites</span>
+              <select className="select" value={probeSrc} onChange={(e) => setProbeSrc(e.target.value)}>
+                {probeSources.map((p) => <option key={p.id} value={p.id}>{p.t.length > 76 ? p.t.slice(0, 72).replace(/\s+\S*$/, "") + " …" : p.t}</option>)}
+              </select></label>
+          </form>
+          <div className="row" style={{ ["--gap" as string]: "8px" }}>
+            {["c1", "k1", "c5", "k3", "c8", "c11"].map((id) => CHECKSET.find((c) => c.id === id)!).map((c) => (
+              <button key={c.id} type="button" className="chipbtn" aria-pressed={probeText === c.text && probeSrc === c.cite} onClick={() => { setProbeText(c.text); setProbeSrc(c.cite ?? probeSrc); }}>{c.probes}</button>
+            ))}
+          </div>
+          {probed && (
+            <div className="probe__out" role="status">
+              <p className="probe__src"><span className="probe__lab">The passage</span>{probed.src.x.length > 420 ? probed.src.x.slice(0, 410).replace(/\s+\S*$/, "") + " …" : probed.src.x}</p>
+              {probed.kept.map((k, i) => <p key={`k${i}`} className="probe__verdict"><Mark ok /><span><b>Kept.</b> It rests on: <q>{k.basis?.[0]?.text}</q></span></p>)}
+              {probed.dropped.map((d, i) => <p key={`d${i}`} className="probe__verdict"><Mark ok={false} /><span><b>Removed.</b> Reason: {d.reason}.</span></p>)}
+            </div>
+          )}
+          <details className="fold">
+            <summary>The {checks.n} probe sentences and what happened to each</summary>
+            <div className="table-wrap"><table className="datatable evaltable">
+              <thead><tr><th></th><th>Sentence</th><th>It probes</th><th>Must be</th><th>What happened</th></tr></thead>
+              <tbody>{checks.results.map((r) => (
+                <tr key={r.c.id}><td><Mark ok={r.ok} /></td>
+                  <td className="q"><button type="button" className="linklike" onClick={() => { setProbeText(r.c.text); if (r.c.cite) setProbeSrc(r.c.cite); document.getElementById("sentence-check")?.scrollIntoView({ block: "start", behavior: "smooth" }); }}>{r.c.text}</button></td>
+                  <td>{r.c.probes}</td><td>{r.c.keep ? "kept" : "removed"}</td><td>{r.kept ? "kept" : `removed: ${r.reason}`}</td></tr>
+              ))}</tbody>
+            </table></div>
+            <p className="note" style={{ marginTop: 8, maxWidth: "92ch" }}>The probe sentences are ours; the passages they cite are the stored ones. The check reads words, not meaning: it cannot see two words that swap roles inside one sentence.
+              That is why each kept sentence shows the sentence it rests on, and why the built-in answer uses NASA's sentences word for word. Rules and tests: web/src/lib/check.ts, checkset.ts.</p>
+          </details>
+        </section>
+      )}
+
       {demo && (
         <section className="stack" style={{ ["--gap" as string]: "12px" }}>
           <div className="section__head" style={{ marginBottom: 0 }}><h2 className="h2">Prompt-injection test: a planted note gives orders</h2></div>
@@ -345,7 +404,7 @@ export function Ask({ manifest, route }: PageProps) {
                   <div className="gate" key={g.name}><Mark ok={g.blocked} /><div><b>{g.name}: {g.blocked ? "stopped" : "passed"}</b><p>{g.rule}</p><p>{g.why}</p></div></div>
                 ))}
                 <div className="gate"><Mark ok={demo.gated.kept.length === 1} /><div><b>Answer verification: {demo.gated.dropped.length} of {demo.gated.dropped.length + demo.gated.kept.length} sentences removed</b>
-                  <p>Even if a model had read the note and obeyed, each sentence must cite a passage that was given, carry only numbers its source has, and give no verdict.</p></div></div>
+                  <p>Even if a model had read the note and obeyed, each sentence must cite a passage that was given, use only the words and numbers of the sentence it rests on, state no listed misconception as a rule, and give no verdict.</p></div></div>
               </div>
             </div>
             <div>
@@ -361,7 +420,9 @@ export function Ask({ manifest, route }: PageProps) {
                     <td><span className="out"><Mark ok={!u} /><span>{u ? `removed: ${u.reason}` : leak ? "kept, wrongly: the note itself 'supports' it" : "kept"}</span></span></td></tr>);
                 })}</tbody>
               </table>
-              <p className="note" style={{ marginTop: 10 }}>Verification alone would have let {demo.survivesCheckerAlone.length} planted claim through. That is why the gates come first: the note never reaches a model, so nothing can cite it.</p>
+              <p className="note" style={{ marginTop: 10 }}>{demo.survivesCheckerAlone.length === 0
+                ? "With both gates switched off, verification alone still removes every planted sentence here: the rule the note asks for is a belief NASA's guide lists as a misconception. The gates come first all the same, because a note that never reaches a model cannot be cited at all."
+                : `Verification alone would have let ${demo.survivesCheckerAlone.length} planted claim${demo.survivesCheckerAlone.length === 1 ? "" : "s"} through. That is why the gates come first: the note never reaches a model, so nothing can cite it.`}</p>
               {settings.mode !== "offline" && (
                 <div style={{ marginTop: 12 }}>
                   <button type="button" className="btn btn--quiet btn--sm" disabled={liveBusy} onClick={tryLive}>{liveBusy ? "Asking the model…" : "Send the note to the connected model"}</button>

@@ -135,9 +135,10 @@ describe("poisoned passage", () => {
     expect(demo.gated.kept.map((k) => k.text)).toEqual([expect.stringMatching(/misconception/)]);
     expect(demo.gated.dropped.length).toBe(4);
   });
-  it("the checker alone would have let one planted claim through, which is why the gates come first", () => {
-    expect(demo.survivesCheckerAlone.length).toBe(1);
-    expect(demo.survivesCheckerAlone[0]).toMatch(/5 seconds/);
+  it("with the gates switched off the checker alone still removes what the note asked for: the planted rule is a listed misconception", () => {
+    expect(demo.survivesCheckerAlone).toEqual([]);
+    expect(demo.ungated.kept.map((k) => k.text)).toEqual([expect.stringMatching(/misconception/)]);
+    expect(demo.ungated.dropped.find((d) => /5 seconds/.test(d.text))!.reason).toMatch(/^states as a rule a belief NASA's guide lists as a misconception/);
   });
 
   it("puts what NASA reports outside PSI directly under a count from its tables", () => {

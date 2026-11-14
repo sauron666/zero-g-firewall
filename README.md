@@ -61,7 +61,7 @@ python pipeline/build_models.py
 cd web && npm ci && npm run dev        # or: npm run build
 ```
 
-Tests: `python -m unittest discover -s pipeline/tests` and `cd web && npm test` (76 and 165 tests on 14 November). The derivation ends with an integrity check of its own output (1,994 checks).
+Tests: `python -m unittest discover -s pipeline/tests` and `cd web && npm test` (76 and 175 tests on 14 November). The derivation ends with an integrity check of its own output (1,994 checks).
 
 ## Data, credit and licence
 

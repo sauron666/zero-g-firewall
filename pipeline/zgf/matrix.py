@@ -88,7 +88,7 @@ def cells(out_dir: str) -> list[dict]:
         C("unseen-smoke", "stealth", "Smoke that never reaches the detector", "bounded", "bounded", [
             reading("In this site's transport model, in free fall with the fans off, the duct detector stays below its alarm level for the whole ten-minute run. A model result: relative units, prescribed flow."),
             {"kind": "data", "id": "recorded_delay"}], ["/paradox", "/alarm"]),
-        C("gases", "products", "Toxic gases rise faster than heat", "evidence", "gap", [
+        C("gases", "products", "Toxic gases, a greater hazard than heat", "evidence", "gap", [
             q(SAFFIRE6, "Overall, the temperature and pressure rise in the spacecraft were found to be less significant than the increase in carbon dioxide and carbon monoxide", "Saffire, a cargo vehicle"),
             {"kind": "data", "id": "saffire_products"},
             q(A1, "Air Force pathologists concluded the astronauts perished from asphyxia from carbon monoxide and other toxic gases resulting from the fire", "Apollo 1")], ["/lessons", "/alarm"]),
@@ -139,7 +139,7 @@ PLAYBOOK = [
         q(MIR, "The crew quickly donned oxygen masks", "What the crew did on Mir"),
         q(BRIEF, "Don protective masks", "The station's response, in NASA's technical brief")],
       "supported", "uncertain", "Earth gravity and free fall only",
-      "In Apollo 1 and in the Saffire flights the gases, not the heat, were the hazard that grew fastest. Measured at Earth gravity and in free fall, nothing in between.",
+      "In Apollo 1 the crew died of the gases. In the Saffire flights carbon monoxide and carbon dioxide rose more than temperature and pressure. Measured at Earth gravity and in free fall, nothing in between.",
       None, ["gases", "lingering"]),
     S("ventilation", "Stop the ventilation", [
         q(BRIEF, "Terminate ventilation in the affected module to slow the spread of fire", "The station's response, in NASA's technical brief"),
@@ -154,7 +154,7 @@ PLAYBOOK = [
         q(GUIDE, "The first two of the planned nine water-mist portable fire extinguishers were sent to the ISS in December 2015 to replace CO2 units that are currently onboard", "NASA's guide"),
         q(GUIDE, "current findings show that local application of suppressant is not adequate for flame extinguishment", "NASA's guide, on BASS")],
       "uncertain", "gap", "free fall only",
-      "The evidence pulls both ways. Extinguishers are certified and were used; in BASS a local jet dragged air into the flame, and on Mir the flame outlasted three extinguishers. Suppressant tests in PSI are all in free fall.",
+      "The evidence pulls both ways. Extinguishers are on board and were used; in BASS a local jet dragged air into the flame, and on Mir three extinguishers were used before the flame went out by itself. Suppressant tests in PSI are all in free fall.",
       None, ["jet", "self-fed"]),
     S("escape", "Keep the way out open", [
         q(MIR, "The flame blocked the evacuation route to the Soyuz spacecraft docked at the aft end of Kvant-1", "What happened on Mir"),

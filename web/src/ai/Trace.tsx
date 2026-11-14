@@ -31,7 +31,7 @@ export function Trace({ run, model, open = false }: { run: AgentRun; model?: { b
               <div className="trace__args"><span className="trace__arg">model = {model.by}</span><span className="trace__reads">reads the passages found, as data</span></div>
               <p className="trace__out">The model received numbered passages and the rule that every sentence must cite one.</p></li>
             <li className="trace__step"><div className="trace__head"><code className="trace__tool">verify_model_answer</code><span className="trace__what">Each sentence is verified against its source</span></div>
-              <p className="trace__out">{model.kept} kept, {model.dropped} removed. A sentence is removed if it cites nothing that was given, carries a number its source lacks, or gives a verdict or a probability.</p></li>
+              <p className="trace__out">{model.kept} kept, {model.dropped} removed. A sentence is removed if it cites nothing that was given, uses a word or a number the sentence it rests on lacks, reaches further than that sentence, states a listed misconception as a rule, or gives a verdict or a probability.</p></li>
           </>
         )}
       </ol>
