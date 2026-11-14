@@ -1,14 +1,14 @@
 # Coverage of the plan, feature by feature
 
-Checked on 14 November 2026 at 16:59 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
+Checked on 14 November 2026 at 17:00 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
 
 | Priority | Features | Done | Partial | Not built |
 |---|---|---|---|---|
 | P0 | 28 | 28 | 0 | 0 |
-| P1 | 59 | 37 | 7 | 15 |
+| P1 | 59 | 38 | 7 | 14 |
 | P2 | 38 | 2 | 9 | 27 |
 | P3 | 5 | 0 | 0 | 5 |
-| All | 130 | 67 | 16 | 47 |
+| All | 130 | 68 | 16 | 46 |
 
 ## Definition of done (specification, section 0)
 
@@ -67,7 +67,7 @@ Checked on 14 November 2026 at 16:59 Sofia time against the 130 features of the 
 | B10 | P1 | **not built** | Audience lens (student, researcher, engineer) |  |
 | B11 | P1 | **not built** | Sensor and measurement inventory across investigations |  |
 | B12 | P1 | **not built** | Hardware-family graph and knowledge graph (facilities, fuels, instruments, investigations) |  |
-| B13 | P1 | **not built** | Controls view |  |
+| B13 | P1 | done | Controls view | on the fire matrix page: prevention, detection and suppression, each with its fire behaviours as marks for the station and the Moon, the NASA records that inform it (by the written pillar rules) and a link that opens those records |
 | B14 | P1 | done | Earth applications with NASA sources | three Spinoff articles; water mist is not in the ledger, so it is not shown |
 | B15 | P1 | **not built** | Report generator with citations, figures, methods, limitations, AI disclosure and a ledger receipt |  |
 | B16 | P2 | **not built** | Tension finder | partly covered by Myths and Try to refute it |

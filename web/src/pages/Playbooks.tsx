@@ -3,7 +3,7 @@ import { ALL_ITEMS } from "../app/nav";
 import { href } from "../app/router";
 import { useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
-import type { Coverage, Habitat, MatrixCell, MatrixDoc, PlaybookStep, StepBadge } from "../lib/types";
+import type { Coverage, Habitat, MatrixCell, MatrixDoc, PlaybookStep, RankDoc, StepBadge } from "../lib/types";
 import { IconCheck, IconInfo } from "../components/icons";
 import { Item } from "./Myths";
 import { PageProps, stub } from "./stubs";
@@ -103,9 +103,53 @@ function Step({ s, doc, open, pick }: { s: PlaybookStep; doc: MatrixDoc; open: b
   );
 }
 
+const CONTROL: Record<string, { title: string; does: string }> = {
+  prevention: { title: "Prevent", does: "Choose materials and an atmosphere in which a fire is hard to start" },
+  detection: { title: "Detect", does: "See smoke and gases early, and tell a fire from dust" },
+  suppression: { title: "Suppress", does: "Put the flame out, and deal with what it leaves in the air" },
+};
+
+/** The three controls, each with the fire behaviours it must answer and the NASA records that inform it. */
+function Controls({ doc, rank, onPillar }: { doc: MatrixDoc; rank: RankDoc; onPillar: (p: string) => void }) {
+  return (
+    <section className="stack" style={{ ["--gap" as string]: "12px" }} id="controls">
+      <div className="section__head"><h2 className="h2">Controls, and the research that informs each</h2><KlassBadge k="derived" note="sorted by written rules" /></div>
+      <div className="ctl">
+        {doc.pillars.map((p) => {
+          const cells = doc.cells.filter((c) => c.pillar === p);
+          const recs = rank.items.filter((i) => i.facets.pillars.includes(p)).sort((a, b) => b.rows - a.rows);
+          const n = (h: Habitat) => cells.filter((c) => c[h] === "evidence").length;
+          return (
+            <article key={p} className="dpanel ctl__col">
+              <header className="dpanel__head"><span className="led" /><h2>{CONTROL[p]?.title ?? p}</h2><button type="button" className="dpanel__more linklike" onClick={() => onPillar(p)}>Show in the matrix</button></header>
+              <p className="dpanel__say">{CONTROL[p]?.does}.</p>
+              {(["iss", "lunar"] as Habitat[]).map((h) => (
+                <div key={h} className={`ctl__row mx__hab--${h}`}>
+                  <span className="ctl__name">{HABITAT[h].short}</span>
+                  <span className="ctl__marks">{cells.map((c) => <a key={c.id} className={`cmark cmark--${c[h]}`} href={href(`/playbooks/${c.id}`)} title={`${c.name}: ${COVER[c[h]].toLowerCase()}`} aria-label={`${c.name}: ${COVER[c[h]].toLowerCase()}`} />)}</span>
+                  <span className="ctl__num"><b>{n(h)}</b> of {cells.length} measured</span>
+                </div>
+              ))}
+              <div>
+                <p className="ctl__lab">{recs.length} NASA records inform it</p>
+                <ul className="ctl__recs">
+                  {recs.map((r) => <li key={r.accession}><a href={href(`/evidence/${r.accession}`)} title={r.title}>{r.acronym || r.accession}</a><span className="num">{r.rows ? `${r.rows.toLocaleString("en-US")} rows` : "no table"}</span></li>)}
+                </ul>
+              </div>
+              <p className="dpanel__foot">A record is listed when {rank.facet_rules.pillars[p]}. <a href={`${href("/evidence")}?pillar=${p}`}>Open these records</a></p>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export function Playbooks(props: PageProps) {
   const ready = !!props.manifest?.nasa;
   const mx = useData<MatrixDoc>(ready ? "matrix.json" : null);
+  const rank = useData<RankDoc>(ready ? "rank_features.json" : null);
+  const grid = useRef<HTMLDivElement>(null);
   const want = props.route.segs[1] ?? "";
   const [hab, setHab] = useState<Habitat>(props.route.query.get("habitat") === "lunar" ? "lunar" : "iss");
   const [pillar, setPillar] = useState<string>("all");
@@ -154,7 +198,7 @@ export function Playbooks(props: PageProps) {
         </div>
       </div>
 
-      <div className={`mx mx--${hab}`}>
+      <div className={`mx mx--${hab}`} ref={grid} style={{ scrollMarginTop: 130 }}>
         <div className="mx__tally" role="status">
           {(["evidence", "bounded", "gap", "na"] as Coverage[]).filter((c) => cov[c] > 0 || c !== "na").map((c) => (
             <div key={c} className="mx__count"><span className="mx__num">{cov[c]}</span><span className="mx__lab"><CoverMark c={c} />{COVER[c]}{c === "bounded" && <span className="note"> by a model or a related test</span>}</span></div>
@@ -174,6 +218,8 @@ export function Playbooks(props: PageProps) {
       </div>
 
       <div ref={detail} style={{ scrollMarginTop: 64 }}><Detail c={cell} doc={doc} pickStep={pickStep} /></div>
+
+      {rank.data && <Controls doc={doc} rank={rank.data} onPillar={(p) => { setPillar(p); grid.current?.scrollIntoView({ block: "start", behavior: "smooth" }); }} />}
 
       <section className="stack" style={{ ["--gap" as string]: "12px" }}>
         <div className="section__head"><h2 className="h2">Response playbook: {doc.playbook.length} documented steps, two habitats</h2></div>

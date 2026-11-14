@@ -64,9 +64,9 @@ const FUEL: [string, string][] = [["solid", "Solids"], ["droplet", "Droplets"], 
 const STATES: [keyof Omit<RankFacets, "pillars">, string][] = [["oxygen", "Oxygen"], ["pressure", "Pressure"], ["flow", "Air flow"], ["outcome", "Outcome"]];
 const flip = (set: Set<string>, v: string) => { const n = new Set(set); if (n.has(v)) n.delete(v); else n.add(v); return n; };
 
-function Explorer({ doc, findings, briefs, rank }: { doc: InvestigationsDoc; findings: CuratorFinding[]; briefs: BriefsDoc | null; rank: RankDoc | null }) {
+function Explorer({ doc, findings, briefs, rank, pillar }: { doc: InvestigationsDoc; findings: CuratorFinding[]; briefs: BriefsDoc | null; rank: RankDoc | null; pillar?: string | null }) {
   const area = useData<AreaDoc>("research_area.json");
-  const [pillars, setPillars] = useState<Set<string>>(new Set());
+  const [pillars, setPillars] = useState<Set<string>>(() => new Set(pillar && (PILLAR as readonly string[]).includes(pillar) ? [pillar] : []));     // a link from the controls view arrives with its pillar chosen
   const [fuels, setFuels] = useState<Set<string>>(new Set());
   const [states, setStates] = useState<Set<string>>(new Set());
   const feat = useMemo(() => new Map((rank?.items ?? []).map((r) => [r.accession, r])), [rank]);
@@ -491,5 +491,5 @@ export function Evidence({ route, manifest }: PageProps) {
     if (!one) return <div className="empty"><p className="empty__title">No record {acc} in the combustion search</p><p style={{ marginTop: 6 }}><a href={href("/evidence")}>See all investigations</a></p></div>;
     return <Card key={one.accession} inv={one} findings={findings} profiles={prof.data} brief={briefs.data} />;
   }
-  return <Explorer doc={inv.data} findings={findings} briefs={briefs.data} rank={rank.data} />;
+  return <Explorer doc={inv.data} findings={findings} briefs={briefs.data} rank={rank.data} pillar={route.query.get("pillar")} />;
 }
