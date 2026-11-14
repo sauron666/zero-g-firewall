@@ -22,6 +22,10 @@ Updated: 14 November 2026, 14:38 Sofia time. Kept truthful: nothing is listed as
 | Gaps and plans | Five gaps, each counted from NASA's tables (no partial-gravity row among 2,009; no solid-material row with pressure; 8 and 11 rows near the exploration atmospheres; outcome columns in 10 of 20 tables; 3 of 6 Saffire flights in PSI), each beside the planned or flown experiment in NASA's words (`pipeline/zgf/lessons.py`). |
 | Incidents and Earth uses, resource coverage | Apollo 1, Apollo 13 and Mir, and three Spinoff articles, in checked sentences, each tied to a page of the site; a table of the challenge's ten resources with receipt and uses. **10 of 10 resources are in the ledger and used.** 79 of 79 quotations on the site are found word for word in the stored documents. |
 | Public site | https://sauron666.github.io/zero-g-firewall/ is deployed from `main` by GitHub Actions. The served manifest was checked after deployment; the live pages were not viewed from the build environment (no route to github.io). |
+| Opening page as a mission console | The question with the two flame windows, then three instruments: the evidence agent (ask, first sentences, tools that ran), what NASA has measured on the station and in lunar gravity (22 marks each), and the alarm lab. Counts link to their pages. The station's own procedure is stated only if a stored NASA document says it. |
+| Quick search | Ctrl or Command with K, or a slash: pages, investigations, fire behaviours and response steps; a sentence is sent to the evidence agent. Keyboard only if wished. |
+| ISKRA, the companion | A lantern with a flame in a glass core, drawn by code from scratch. The flame follows gravity (cube root) and the fans; the ring is drawn differently for each class of information and follows the page; states for searching, pointing at sources, no answer, sceptical on tampered readings, alarm, success. Its panel holds the "fans off" demonstration for the station and the Moon with the mandatory captions. Hidden on request (remembered); still pictures under reduced motion. 11 tests. |
+| Guided tour | Ten stops in 85 seconds, each named by the challenge verb it serves, from a button, the companion or a link with tour=1. Flips the fan switch at the first stop. Works offline. |
 | Evidence agent | A question goes through a plan of typed tools, all offline: screening (instructions, probability requests, names the evidence never mentions), counting test rows near a stated atmosphere, ranking for a mission, matrix coverage, curator notes, record lookup, passage search, composing, checking. Counts and rankings are computed by code; every other sentence is taken word for word from a passage. The trace under each answer is the list of calls as they ran. 14 tests on the shipped artifacts. The planner is a set of rules; a connected model may only rephrase. |
 | Evaluation scorecard | 36 questions with pass rules: 19 gold, 5 computed, 7 abstention, 5 adversarial. 35 pass. 7 were written after the engine was last changed and never tuned against (6 pass); the others were also used to improve the engine. Runs in the browser and in the test suite. |
 | Poisoned-passage demonstration | A planted note (synthetic) that gives the engine orders is stopped by the provenance gate and the instruction screen; a scripted obedient reply (synthetic) is then put through the real checker, with and without the gates. The page shows that the checker alone would let one planted claim through. Can be sent to a connected model. 3 tests. |
@@ -51,7 +55,7 @@ Sensor inventory, a nearest-evidence finder at row level, ISS live telemetry on 
 
 ## Next in the build order
 
-The companion, ISS live telemetry, judge tour.
+ISS live telemetry.
 
 ## Simulated or illustrative by design
 

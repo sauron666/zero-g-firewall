@@ -44,6 +44,14 @@ Motion answers an action (the fan switch, the time slider, a drawer). One ambien
 
 Visible keyboard focus, `aria-label` on every canvas and SVG, controls reachable by keyboard, contrast kept in both themes, class and status never by colour alone.
 
+## The opening page, the quick search, the companion
+
+- The opening page is a console: the question with the two flame windows, then three instruments (the evidence agent, what NASA has measured in two habitats, the alarm lab), then the counts, then the routes by challenge verb. Every instrument links to its full page.
+- Quick search opens with Ctrl or Command with K, with a slash, or from the top bar. A word or two finds a place; a sentence is a question for the agent.
+- Navigation items carry a line icon from `components/icons.tsx`, in ink. Icons never carry meaning alone: the label is always there.
+- ISKRA, the companion (`web/src/mascot/`), lives at the foot of the rail and in the tour bar. It never floats over content. Its flame follows gravity and the fans (`flame.ts`); its ring is drawn per class (`Lantern.tsx`, `RING`), in ink; its lines never state data. Pages talk to it only through `mascot/bus.ts`.
+- Coverage of the fire matrix is drawn as a square: full, half, empty with a dashed edge, or a dash. Its one hue is the gravity regime of the habitat.
+
 ## Components you already have
 
 `KlassBadge`, `ReceiptProvider/useReceipt`, `Porthole`, `FlameCanvas` (schematic flame that follows gravity and flow), `FanSwitch`, `SmokeView`, `LineChart`, `useWidth`, `useData`, `.panel`, `.statline`, `.table`, `.kv`, `.seg`, `.chip`, `.banner`, `.empty`, `.choice`, `details.fold`. Reuse them before writing new ones.

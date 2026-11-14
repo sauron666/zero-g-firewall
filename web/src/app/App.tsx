@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NAV, ALL_ITEMS } from "./nav";
 import { href, useRoute } from "./router";
 import { Manifest, fmtUtc, useData } from "../lib/data";
 import { ReceiptProvider } from "../components/Receipt";
 import { loadSettings, MODE_LABEL, onSettings } from "../lib/ai";
-import { IconClose, IconMenu, IconMoon, IconSun } from "../components/icons";
+import { IconClose, IconMenu, IconMoon, IconSearch, IconSun } from "../components/icons";
+import { NavIcon } from "../components/NavIcon";
+import { Palette } from "../components/Palette";
+import { IskraDock, useIskra } from "../mascot/Iskra";
+import { Tour } from "../mascot/Tour";
 import { Home } from "../pages/Home";
 import { Paradox } from "../pages/Paradox";
 import { Physics } from "../pages/Physics";
@@ -59,7 +63,17 @@ export function App() {
   const manifest = useData<Manifest>("manifest.json");
   const [theme, setTheme] = useState<Theme>(readTheme);
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState(false);
   const [aiMode, setAiMode] = useState(() => loadSettings().mode);
+  useEffect(() => {                       // Ctrl or Command with K anywhere; a bare slash when nothing is being typed
+    const on = (e: KeyboardEvent) => {
+      const typing = /^(INPUT|TEXTAREA|SELECT)$/.test((e.target as HTMLElement)?.tagName ?? "") || (e.target as HTMLElement)?.isContentEditable;
+      if ((e.key === "k" || e.key === "K") && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setSearch((v) => !v); }
+      else if (e.key === "/" && !typing && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); setSearch(true); }
+    };
+    window.addEventListener("keydown", on);
+    return () => window.removeEventListener("keydown", on);
+  }, []);
   useEffect(() => onSettings(() => setAiMode(loadSettings().mode)), []);
   const nasa = manifest.data?.nasa ?? null;
   const brand = manifest.data?.brand ?? "Zero-G Firewall";
@@ -73,6 +87,14 @@ export function App() {
 
   const top = "/" + (route.segs[0] ?? "");
   const current = ALL_ITEMS.find((i) => i.path === top);
+  const iskra = useIskra(top);
+  const mascot = manifest.data?.mascot ?? "ISKRA";
+  const [tour, setTour] = useState<number | null>(null);
+  const toured = useRef(false);
+  useEffect(() => {                       // a link with tour=1 starts the tour once
+    if (route.query.get("tour") === "1" && !toured.current) { toured.current = true; setTour(0); }
+  }, [route]);
+  const startTour = () => { toured.current = true; setTour(0); };
   let page: React.ReactNode;
   switch (top) {
     case "/": page = <Home manifest={manifest.data} />; break;
@@ -87,7 +109,7 @@ export function App() {
 
   return (
     <ReceiptProvider>
-      <div className="shell">
+      <div className={`shell ${tour != null ? "tour-on" : ""}`}>
         <nav className="rail" data-open={open} aria-label="Sections">
           <a className="brand" href={href("/")}>
             <Mark />
@@ -104,7 +126,7 @@ export function App() {
                 {g.items.map((it) => (
                   <li key={it.path}>
                     <a className="nav-link" href={href(it.path)} aria-current={it.path === top ? "page" : undefined}>
-                      <span>{it.label}</span>
+                      <span className="nav-link__main"><NavIcon name={it.icon} /><span>{it.label}</span></span>
                       {it.needs === "nasa" && !nasa && <span className="nav-link__state">after sync</span>}
                     </a>
                   </li>
@@ -117,6 +139,7 @@ export function App() {
             <br />
             Independent project, not endorsed by NASA.
           </div>
+                  <IskraDock state={iskra} name={mascot} onTour={startTour} />
         </nav>
         <div className="main-col">
           <header className="topbar">
@@ -125,6 +148,7 @@ export function App() {
             </button>
             <span className="label">{current?.label ?? "Zero-G Firewall"}</span>
             <span className="topbar__spacer" />
+            <button type="button" className="searchbtn" onClick={() => setSearch(true)} aria-label="Quick search"><IconSearch size={16} /><span>Search or ask</span><kbd>Ctrl K</kbd></button>
             <a className="chip chip--wide" href={href("/ledger")} title="Where the data came from">
               <span className={`dot ${nasa ? "dot--ok" : "dot--off"}`} />
               {nasa ? `NASA data synced ${fmtUtc(nasa.synced_at_utc)}` : "NASA data: waiting for sync"}
@@ -133,6 +157,7 @@ export function App() {
               <span className="dot dot--ok" />
               Evidence engine: {MODE_LABEL[aiMode]}
             </a>
+            <span className="topbar__iskra"><IskraDock state={iskra} name={mascot} onTour={startTour} compact /></span>
             <button className="icon-btn" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label={theme === "dark" ? "Switch to the light theme" : "Switch to the dark theme"}>
               {theme === "dark" ? <IconSun /> : <IconMoon />}
             </button>
@@ -140,6 +165,8 @@ export function App() {
           <main className="main" id="main">{page}</main>
         </div>
       </div>
+      <Palette open={search} onClose={() => setSearch(false)} ready={!!nasa} />
+      {tour != null && <Tour at={tour} set={setTour} manifest={manifest.data} state={iskra} />}
     </ReceiptProvider>
   );
 }

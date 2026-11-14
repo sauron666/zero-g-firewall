@@ -1,14 +1,14 @@
 # Coverage of the plan, feature by feature
 
-Checked on 14 November 2026 at 15:06 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
+Checked on 14 November 2026 at 15:24 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
 
 | Priority | Features | Done | Partial | Not built |
 |---|---|---|---|---|
 | P0 | 28 | 22 | 6 | 0 |
-| P1 | 59 | 29 | 10 | 20 |
-| P2 | 38 | 1 | 9 | 28 |
+| P1 | 59 | 35 | 8 | 16 |
+| P2 | 38 | 1 | 10 | 27 |
 | P3 | 5 | 0 | 0 | 5 |
-| All | 130 | 52 | 25 | 53 |
+| All | 130 | 58 | 24 | 48 |
 
 ## Definition of done (specification, section 0)
 
@@ -129,14 +129,14 @@ Checked on 14 November 2026 at 15:06 Sofia time against the 130 features of the 
 | G02 | P2 | **not built** | Classical segmentation and leading-edge tracking in pixel units |  |
 | G03 | P2 | **not built** | Physical scale only when a sample dimension is known from the table |  |
 | G04 | P3 | **not built** | Learned segmentation |  |
-| H01 | P1 | **not built** | Judge Tour |  |
-| H02 | P1 | **not built** | Animated companion (working name ISKRA) |  |
+| H01 | P1 | done | Judge Tour | ten stops in 85 seconds, each named by the challenge verb it serves; starts from the opening page, the companion or a link with tour=1; arrow keys, pause, works offline |
+| H02 | P1 | done | Animated companion (working name ISKRA) | ISKRA, a lantern with a flame in a glass core, drawn by code; lives at the foot of the navigation and in the tour; states for searching, pointing, gap, sceptical, alarm, success; hide is remembered; reduced motion gives still pictures |
 | H03 | P1 | **partial** | Accessibility | keyboard, labels, phone layout, both themes; no full audit |
-| H04 | P1 | **partial** | Physics-true flame core | the flame windows on the opening page |
-| H05 | P1 | **partial** | "Fans off" demonstration | works on the opening page for the station and the Moon with its labels; not yet through the companion |
-| H06 | P1 | **not built** | Evidence pointer |  |
-| H07 | P1 | **not built** | Provenance ring |  |
-| H08 | P2 | **not built** | Triage ring in the Alarm Trust Lab |  |
+| H04 | P1 | done | Physics-true flame core | the companion's flame and the flame windows follow gravity (cube root) and the fans; partial gravity always carries the question mark |
+| H05 | P1 | done | "Fans off" demonstration | on the opening page and in the companion's own panel, for the station and the Moon, each with its caption |
+| H06 | P1 | done | Evidence pointer | after an answer a thin line runs from the companion to each cited source in turn, and the source is outlined |
+| H07 | P1 | done | Provenance ring | the companion's ring is drawn differently for each of the eight classes and follows the page |
+| H08 | P2 | **partial** | Triage ring in the Alarm Trust Lab | the companion turns sceptical on an integrity anomaly and still on a fire alarm; the ring does not split into weighted segments |
 | H09 | P2 | **not built** | Orbital motion extras and live ISS air as flame context |  |
 | H10 | P2 | **not built** | Lines in English and Bulgarian |  |
 | I01 | P0 | done | Mission Overview with real counts only |  |

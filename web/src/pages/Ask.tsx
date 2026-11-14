@@ -11,6 +11,8 @@ import { Trace } from "../ai/Trace";
 import { useReceipt } from "../components/Receipt";
 import { IconCheck, IconClose, IconInfo, IconReceipt, IconWarn } from "../components/icons";
 import { PageProps } from "./stubs";
+import { emit } from "../mascot/bus";
+import { point } from "../mascot/pointer";
 
 export const EXAMPLES = [
   "Will a fire go out if the fans are stopped?",
@@ -98,6 +100,8 @@ export function Ask({ manifest, route }: PageProps) {
   const [progress, setProgress] = useState<{ f: number; text: string } | null>(null);
   const srcRef = useRef<HTMLOListElement | null>(null);
   const first = useRef(false);
+  const stopPointing = useRef<() => void>(() => {});
+  useEffect(() => () => stopPointing.current(), []);
   const open = useReceipt();
   const update = (s: Settings) => { setSettings(s); saveSettings(s); };
   useEffect(() => { if (focus != null) srcRef.current?.querySelector(`[data-n="${focus}"]`)?.scrollIntoView({ block: "nearest", behavior: "smooth" }); }, [focus]);
@@ -106,8 +110,12 @@ export function Ask({ manifest, route }: PageProps) {
     const text = question.trim();
     if (!kit || !text) return;
     setQ(text); setErr(null); setRun(null); setFocus(null);
+    emit({ type: "SEARCHING" });
     const a = runAgent(text, kit);
     setAgent(a);
+    const cites = Array.from(new Set(a.answer.lines.map((l) => l.cite)));
+    emit({ type: "ANSWER_DONE", strength: a.refused ? "refused" : a.answer.abstained ? "gap" : "supported", cites });
+    window.setTimeout(() => { stopPointing.current(); stopPointing.current = point(cites.map((n) => document.querySelector(`.sources li[data-n="${n}"]`)).filter((e): e is Element => !!e)); }, 350);
     if (settings.mode === "offline" || a.refused || a.hits.length === 0) return;
     setBusy(true);
     const t0 = performance.now();
@@ -186,7 +194,7 @@ export function Ask({ manifest, route }: PageProps) {
                 const p = hits[l.cite - 1]?.passage;
                 const computed = p?.id.startsWith("tool:");
                 const ours = p?.t.startsWith("Our reading");
-                return <p key={i}>{ours || computed ? l.text : `“${l.text}”`} {cite(l.cite)}
+                return <p key={i}>{ours || computed || /["“”]/.test(l.text) ? l.text : `“${l.text}”`} {cite(l.cite)}
                   {computed && <span className="ev__tag" style={{ marginLeft: 8, fontFamily: "var(--font-ui)" }}>computed here from NASA's tables</span>}
                   {ours && <span className="ev__tag" style={{ marginLeft: 8, fontFamily: "var(--font-ui)" }}>our reading, not NASA's words</span>}</p>;
               })}</div>

@@ -7,6 +7,7 @@ import type { Coverage, Habitat, MatrixCell, MatrixDoc, PlaybookStep, StepBadge 
 import { IconCheck, IconInfo } from "../components/icons";
 import { Item } from "./Myths";
 import { PageProps, stub } from "./stubs";
+import { emit } from "../mascot/bus";
 
 const Waiting = stub("/playbooks");
 const HABITAT: Record<Habitat, { label: string; short: string; about: string }> = {
@@ -113,6 +114,7 @@ export function Playbooks(props: PageProps) {
   const detail = useRef<HTMLDivElement>(null);
   const moved = useRef(false);
 
+  useEffect(() => { emit({ type: "CONTEXT", g: hab === "lunar" ? 0.1654 : 0, source: "habitat" }); }, [hab]);
   useEffect(() => {
     if (!mx.data) return;
     if (step) document.getElementById(`step-${step}`)?.scrollIntoView({ block: "start", behavior: moved.current ? "smooth" : "auto" });

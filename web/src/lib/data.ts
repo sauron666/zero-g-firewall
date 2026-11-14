@@ -64,6 +64,9 @@ export interface Manifest {
     envelope_points_with_pressure?: number;
     validation_rows?: number | null;
     validation_mean_abs_K?: number | null;
+    /** quotations shown on the site, and how many of them were found word for word in the stored documents */
+    quotes?: number;
+    quotes_verified?: number;
   };
   artifacts: Record<string, { sha256: string; bytes: number; klass: string }>;
 }

@@ -4,6 +4,7 @@ import { useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
 import { normalise, rankAll, stability } from "../lib/rank";
 import type { RankDoc } from "../lib/types";
+import { emit } from "../mascot/bus";
 import { PageProps, stub } from "./stubs";
 
 const Waiting = stub("/rank");
@@ -20,6 +21,8 @@ export function Rank({ route, manifest }: PageProps) {
   const [open, setOpen] = useState<string | null>(null);
   const [picked, setPicked] = useState<string[]>([]);
   const lens = d.data?.lenses.find((l) => l.id === lensId) ?? d.data?.lenses[0];
+  const lensGravity = lens?.gravity;
+  useEffect(() => { if (lensGravity) emit({ type: "CONTEXT", g: lensGravity === "partial" ? (lensId === "mars" ? 0.3794 : 0.1654) : 0, source: "mission" }); }, [lensGravity, lensId]);
   useEffect(() => { if (lens) setWeights({ ...lens.weights }); }, [lens?.id]);
   const w = weights ?? lens?.weights ?? {};
   const ranked = useMemo(() => (d.data && lens ? rankAll(d.data, lens.id, w) : []), [d.data, lens?.id, w]);

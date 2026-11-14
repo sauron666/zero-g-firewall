@@ -6,6 +6,7 @@ import { KlassBadge } from "../lib/klass";
 import { useWidth } from "../lib/hooks";
 import type { InvestigationsDoc } from "../lib/types";
 import { IconCheck, IconInfo, IconPause, IconPlay, IconReset, IconWarn } from "../components/icons";
+import { emit } from "../mascot/bus";
 import { auditLog, Checked, checkFrames, DURATION, generate, Keys, LogEntry, makeKeys, Run, SCENARIOS, ScenarioId, scorecard, Score, SENSOR_IDS, SENSORS, SensorId, STEP, timeline, Verdict } from "../trust/lab";
 import { PageProps } from "./stubs";
 
@@ -99,6 +100,8 @@ export function Alarm({ route }: PageProps) {
   const scenario = SCENARIOS.find((s) => s.id === sc)!;
   const v = tl.length ? tl[Math.min(tl.length - 1, Math.floor(at / STEP))] : null;
   const accepted = checked.filter((f) => f.ok).length;
+  const vState = v?.state, vAnomaly = v?.integrity.anomaly ?? false;
+  useEffect(() => { if (vState) emit({ type: "ALARM", state: vState, anomaly: vAnomaly }); }, [vState, vAnomaly]);   // the companion reacts to the verdict, never to raw readings
   const smoke = (inv.data?.items ?? []).filter((i) => ["PSI-101", "PSI-102", "PSI-47", "PSI-115"].includes(i.accession));
 
   return (

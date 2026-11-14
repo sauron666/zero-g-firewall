@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { fmtBytes, fmtInt, fmtUtc, useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
 import { canHash, ChainResult, parseLedger, verifyChain } from "../lib/ledger";
+import { emit } from "../mascot/bus";
 import type { LedgerEntry, LedgerIndex } from "../lib/types";
 import { useReceipt } from "../components/Receipt";
 import { IconCheck, IconWarn } from "../components/icons";
@@ -64,6 +65,7 @@ export function Ledger({ route, manifest }: PageProps) {
     const r = await verifyChain(parsed.lines, setProgress);
     setProgress(null);
     setChain(r);
+    if (r.ok) emit({ type: "SUCCESS", text: "The chain holds." });
   };
   const runFiles = async () => {
     if (!manifest) return;
