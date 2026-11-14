@@ -56,10 +56,12 @@ body { background: var(--page); }
 /* ---------- top bar ---------- */
 .topbar { background: color-mix(in srgb, var(--page) 78%, transparent); border-bottom-color: transparent; }
 .topbar::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--g-micro) 60%, var(--hairline)) 30%, var(--hairline) 70%, transparent); }
-.topbar .label { font-family: var(--font-data); font-size: var(--t-12); letter-spacing: 0.05em; color: var(--ink-2); }
+.topbar .label { font-family: var(--font-data); font-size: var(--t-12); letter-spacing: 0.05em; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.searchbtn { white-space: nowrap; flex: none; }
+@media (max-width: 1420px) { .topbar .chip--engine { display: none; } }
 .dot--ok { box-shadow: 0 0 8px color-mix(in srgb, var(--ok) 80%, transparent); }
 .clock { display: inline-flex; align-items: baseline; gap: 6px; font-family: var(--font-data); font-size: var(--t-12); color: var(--ink-2); white-space: nowrap; }
-.clock b { font-weight: 400; color: var(--ink); font-size: var(--t-13); font-variant-numeric: tabular-nums; }
+.clock b { font-family: var(--font-ui); font-weight: 400; color: var(--ink); font-size: var(--t-13); font-variant-numeric: tabular-nums; letter-spacing: 0.03em; }
 @media (max-width: 1240px) { .clock { display: none; } }
 
 /* ---------- panels, numbers, controls ---------- */

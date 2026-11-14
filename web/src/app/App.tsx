@@ -162,7 +162,7 @@ export function App() {
               <span className={`dot ${nasa ? "dot--ok" : "dot--off"}`} />
               {nasa ? `NASA data synced ${fmtUtc(nasa.synced_at_utc)}` : "NASA data: waiting for sync"}
             </a>
-            <a className="chip chip--wide" href={href("/ask")} title="How answers are written">
+            <a className="chip chip--wide chip--engine" href={href("/ask")} title="How answers are written">
               <span className="dot dot--ok" />
               {mascot}: {ENGINE[aiMode] ?? MODE_LABEL[aiMode]}
             </a>

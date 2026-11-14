@@ -46,16 +46,17 @@ await page.waitForSelector(".fanswitch");
 await page.waitForTimeout(900);
 
 await page.addStyleTag({ content: `
-  #zgf-cap { position: fixed; left: 236px; right: 0; bottom: 0; z-index: 9000; padding: 54px 40px 22px; pointer-events: none; text-align: center;
+  .fab { bottom: 150px !important; animation: none !important; } .fab__text { animation: none !important; }
+  #zgf-cap { position: fixed; left: 236px; right: 0; bottom: 0; z-index: 60; padding: 54px 40px 22px; pointer-events: none; text-align: center;
     background: linear-gradient(to top, rgba(3,6,12,.97) 58%, rgba(3,6,12,0)); font-family: "STIX Two Text", Georgia, serif; font-size: 31px; line-height: 1.25; color: #fff; }
   #zgf-cap span { display: inline-block; max-width: 980px; }
-  #zgf-note { position: fixed; right: 12px; bottom: 5px; z-index: 9001; font: 10px "B612", sans-serif; color: rgba(255,255,255,.5); pointer-events: none; }
+  #zgf-note { position: fixed; left: 250px; bottom: 5px; z-index: 9001; font: 10px "B612", sans-serif; color: rgba(255,255,255,.5); pointer-events: none; }
   #zgf-cur { position: fixed; z-index: 9500; left: 0; top: 0; width: 26px; height: 26px; pointer-events: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
   #zgf-ring { position: fixed; z-index: 9400; width: 46px; height: 46px; margin: -23px 0 0 -23px; border: 3px solid #fff; border-radius: 50%; pointer-events: none; opacity: 0; }
   #zgf-end { position: fixed; inset: 0; z-index: 9800; display: grid; place-content: center; justify-items: center; gap: 18px; text-align: center; background: #060a12; opacity: 0; pointer-events: none; }
   #zgf-end .n { font: 700 66px "B612", sans-serif; color: #fff; letter-spacing: .01em; }
   #zgf-end .q { font: 400 36px "STIX Two Text", Georgia, serif; color: #dfe6f3; }
-  #zgf-end .u { font: 400 25px "B612 Mono", monospace; color: #fff; margin-top: 14px; padding: 10px 18px; border: 1px solid #5a6784; border-radius: 6px; }
+  #zgf-end .u { font: 400 25px "B612", sans-serif; letter-spacing: .02em; color: #fff; margin-top: 14px; padding: 10px 18px; border: 1px solid #5a6784; border-radius: 6px; }
   #zgf-end .t { font: 400 17px "B612", sans-serif; color: #9aa6bf; }
   html { scroll-behavior: auto !important; }
 ` });
@@ -67,9 +68,10 @@ await page.evaluate((site) => {
   const ring = el("div", "zgf-ring");
   const end = el("div", "zgf-end", `<svg viewBox="0 0 64 64" width="120" height="120"><circle cx="32" cy="32" r="30" fill="#04070d" stroke="#5a6784" stroke-width="2"/><circle cx="32" cy="34" r="14" fill="#3987e5" opacity=".55"/><circle cx="32" cy="35" r="9" fill="#3987e5"/><circle cx="32" cy="36.5" r="4.6" fill="#d6e6ff"/></svg>
     <div class="n">Zero-G Firewall</div><div class="q">Kill the fans? Check the evidence first.</div><div class="u">${site}</div><div class="t">The Rule of Flame &nbsp;·&nbsp; NASA Space Apps Challenge 2026, Sofia &nbsp;·&nbsp; built on NASA PSI data</div>
-    <div class="t">Screen recording of the working site. Code written with AI assistance. Not endorsed by NASA.</div>`);
+    <div class="t">Screen recording of the working site. Independent project, not endorsed by NASA.</div>`);
   window.__zgf = {
     cap(text) { cap.firstChild.textContent = text; },
+    capRight(px) { cap.style.right = px + "px"; },
     cur(x, y) { cur.style.transform = `translate(${x - 3}px, ${y - 2}px)`; },
     ring(x, y, u) { ring.style.left = x + "px"; ring.style.top = y + "px"; ring.style.opacity = String(u >= 1 ? 0 : 0.9 * (1 - u)); ring.style.transform = `scale(${0.3 + 0.95 * u})`; },   // every moving part is set per frame: no timers, no CSS clocks
     end(u) { end.style.opacity = String(u); cur.style.opacity = u > 0 ? "0" : "1"; },
@@ -82,6 +84,12 @@ const MATRIX = JSON.parse(fs.readFileSync(path.join(DIST, "data", "v1", "matrix.
 const CELLS = MATRIX.cells.length, MEASURED = MATRIX.coverage.iss.evidence;
 if (MATRIX.coverage.lunar.evidence !== 0) throw new Error("the caption says nothing is measured in lunar gravity; the matrix now says otherwise");
 const QUOTES = MANIFEST.nasa.quotes_verified, FILES = MANIFEST.nasa.files_in_ledger.toLocaleString("en-US");   // caption numbers come from the build, not from memory
+const GAPS = JSON.parse(fs.readFileSync(path.join(DIST, "data", "v1", "gaps.json"), "utf8")).coverage;
+const DROPS = JSON.parse(fs.readFileSync(path.join(DIST, "data", "v1", "droplets.json"), "utf8"));
+const pct = (x) => String(Number((100 * x).toFixed(1)));
+const SOLID_TOP = pct(GAPS.kinds.find((k) => k.id === "solid").max);
+if (GAPS.regimes.find((r) => r.id === "partial").rows !== 0) throw new Error("the caption says no row was taken in lunar gravity; the data now says otherwise");
+const TAD = MANIFEST.nasa.validation_mean_abs_K.toFixed(1), TAD_N = MANIFEST.nasa.validation_rows;
 
 /* ---------------------------------------------------------------- helpers */
 const ease = (u) => (u <= 0 ? 0 : u >= 1 ? 1 : u * u * (3 - 2 * u));
@@ -129,64 +137,66 @@ async function scene(name, n, setup, per, stills = []) {
 /* ---------------------------------------------------------------- the film: 900 frames, nine scenes */
 // 1. the question (4.0 s)
 await scene("question", 120, async () => {
-  await cap("Stop the air, and a flame in free fall starves.");
+  await cap("In a NASA test, a flame went out two seconds after its airflow was cut.");
   const b = await boxOf(".fanswitch");
-  if (b.y + b.height > 586) await scrollToY(b.y + b.height - 580);        // keep the switch clear of the caption, and the title whole
+  if (b.y + b.height > 570) await scrollToY(b.y + b.height - 564);        // keep the switch clear of the caption
   const [x, y] = await centre(".fanswitch__track");
-  return [glide(x, y, 16, 42)];
+  return [glide(x, y, 22, 48)];
 }, async (i) => {
-  if (i === 46) await click();
-  if (i === 60) await cap("On the Moon, gravity is a fan nobody can switch off.");
-}, [36, 112]);
+  if (i === 52) await click();
+  if (i === 66) await cap("On the Moon, gravity is a fan nobody can switch off.");
+}, [40, 112]);
 
-// 2. the misconception (3.2 s)
-await scene("myth", 96, async () => {
+// 2. the misconception (2.8 s)
+await scene("myth", 84, async () => {
   await go("myths--fans", ".myth");
   await putAt(".myth[open]", 64);
-  await cap("NASA's own guide calls that rule a misconception.");
+  await cap("NASA's own guide calls the rule a misconception.");
   await pointer(1010, 300);
   const y0 = await scrollY();
-  return [glideScroll(y0 + 420, 34, 88)];
-}, async (i) => { if (i === 48) await cap(`${QUOTES} quotations on this site, each checked against the stored NASA document.`); }, [20, 90]);
+  return [glideScroll(y0 + 400, 30, 78)];
+}, async (i) => { if (i === 44) await cap(`${QUOTES} quotations, each checked against the stored NASA document.`); }, [20, 78]);
 
-// 3. the map and a receipt (3.2 s)
-await scene("map", 96, async () => {
-  await go("envelope", ".mapwrap svg");
-  await putAt(".mapwrap", 96);
-  await cap("Every real test in NASA's tables, by oxygen and pressure.");
-  await pointer(900, 200);
-  const b = await boxOf(page.locator(".mapwrap svg text", { hasText: "30% at 10.2 psia" }));
-  return [glide(b.x + b.width + 13, b.y + b.height / 2 - 3, 18, 44)];
+// 3. where the tests are, and where there are none (3.6 s)
+await scene("coverage", 108, async () => {
+  await go("gaps", ".cov");
+  await putAt(".cov", 150);
+  await cap("Every test row in NASA's tables, by oxygen.");
+  await pointer(900, 220);
+  const [x, y] = await centre(page.locator("button.cov__cell--4").first());
+  return [glide(x, y, 14, 40)];
 }, async (i) => {
-  if (i === 50) await click();
-  if (i === 56) await cap("Every point opens a receipt: file, row, SHA-256.");
-}, [44, 90]);
+  if (i === 52) await cap(`Solid materials stop at ${SOLID_TOP}% oxygen. In lunar gravity: nothing.`);
+}, [44, 100]);
 
-// 4. the matrix: station, then Moon (3.6 s)
-await scene("matrix", 108, async () => {
+// 4. the matrix: station, then Moon (3.2 s)
+await scene("matrix", 96, async () => {
   await go("playbooks", ".mx__grid");
   await putAt(".controls", 70);
   await cap(`${CELLS} fire behaviours, mapped like an attack. Measured in free fall: ${MEASURED}.`);
   const [x, y] = await centre(page.locator(".seg--habitat button").nth(1));
   await pointer(x + 260, y + 120);
-  return [glide(x, y, 26, 50)];
+  return [glide(x, y, 22, 44)];
 }, async (i) => {
-  if (i === 54) await click();
-  if (i === 60) await cap("Measured in lunar gravity: none.");
-}, [44, 100]);
+  if (i === 48) await click();
+  if (i === 54) await cap("Measured in lunar gravity: none.");
+}, [40, 90]);
 
-// 5. the model against NASA (2.8 s)
-await scene("model", 84, async () => {
-  await go("physics", "text=The flame model against NASA's own numbers");
+// 5. the models against NASA (3.2 s)
+await scene("model", 96, async () => {
+  await go("physics", ".deck__strip--page");
+  await page.waitForSelector("#droplets .plot svg");
   await putAt(page.locator("p.claim", { hasText: "the model lands within" }), 84);
-  await cap("Our flame model lands within about 2 K of NASA's own numbers, over 587 tests.");
-  await pointer(980, 420);
-  const y0 = await scrollY();
-  return [glideScroll(y0 + 150, 30, 74)];
-}, null, [20, 76]);
+  await cap(`Models checked against NASA's own numbers: within ${TAD} K over ${TAD_N} flame tests.`);
+  await pointer(980, 300);
+  const y = (await scrollY()) + (await boxOf("#droplets .plot")).y - 250;
+  return [glideScroll(y, 40, 62)];
+}, async (i) => {
+  if (i === 50) await cap(`The d² law gives NASA's burn time within 10% in ${DROPS.within["10"]} of ${DROPS.n_usable} droplet tests.`);
+}, [24, 90]);
 
-// 6. the alarm that must not be fooled (3.6 s)
-await scene("alarm", 108, async () => {
+// 6. the alarm that must not be fooled (3.2 s)
+await scene("alarm", 96, async () => {
   await go("alarm--replay", ".verdictcard");
   await putAt(".verdictcard", 96);
   await cap("A real fire, hidden behind replayed \"all clear\" readings.");
@@ -195,42 +205,48 @@ await scene("alarm", 108, async () => {
   await pointer(x - 200, y);
   return [];
 }, async (i) => {
-  const t = Math.round(lerp(0, 240, ease(i / 70)) / 2) * 2;
-  if (i <= 72) await page.evaluate((v) => window.__zgf.scrub(v), t);
-  if (i === 58) await cap("The sequence and clock checks catch it. The alarm stands.");
-}, [30, 100]);
+  const t = Math.round(lerp(0, 240, ease(i / 62)) / 2) * 2;
+  if (i <= 64) await page.evaluate((v) => window.__zgf.scrub(v), t);
+  if (i === 52) await cap("The sequence and clock checks catch it. The alarm stands.");
+}, [30, 90]);
 
-// 7. the agent (4.6 s)
-const QUESTION = "Has anything been burned in lunar gravity?";
-let glideAsk = null;
-await scene("ask", 138, async () => {
-  await go("ask", ".chipbtn:not([disabled])");
-  await putAt(".askbar", 120);
-  await cap("Ask in plain words.");
-  const [x, y] = await centre("#askq");
-  await pointer(x - 120, y + 4);
-  await page.mouse.click(x - 120, y + 4);
-  return [];
+// 7. ISKRA answers on any page (5.2 s)
+const QUESTION = "Was anything burned above 40% oxygen?";
+await scene("iskra", 156, async () => {
+  await go("envelope", ".mapwrap svg");
+  await putAt(".mapwrap", 110);
+  await cap("Ask ISKRA on any page, in plain words.");
+  const [x, y] = await centre(".fab");
+  await pointer(x - 320, y - 160);
+  return [glide(x - 30, y, 6, 24)];
 }, async (i) => {
-  if (i >= 4 && i < 4 + QUESTION.length) await page.keyboard.type(QUESTION[i - 4]);
-  if (i === 50) { await page.keyboard.press("Enter"); await page.waitForSelector(".askgrid"); await cap("An agent counts with code, quotes its sources and shows every step. No key. Works offline."); }
-  if (i === 54) { const y = (await scrollY()) + (await boxOf(".askgrid")).y - 60; glideAsk = glideScroll(y, 54, 80); }
-  if (i === 96) { const y = (await scrollY()) + (await boxOf(".trace")).y - 150; glideAsk = glideScroll(y, 96, 126); }
-  if (glideAsk) await glideAsk(i);
-}, [46, 90, 132]);
+  if (i === 26) {
+    await click();
+    await page.waitForSelector(".chat #chatq");
+    await page.waitForSelector(".chat .chipbtn");
+    await page.waitForTimeout(900);                       // the search index arrives from the local server
+    await page.evaluate(() => window.__zgf.capRight(430));
+    const [x, y] = await centre("#chatq");
+    await pointer(x - 60, y - 70);
+  }
+  if (i >= 34 && i < 34 + QUESTION.length) await page.keyboard.type(QUESTION[i - 34]);
+  if (i === 76) { await page.keyboard.press("Enter"); await pointer(760, 300); }
+  if (i === 100) { await page.waitForSelector(".chat .msg__meta"); await cap("It computes from NASA's tables and shows its sources. No key. Works offline."); }
+}, [20, 70, 150]);
 
-// 8. verify, and try to tamper (3.0 s)
-await scene("verify", 90, async () => {
+// 8. verify, and try to tamper (2.8 s)
+await scene("verify", 84, async () => {
+  await page.evaluate(() => window.__zgf.capRight(0));
   await go("ledger", ".statline");
   await page.waitForSelector(".btn--primary:not([disabled])");
   await putAt(page.locator("section.panel[data-klass=\"synthetic\"]"), 150);
   await cap(`${FILES} NASA files, hash-chained and verified in your browser.`);
   const [x, y] = await centre(page.locator("button", { hasText: "Change one character of a file hash" }));
   await pointer(x + 300, y + 90);
-  return [glide(x, y, 8, 30)];
+  return [glide(x, y, 8, 28)];
 }, async (i) => {
-  if (i === 34) { await click(); await page.waitForSelector("section.panel[data-klass=\"synthetic\"] .verdict-line", { timeout: 20000 }); await cap("Change one character, and the chain breaks."); }
-}, [28, 84]);
+  if (i === 32) { await click(); await page.waitForSelector("section.panel[data-klass=\"synthetic\"] .verdict-line", { timeout: 20000 }); await cap("Change one character, and the chain breaks."); }
+}, [26, 80]);
 
 // 9. the end card (2.0 s)
 await scene("end", 60, async () => [], async (i) => { await page.evaluate((u) => window.__zgf.end(u), ease(i / 9)); }, [50]);

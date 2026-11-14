@@ -68,8 +68,8 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
       <div className="deck__strip" aria-label="State of the evidence">
         <Tile label="Investigations" value={nasa?.investigations_in_scope ?? null} of={nasa ? `of ${nasa.search_hits}` : undefined} sub="combustion records in PSI" to={href("/evidence")} />
         <Tile label="Test rows" value={nasa?.table_rows ?? null} sub={nasa ? `in ${nasa.tables} NASA tables` : "after the NASA sync"} to={href("/envelope")} />
-        <Tile label="Measured, station" value={mx.data?.coverage.iss.evidence ?? null} of={mx.data ? `of ${mx.data.cells.length}` : undefined} sub="fire behaviours" to={href("/playbooks")} />
-        <Tile label="Measured, Moon" value={mx.data?.coverage.lunar.evidence ?? null} of={mx.data ? `of ${mx.data.cells.length}` : undefined} sub="fire behaviours" to={`${href("/playbooks")}?habitat=lunar`} tone="partial" />
+        <Tile label="Measured on station" value={mx.data?.coverage.iss.evidence ?? null} of={mx.data ? `of ${mx.data.cells.length}` : undefined} sub="fire behaviours" to={href("/playbooks")} />
+        <Tile label="Measured on Moon" value={mx.data?.coverage.lunar.evidence ?? null} of={mx.data ? `of ${mx.data.cells.length}` : undefined} sub="fire behaviours" to={`${href("/playbooks")}?habitat=lunar`} tone="partial" />
         <Tile label="Model against NASA" value={nasa?.validation_mean_abs_K ?? null} decimals={1} unit="K" sub={nasa ? `mean gap over ${nasa.validation_rows} rows` : "after the NASA sync"} to={href("/physics")} tone="flame" />
         <Tile label="Files with receipt" value={nasa?.files_in_ledger ?? null} sub={nasa?.ledger_chain_ok ? "hash chain verified" : "evidence ledger"} to={href("/ledger")} tone="ok" led={!!nasa?.ledger_chain_ok} />
       </div>
