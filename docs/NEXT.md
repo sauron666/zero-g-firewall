@@ -1,5 +1,7 @@
 # What to build next, in order
 
+**Read `docs/COVERAGE.md` first.** It lists all 130 planned features with their true state and the order of work agreed with the team on 14 November at 14:25. The pitch: a 30-second video on Sunday at 14:00; the best five teams then present for 3 minutes and answer the jury for 5. The recorder for the video is `tools/video/record.mjs`.
+
 Clock: the event ends Sunday 15 November 2026 at 23:59 Sofia time. Freeze features on Sunday around 11:00, submit at least two hours before the deadline. Ask the human when the local pitch is.
 
 Acceptance rows (Q01 to Q35) are in `docs/pack/04_TESTS_SUBMISSION_PLAYBOOK.md`; feature IDs (A01, B04...) in `docs/pack/01_MASTER_SPEC.md`; facts and check values in `docs/pack/05`, `06` and `10`.
