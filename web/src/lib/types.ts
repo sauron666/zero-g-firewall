@@ -373,3 +373,24 @@ export interface FalsifyClaim {
   next: MythItem[];
 }
 export interface FalsifyDoc { klass: Klass; note: string; quotes: number; quotes_verified: number; verdicts: Record<string, string>; items: FalsifyClaim[] }
+
+/** gaps.json and lessons.json */
+export interface Gap {
+  id: string;
+  title: string;
+  measure: string;
+  unit: string;
+  why: string;
+  evidence: MythItem[];
+  plans: { name: string; state: string; items: MythItem[] }[];
+}
+export interface GapsDoc { klass: Klass; note: string; searches: Record<string, number>; outside_the_combustion_search: string[]; outside_note: string; items: Gap[] }
+export interface LessonCard { id: string; title: string; when?: string; resource: string; what: MythItem[]; ties: MythItem[] }
+export interface LessonsDoc {
+  klass: Klass;
+  note: string;
+  incidents: LessonCard[];
+  earth: LessonCard[];
+  video: null | { title: string; by: string; url: string; resource: string; ref: SourceRef };
+  resources: { id: string; title: string; url: string; type: string; in_ledger: boolean; used_in: { page: string; what: string }[]; receipts: SourceRef[] }[];
+}

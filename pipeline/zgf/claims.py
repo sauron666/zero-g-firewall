@@ -127,11 +127,16 @@ CARDS = [
 ]
 
 USES = {      # official resource -> where the site uses it (only pages that exist)
-    "R1": [("/evidence", "every investigation card and table"), ("/envelope", "every point of the atmosphere map"), ("/data", "the curator report and the model check"), ("/ledger", "the first entry of the ledger")],
-    "R2": [("/myths", "the caution about the 1 g test, and the FM2 objective"), ("/falsify", "what would test each conclusion next")],
+    "R1": [("/evidence", "every investigation card and table"), ("/envelope", "every point of the atmosphere map"), ("/rank", "the factors of the ranking"), ("/data", "the curator report and the model check"), ("/ledger", "the first entry of the ledger")],
+    "R2": [("/myths", "the caution about the 1 g test, and the FM2 objective"), ("/gaps", "the experiments planned to fill each gap: FM2, SoFIE, FLARE"), ("/falsify", "what would test each conclusion next")],
+    "R3": [("/lessons", "linked as the introduction to combustion research on the station; title and author from the stored record")],
     "R4": [("/myths", "the three misconceptions and most of the evidence against them"), ("/falsify", "the conditions under which each conclusion fails"), ("/ask", "153 passages of the guide, searchable")],
-    "R7": [("/myths", "the Mir fire: a flame fed by its own oxygen"), ("/falsify", "a case where stopping the flow could not have starved the flame")],
-    "R9": [("/falsify", "a detector built to tell combustion particles from dust")],
+    "R5": [("/lessons", "Apollo 1: a flash fire in pure oxygen"), ("/envelope", "the historical point at 16.7 psi of pure oxygen")],
+    "R6": [("/lessons", "Apollo 13: insulation burned inside an oxygen tank")],
+    "R7": [("/myths", "the Mir fire: a flame fed by its own oxygen"), ("/lessons", "the incident, in NASA's words"), ("/falsify", "a case where stopping the flow could not have starved the flame")],
+    "R8": [("/lessons", "lighter air tanks for firefighters")],
+    "R9": [("/lessons", "a detector that tells smoke from dust"), ("/falsify", "why a detector from Earth may not behave the same in orbit")],
+    "R10": [("/lessons", "firefighters' gear from spacesuit materials")],
 }
 
 

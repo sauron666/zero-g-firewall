@@ -16,7 +16,7 @@ Acceptance rows (Q01 to Q35) are in `docs/pack/04_TESTS_SUBMISSION_PLAYBOOK.md`;
 8. "A fan you cannot switch off". *(done: Flame physics page)*
 9. Alarm trust lab: a spoofed reading flagged, the detector-lineage chart, the cost of acting.
 10. A provenance receipt opened from a chart, and the signed release verified in the browser. *(receipts and the chain check: done; signature: not yet)*
-11. Official Resources Coverage: ten of ten.
+11. Official Resources Coverage: ten of ten. *(done: Incidents and Earth uses, section coverage)*
 12. Limits and AI disclosure. *(done: Method and limits page)*
 
 Already built and to keep working: the opening scene with the fan switch, **Two realities (the Fan Paradox)**, Flame physics.
@@ -41,8 +41,8 @@ The raw cache is not in the repository. To re-derive, put the team's core archiv
 ## Gate 2: what is left of the challenge core
 
 1. ~~Ranking for a mission~~ done (`pipeline/zgf/rank.py`, `web/src/lib/rank.ts`, page Rank). Still open there: a nearest-evidence finder at row level.
-2. **Gaps and plans** (page Gaps): no partial-gravity rows; no solid material with pressure; rows near each crew atmosphere; then the planned experiments from the Glenn pages in the ledger (FM2, FLARE, SoFIE) with checked quotations, and LUCI from its NTRS abstract.
-3. **Official Resources Coverage and Incidents and Earth uses** (page Lessons): Apollo 1, Apollo 13, Mir, the three Spinoff articles and the ScienceCast, each with checked sentences; this takes the counter from 4 to 10 of 10. Content spec: `docs/pack/10_OFFICIAL_RESOURCES_MAP.md` section 4. Add each use to `USES` in `pipeline/zgf/claims.py`.
+2. ~~Gaps and plans~~ done (`pipeline/zgf/lessons.py`, page Gaps).
+3. ~~Official Resources Coverage and Incidents and Earth uses~~ done (page Lessons, section "coverage"): 10 of 10. PSI-179 (Aerosol Sampling Experiment) answers the search "smoke" but not "combustion"; it is listed as outside the search and was not fetched (`python pipeline/sync_nasa.py --extra PSI-179` would add it if it turns out to matter for the alarm lab).
 4. ~~Evidence Q&A~~ done (`pipeline/zgf/index.py`, `web/src/lib/search.ts`, `lib/ai.ts`, page Ask): offline engine, checker, connectors for local and cloud models, hybrid. Still open: try the connectors against live services (a local Ollama and one cloud key), an evaluation scorecard (gold, adversarial, abstention sets) shown on the page, and an in-browser model if time allows.
 5. Tidy CSV exports with a data dictionary; sensor and hardware inventory from metadata and the guide's appendix.
 

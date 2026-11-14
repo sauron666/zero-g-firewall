@@ -19,5 +19,7 @@
 | 14 Nov 13:20 | The flame model is checked against NASA's `Tad` at two pressures, the row's and one atmosphere, and both results are published. | PSI-159's column only matches at one atmosphere; PSI-10's matches at the row's pressure. Assuming either convention for both would hide a 70 K difference. |
 | 14 Nov 13:25 | The raw ledger ships with the site and the browser re-computes the chain from it. | "Verified" should be something a judge can do, not something the site says about itself. |
 | 14 Nov 13:40 | The opening claim about BASS-II is narrowed to one documented test. | The stronger wording came from a paper that is not in the ledger. A quotation or a claim is shown only if the stored document supports it. |
+| 14 Nov 14:20 | The Artemis II smoke alarm is not on the incidents page. | No document about it is in the ledger and its cause is not public; the page holds only what a stored NASA page states. |
+| 14 Nov 14:20 | A resource counts as used only with a file in the ledger and a page that draws on it; the ScienceCast is used through its stored title record and a link, with no claim about its content. | The video itself cannot be fetched or quoted; saying more would be a claim without a receipt. |
 
 Originality check for the companion: pending (the companion is not built yet).

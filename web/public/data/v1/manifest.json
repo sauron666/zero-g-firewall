@@ -9,7 +9,7 @@
   "table_rows": 2009,
   "files_in_ledger": 1219,
   "bytes_in_ledger": 38451159,
-  "official_resources_used": 5,
+  "official_resources_used": 10,
   "official_resources_total": 10,
   "ledger_head": "2f80e83ca20ded09f5518fed46a7a2447f8e3fd142aff166a4d6926b2c531759",
   "ledger_chain_ok": true,
@@ -18,10 +18,10 @@
   "envelope_points_with_pressure": 746,
   "validation_rows": 587,
   "validation_mean_abs_K": 2.12,
-  "quotes": 55,
-  "quotes_verified": 55,
-  "files_read": 75,
-  "passages": 464
+  "quotes": 79,
+  "quotes_verified": 79,
+  "files_read": 83,
+  "passages": 496
  },
  "artifacts": {
   "model/atmospheres.json": {
@@ -180,8 +180,8 @@
    "klass": "observed"
   },
   "official_resources.json": {
-   "sha256": "95b6477cbec1385aedb03762acb3b86304c76117318d005507e74a6016171e15",
-   "bytes": 9268,
+   "sha256": "de0c28ecd70ced9066ba42bbf17727847e2d9e6b9991b922f1605ce0ffc9907b",
+   "bytes": 10028,
    "klass": "literature"
   },
   "profiles.json": {
@@ -210,8 +210,8 @@
    "klass": "observed"
   },
   "ledger_index.json": {
-   "sha256": "6ccf067213b86a38972e26c2116c4b4d6b5d58f65c198ac16e64b067636c038c",
-   "bytes": 1351,
+   "sha256": "41e73d8dfd8ed770664c80ace47734af74b0b244076e158a99244e366ff99003",
+   "bytes": 1370,
    "klass": "observed"
   },
   "myths.json": {
@@ -225,18 +225,28 @@
    "klass": "derived"
   },
   "index.json": {
-   "sha256": "eace3799cee5a7bc268a67a73cb0ffbab557e997710729ea3d25ff960a42ea9b",
-   "bytes": 397410,
+   "sha256": "636992a6fd7ef2f12a811c0710cf9339f1cc4bf953c0349eafd5fdd0b065a34f",
+   "bytes": 430806,
    "klass": "derived"
   },
   "falsify.json": {
    "sha256": "1c03770647981a919d8826a7a9a94538a71ddbfef8dd6c89776f892157f54798",
    "bytes": 26436,
    "klass": "derived"
+  },
+  "gaps.json": {
+   "sha256": "5b8969b703f178462d7223edb31b30c4a2ba66085c85749160bfa3146446141e",
+   "bytes": 10269,
+   "klass": "derived"
+  },
+  "lessons.json": {
+   "sha256": "7bf98baf1d227fa946aa1ea2b880f98973eef015f46c3b00dbe4a26f90cab83c",
+   "bytes": 16299,
+   "klass": "literature"
   }
  },
  "brand": "Zero-G Firewall",
  "team": "The Rule of Flame",
  "mascot": "ISKRA",
- "built_at_utc": "2026-11-14T11:49:32Z"
+ "built_at_utc": "2026-11-14T12:13:02Z"
 }

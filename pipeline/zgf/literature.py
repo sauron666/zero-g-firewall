@@ -13,7 +13,7 @@ from html.parser import HTMLParser
 
 from . import ledger as L
 
-_SKIP = {"script", "style", "noscript", "svg", "nav", "header", "footer", "form", "button", "aside", "iframe"}
+_SKIP = {"script", "style", "noscript", "svg", "nav", "header", "footer", "button", "aside", "iframe", "select", "option"}   # not "form": some NASA sites wrap the whole page in one
 _BLOCK = {"p", "div", "li", "h1", "h2", "h3", "h4", "h5", "br", "tr", "section", "article", "figcaption", "blockquote", "td"}
 
 
