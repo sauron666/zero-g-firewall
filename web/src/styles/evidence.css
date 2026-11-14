@@ -315,3 +315,8 @@ button.cov__cell:hover, button.cov__cell:focus-visible { outline: 2px solid var(
   .inv__kind { grid-template-columns: 112px minmax(30px, 1fr) 50px; }
   .inv__kind .note { display: none; }
 }
+
+/* a citation for a record: the sentence in the claim face, the BibTeX entry in the data face */
+.refcite__text { font-family: var(--font-claim); font-size: var(--t-16); line-height: 1.45; max-width: 76ch; overflow-wrap: anywhere; }
+.refcite__bib { margin-top: 8px; padding: 10px 12px; border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--sunken); font-family: var(--font-data); font-size: var(--t-12);
+  line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; max-width: 92ch; }

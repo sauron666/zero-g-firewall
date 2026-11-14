@@ -10,6 +10,7 @@ import { SourceBtn } from "../components/Source";
 import { useReceipt } from "../components/Receipt";
 import { IconArrow, IconWarn } from "../components/icons";
 import { PageProps, stub } from "./stubs";
+import { citation } from "../lib/cite";
 
 const Waiting = stub("/evidence");
 
@@ -389,7 +390,30 @@ function TableView({ t, inv, findings }: { t: TableSummary; inv: Investigation; 
   );
 }
 
-function Card({ inv, findings, profiles, brief }: { inv: Investigation; findings: CuratorFinding[]; profiles: ProfilesDoc | null; brief: BriefsDoc | null }) {
+/** A citation composed from the record's own fields, with the file this site read. Copy as text or as BibTeX. */
+function Cite({ inv, readOn }: { inv: Investigation; readOn: string | null }) {
+  const c = citation(inv, readOn);
+  const [copied, setCopied] = useState<"text" | "bibtex" | null>(null);
+  const copy = (what: "text" | "bibtex") => {
+    const done = () => { setCopied(what); window.setTimeout(() => setCopied(null), 1600); };
+    const value = what === "text" ? c.text : c.bibtex;
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(value).then(done).catch(() => undefined);
+  };
+  return (
+    <details className="howto refcite" style={{ marginTop: 12 }}>
+      <summary>Cite this record</summary>
+      <p className="refcite__text">{c.text}</p>
+      <pre className="refcite__bib" tabIndex={0} aria-label="BibTeX entry">{c.bibtex}</pre>
+      <div className="row" style={{ marginTop: 8 }}>
+        <button type="button" className="btn btn--quiet btn--sm" onClick={() => copy("text")}>{copied === "text" ? "Copied" : "Copy citation"}</button>
+        <button type="button" className="btn btn--quiet btn--sm" onClick={() => copy("bibtex")}>{copied === "bibtex" ? "Copied" : "Copy BibTeX"}</button>
+      </div>
+      <p className="note" style={{ marginTop: 8 }}>Composed here from the record's own fields in PSI, which gives no citation line of its own. The note names the file this site read, so a later download can be compared by its hash.</p>
+    </details>
+  );
+}
+
+function Card({ inv, findings, profiles, brief, readOn }: { inv: Investigation; findings: CuratorFinding[]; profiles: ProfilesDoc | null; brief: BriefsDoc | null; readOn: string | null }) {
   const mineBrief = brief?.items[inv.accession];
   const mine = findings.filter((f) => f.accession === inv.accession || f.also?.includes(inv.accession));
   const folders = Object.entries(inv.files.by_folder).sort((a, b) => b[1].bytes - a[1].bytes);
@@ -441,6 +465,7 @@ function Card({ inv, findings, profiles, brief }: { inv: Investigation; findings
           {inv.refs.title && <SourceBtn title={`${inv.accession}: metadata record`} sref={{ ...inv.refs.title, field: undefined }} label="record receipt" />}
           <a className="src-btn" href={inv.psi_url} target="_blank" rel="noreferrer">Open in PSI</a>
         </div>
+        <Cite inv={inv} readOn={readOn} />
         {!inv.scope.in_scope && <p className="note" style={{ marginTop: 12 }}>Why it is set aside: {inv.scope.reason}. The combustion search still returns it, so it is listed and not hidden.</p>}
       </section>
 
@@ -556,7 +581,7 @@ export function Evidence({ route, manifest }: PageProps) {
   if (acc) {
     const one = inv.data.items.find((i) => i.accession.toLowerCase() === acc.toLowerCase());
     if (!one) return <div className="empty"><p className="empty__title">No record {acc} in the combustion search</p><p style={{ marginTop: 6 }}><a href={href("/evidence")}>See all investigations</a></p></div>;
-    return <Card key={one.accession} inv={one} findings={findings} profiles={prof.data} brief={briefs.data} />;
+    return <Card key={one.accession} inv={one} findings={findings} profiles={prof.data} brief={briefs.data} readOn={manifest?.nasa?.synced_at_utc ?? null} />;
   }
   return <Explorer doc={inv.data} findings={findings} briefs={briefs.data} rank={rank.data} pillar={route.query.get("pillar")} />;
 }
