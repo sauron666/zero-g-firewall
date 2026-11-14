@@ -40,6 +40,12 @@ describe("the companion's states", () => {
     expect(reduce(moon, { type: "CONTEXT", fans: false }, 50).fansOffAt).toBe(50);
   });
 
+  it("a tour caption is marked as one, so it survives a change of page; other lines do not", () => {
+    expect(reduce(base, { type: "TOUR_STEP", id: "x", text: "caption" }, 0)).toMatchObject({ line: "caption", touring: true });
+    expect(reduce({ ...base, touring: true, line: "caption" }, { type: "TOUR_END" }, 0)).toMatchObject({ line: "", touring: false });
+    expect(reduce(base, { type: "CONTEXT", g: 0.1654 }, 0).touring).toBeUndefined();
+  });
+
   it("no line states a number, a probability or advice", () => {
     for (const l of Object.values(LINES)) expect(l).not.toMatch(/\d|probab|safe\b|should|must/i);
   });

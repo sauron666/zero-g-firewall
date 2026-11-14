@@ -27,7 +27,7 @@ export const LINES = {
   partial: "Partial gravity. Not yet measured in NASA's tables.",
 };
 
-export interface IskraState { g: number; fansOffAt: number | null; klass: Klass; mood: Mood; line: string }
+export interface IskraState { g: number; fansOffAt: number | null; klass: Klass; mood: Mood; line: string; /** the line is a tour caption, which outlives a change of page */ touring?: boolean }
 
 /** One reduction for every event, so what the companion shows can be tested without a browser. */
 export function reduce(s: IskraState, e: IskraEvent, now: number): IskraState {
@@ -42,8 +42,8 @@ export function reduce(s: IskraState, e: IskraEvent, now: number): IskraState {
     case "SEARCHING": return { ...s, mood: "searching", line: LINES.searching };
     case "ANSWER_DONE": return e.strength === "supported" ? { ...s, mood: "pointing", line: LINES.pointing } : { ...s, mood: "gap", line: e.strength === "gap" ? LINES.gap : LINES.refused };
     case "ALARM": return e.state === "CLEAR" && !e.anomaly ? { ...s, mood: "idle", line: "" } : e.anomaly ? { ...s, mood: "sceptical", line: LINES.anomaly } : { ...s, mood: "alarm", line: LINES.alarm };
-    case "TOUR_STEP": return { ...s, mood: "idle", line: e.text };
-    case "TOUR_END": return { ...s, mood: "idle", line: "" };
+    case "TOUR_STEP": return { ...s, mood: "idle", line: e.text, touring: true };
+    case "TOUR_END": return { ...s, mood: "idle", line: "", touring: false };
     case "SUCCESS": return { ...s, mood: "success", line: e.text ?? "" };
   }
 }
@@ -60,7 +60,7 @@ export function useIskra(top: string) {
   if (shown.current !== top) {                                                 // a new page: its own kind of information, free fall, fans running.
     shown.current = top;                                                       // Done while rendering, so that it comes before anything the new page reports about itself.
     forgetContext();
-    setS((p) => ({ ...p, g: 0, fansOffAt: null, klass: PAGE_KLASS[top] ?? "derived", mood: "idle", line: p.line && p.mood === "idle" ? p.line : "" }));
+    setS((p) => ({ ...p, g: 0, fansOffAt: null, klass: PAGE_KLASS[top] ?? "derived", mood: "idle", line: p.touring ? p.line : "" }));
   }
   return s;
 }

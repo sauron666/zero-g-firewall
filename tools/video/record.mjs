@@ -2,7 +2,7 @@
 /**
  * Records the 30-second demo video from the real site, frame by frame.
  *
- *   node tools/video/record.mjs web/dist out_dir            full render (900 frames, 1920x1080, 30 fps)
+ *   node tools/video/record.mjs web/dist out_dir            full render (900 frames in nine scenes, 1920x1080, 30 fps)
  *   node tools/video/record.mjs web/dist out_dir --preview  one still per scene, to check the framing first
  *
  * The page's clock is driven by this script (Playwright's clock), so every run films the same frames.
@@ -46,9 +46,9 @@ await page.waitForSelector(".fanswitch");
 await page.waitForTimeout(900);
 
 await page.addStyleTag({ content: `
-  #zgf-cap { position: fixed; left: 0; right: 0; bottom: 0; z-index: 9000; padding: 54px 40px 22px; pointer-events: none; text-align: center;
+  #zgf-cap { position: fixed; left: 236px; right: 0; bottom: 0; z-index: 9000; padding: 54px 40px 22px; pointer-events: none; text-align: center;
     background: linear-gradient(to top, rgba(3,6,12,.97) 58%, rgba(3,6,12,0)); font-family: "STIX Two Text", Georgia, serif; font-size: 31px; line-height: 1.25; color: #fff; }
-  #zgf-cap span { display: inline-block; max-width: 1190px; }
+  #zgf-cap span { display: inline-block; max-width: 980px; }
   #zgf-note { position: fixed; right: 12px; bottom: 5px; z-index: 9001; font: 10px "B612", sans-serif; color: rgba(255,255,255,.5); pointer-events: none; }
   #zgf-cur { position: fixed; z-index: 9500; left: 0; top: 0; width: 26px; height: 26px; pointer-events: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
   #zgf-ring { position: fixed; z-index: 9400; width: 46px; height: 46px; margin: -23px 0 0 -23px; border: 3px solid #fff; border-radius: 50%; pointer-events: none; opacity: 0; }
@@ -66,7 +66,8 @@ await page.evaluate((site) => {
   const cur = el("div", "zgf-cur", '<svg viewBox="0 0 24 24" width="26" height="26"><path d="M4 2.5v17l4.6-4.2 3 6.6 2.9-1.3-3-6.5h6.2z" fill="#fff" stroke="#0a0f1a" stroke-width="1.4" stroke-linejoin="round"/></svg>');
   const ring = el("div", "zgf-ring");
   const end = el("div", "zgf-end", `<svg viewBox="0 0 64 64" width="120" height="120"><circle cx="32" cy="32" r="30" fill="#04070d" stroke="#5a6784" stroke-width="2"/><circle cx="32" cy="34" r="14" fill="#3987e5" opacity=".55"/><circle cx="32" cy="35" r="9" fill="#3987e5"/><circle cx="32" cy="36.5" r="4.6" fill="#d6e6ff"/></svg>
-    <div class="n">Zero-G Firewall</div><div class="q">Kill the fans? Check the evidence first.</div><div class="u">${site}</div><div class="t">The Rule of Flame &nbsp;·&nbsp; NASA Space Apps Challenge 2026, Sofia &nbsp;·&nbsp; built on NASA PSI data</div>`);
+    <div class="n">Zero-G Firewall</div><div class="q">Kill the fans? Check the evidence first.</div><div class="u">${site}</div><div class="t">The Rule of Flame &nbsp;·&nbsp; NASA Space Apps Challenge 2026, Sofia &nbsp;·&nbsp; built on NASA PSI data</div>
+    <div class="t">Screen recording of the working site. Code written with AI assistance. Not endorsed by NASA.</div>`);
   window.__zgf = {
     cap(text) { cap.firstChild.textContent = text; },
     cur(x, y) { cur.style.transform = `translate(${x - 3}px, ${y - 2}px)`; },
@@ -75,6 +76,12 @@ await page.evaluate((site) => {
     scrub(v) { const i = document.querySelector(".transport input.scrub"); if (!i) return; Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set.call(i, String(v)); i.dispatchEvent(new Event("input", { bubbles: true })); },
   };
 }, SITE);
+
+const MANIFEST = JSON.parse(fs.readFileSync(path.join(DIST, "data", "v1", "manifest.json"), "utf8"));
+const MATRIX = JSON.parse(fs.readFileSync(path.join(DIST, "data", "v1", "matrix.json"), "utf8"));
+const CELLS = MATRIX.cells.length, MEASURED = MATRIX.coverage.iss.evidence;
+if (MATRIX.coverage.lunar.evidence !== 0) throw new Error("the caption says nothing is measured in lunar gravity; the matrix now says otherwise");
+const QUOTES = MANIFEST.nasa.quotes_verified, FILES = MANIFEST.nasa.files_in_ledger.toLocaleString("en-US");   // caption numbers come from the build, not from memory
 
 /* ---------------------------------------------------------------- helpers */
 const ease = (u) => (u <= 0 ? 0 : u >= 1 ? 1 : u * u * (3 - 2 * u));
@@ -119,104 +126,114 @@ async function scene(name, n, setup, per, stills = []) {
   console.log(`${id}: ${n} frames`);
 }
 
-/* ---------------------------------------------------------------- the film: 900 frames */
-// 1. the question (4.5 s)
-await scene("question", 135, async () => {
-  await cap("Fire on the space station. First response: stop the fans.");
+/* ---------------------------------------------------------------- the film: 900 frames, nine scenes */
+// 1. the question (4.0 s)
+await scene("question", 120, async () => {
+  await cap("Stop the air, and a flame in free fall starves.");
   const b = await boxOf(".fanswitch");
   if (b.y + b.height > 586) await scrollToY(b.y + b.height - 580);        // keep the switch clear of the caption, and the title whole
   const [x, y] = await centre(".fanswitch__track");
-  return [glide(x, y, 22, 52)];
+  return [glide(x, y, 16, 42)];
 }, async (i) => {
-  if (i === 58) await click();
-  if (i === 74) await cap("On the Moon, gravity is a fan nobody can switch off.");
-}, [40, 128]);
+  if (i === 46) await click();
+  if (i === 60) await cap("On the Moon, gravity is a fan nobody can switch off.");
+}, [36, 112]);
 
-// 2. the misconception (4 s)
-await scene("myth", 120, async () => {
-  await go("myths", ".myth");
-  await putAt(".myth", 64);
-  await cap("NASA's own guide calls that belief a misconception.");
+// 2. the misconception (3.2 s)
+await scene("myth", 96, async () => {
+  await go("myths--fans", ".myth");
+  await putAt(".myth[open]", 64);
+  await cap("NASA's own guide calls that rule a misconception.");
   await pointer(1010, 300);
   const y0 = await scrollY();
-  return [glideScroll(y0 + 470, 42, 108)];
-}, async (i) => { if (i === 62) await cap("We set it against NASA's documents and data: 79 quotations, each checked."); }, [20, 112]);
+  return [glideScroll(y0 + 420, 34, 88)];
+}, async (i) => { if (i === 48) await cap(`${QUOTES} quotations on this site, each checked against the stored NASA document.`); }, [20, 90]);
 
-// 3. two realities (4.5 s)
-await scene("realities", 135, async () => {
-  await go("paradox", ".transport");
-  await putAt(page.locator(".reality").first(), 62);
-  await cap("Two realities. One difference: ventilation.");
-  await page.evaluate(() => window.__zgf.scrub(0));
-  const [x, y] = await centre(".transport input.scrub");
-  await pointer(x - 220, y);
-  return [];
-}, async (i) => {
-  const t = Math.round(lerp(0, 170, ease(i / 128)));
-  await page.evaluate((v) => window.__zgf.scrub(v), t);
-  if (i === 70) await cap("With the fans off, the smoke may never reach the detector.");
-}, [60, 130]);
-
-// 4. the map and a receipt (4.5 s)
-await scene("map", 135, async () => {
+// 3. the map and a receipt (3.2 s)
+await scene("map", 96, async () => {
   await go("envelope", ".mapwrap svg");
   await putAt(".mapwrap", 96);
-  await cap("746 real NASA tests on one map. In lunar gravity: zero.");
+  await cap("Every real test in NASA's tables, by oxygen and pressure.");
   await pointer(900, 200);
   const b = await boxOf(page.locator(".mapwrap svg text", { hasText: "30% at 10.2 psia" }));
-  return [glide(b.x + b.width + 13, b.y + b.height / 2 - 3, 30, 62)];
+  return [glide(b.x + b.width + 13, b.y + b.height / 2 - 3, 18, 44)];
 }, async (i) => {
-  if (i === 76) await click();
-  if (i === 84) await cap("Every point opens a receipt: file, row, SHA-256.");
-}, [66, 128]);
+  if (i === 50) await click();
+  if (i === 56) await cap("Every point opens a receipt: file, row, SHA-256.");
+}, [44, 90]);
 
-// 5. the model against NASA (4 s)
-await scene("model", 120, async () => {
+// 4. the matrix: station, then Moon (3.6 s)
+await scene("matrix", 108, async () => {
+  await go("playbooks", ".mx__grid");
+  await putAt(".controls", 70);
+  await cap(`${CELLS} fire behaviours, mapped like an attack. Measured in free fall: ${MEASURED}.`);
+  const [x, y] = await centre(page.locator(".seg--habitat button").nth(1));
+  await pointer(x + 260, y + 120);
+  return [glide(x, y, 26, 50)];
+}, async (i) => {
+  if (i === 54) await click();
+  if (i === 60) await cap("Measured in lunar gravity: none.");
+}, [44, 100]);
+
+// 5. the model against NASA (2.8 s)
+await scene("model", 84, async () => {
   await go("physics", "text=The flame model against NASA's own numbers");
   await putAt(page.locator("p.claim", { hasText: "the model lands within" }), 84);
-  await cap("Our flame model matches NASA's own numbers within 2 K, over 587 tests.");
-  const seg = page.locator('.seg[aria-label="Pressure used by the model"]');
-  const y = (await scrollY()) + (await boxOf(seg)).y - 70;
-  return [glideScroll(y, 26, 50)];
-}, async (i) => {
-  const seg = page.locator('.seg[aria-label="Pressure used by the model"] button');
-  if (i === 52) { const [x, y] = await centre(seg.nth(1)); mx = x + 160; my = y + 60; }
-  if (i >= 52 && i <= 66) { const [x, y] = await centre(seg.nth(1)); const u = ease((i - 52) / 14); await pointer(lerp(mx, x, u), lerp(my, y, u)); }
-  if (i === 68) { await click(); await cap("It also caught 40 issues in the data, for NASA's curators."); }
-  if (i >= 92 && i <= 102) { const [x, y] = await centre(seg.nth(0)); const u = ease((i - 92) / 10); await pointer(lerp(mx, x, u), lerp(my, y, u)); }
-  if (i === 104) await click();
-}, [20, 86]);
+  await cap("Our flame model lands within about 2 K of NASA's own numbers, over 587 tests.");
+  await pointer(980, 420);
+  const y0 = await scrollY();
+  return [glideScroll(y0 + 150, 30, 74)];
+}, null, [20, 76]);
 
-// 6. ask (4.5 s)
-const QUESTION = "Will a fire go out if the fans are stopped?";
+// 6. the alarm that must not be fooled (3.6 s)
+await scene("alarm", 108, async () => {
+  await go("alarm--replay", ".verdictcard");
+  await putAt(".verdictcard", 96);
+  await cap("A real fire, hidden behind replayed \"all clear\" readings.");
+  await page.evaluate(() => window.__zgf.scrub(0));
+  const [x, y] = await centre(".transport input.scrub");
+  await pointer(x - 200, y);
+  return [];
+}, async (i) => {
+  const t = Math.round(lerp(0, 240, ease(i / 70)) / 2) * 2;
+  if (i <= 72) await page.evaluate((v) => window.__zgf.scrub(v), t);
+  if (i === 58) await cap("The sequence and clock checks catch it. The alarm stands.");
+}, [30, 100]);
+
+// 7. the agent (4.6 s)
+const QUESTION = "Has anything been burned in lunar gravity?";
 let glideAsk = null;
-await scene("ask", 135, async () => {
+await scene("ask", 138, async () => {
   await go("ask", ".chipbtn:not([disabled])");
-  await putAt(".askbar", 150);
+  await putAt(".askbar", 120);
   await cap("Ask in plain words.");
   const [x, y] = await centre("#askq");
   await pointer(x - 120, y + 4);
   await page.mouse.click(x - 120, y + 4);
   return [];
 }, async (i) => {
-  if (i >= 6 && i < 6 + QUESTION.length) await page.keyboard.type(QUESTION[i - 6]);
-  if (i === 54) { await page.keyboard.press("Enter"); await page.waitForSelector(".askgrid"); await cap("Offline, with a local model or in the cloud: every sentence cited, or deleted."); }
-  if (i === 58) { const y = (await scrollY()) + (await boxOf(".askgrid")).y - 64; glideAsk = glideScroll(y, 58, 92); }
+  if (i >= 4 && i < 4 + QUESTION.length) await page.keyboard.type(QUESTION[i - 4]);
+  if (i === 50) { await page.keyboard.press("Enter"); await page.waitForSelector(".askgrid"); await cap("An agent counts with code, quotes its sources and shows every step. No key. Works offline."); }
+  if (i === 54) { const y = (await scrollY()) + (await boxOf(".askgrid")).y - 60; glideAsk = glideScroll(y, 54, 80); }
+  if (i === 96) { const y = (await scrollY()) + (await boxOf(".trace")).y - 150; glideAsk = glideScroll(y, 96, 126); }
   if (glideAsk) await glideAsk(i);
-}, [50, 128]);
+}, [46, 90, 132]);
 
-// 7. verify, and the end card (4 s)
-await scene("verify", 120, async () => {
+// 8. verify, and try to tamper (3.0 s)
+await scene("verify", 90, async () => {
   await go("ledger", ".statline");
   await page.waitForSelector(".btn--primary:not([disabled])");
-  await putAt("section.panel", 62);
-  await cap("Don't trust us. Verify: the browser re-computes all 1,219 hashes.");
-  const [x, y] = await centre(page.locator("button", { hasText: "Re-compute the chain" }));
-  return [glide(x, y, 4, 24)];
+  await putAt(page.locator("section.panel[data-klass=\"synthetic\"]"), 150);
+  await cap(`${FILES} NASA files, hash-chained and verified in your browser.`);
+  const [x, y] = await centre(page.locator("button", { hasText: "Change one character of a file hash" }));
+  await pointer(x + 300, y + 90);
+  return [glide(x, y, 8, 30)];
 }, async (i) => {
-  if (i === 27) { await click(); await page.waitForSelector(".verdict-line", { timeout: 20000 }); }
-  if (i >= 74) await page.evaluate((u) => window.__zgf.end(u), ease((i - 74) / 10));
-}, [60, 112]);
+  if (i === 34) { await click(); await page.waitForSelector("section.panel[data-klass=\"synthetic\"] .verdict-line", { timeout: 20000 }); await cap("Change one character, and the chain breaks."); }
+}, [28, 84]);
+
+// 9. the end card (2.0 s)
+await scene("end", 60, async () => [], async (i) => { await page.evaluate((u) => window.__zgf.end(u), ease(i / 9)); }, [50]);
 
 await browser.close();
 server.close();
