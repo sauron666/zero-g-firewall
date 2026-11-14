@@ -238,3 +238,14 @@ button.cov__cell:hover, button.cov__cell:focus-visible { outline: 2px solid var(
 .caution { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 10px; align-items: baseline; padding: 8px 12px; border: 1px solid var(--hairline); border-left: 3px solid var(--ink); border-radius: var(--radius); background: var(--surface); font-size: var(--t-13); line-height: 1.45; }
 .caution--note { border-left-style: dotted; color: var(--ink-2); }
 @media (max-width: 760px) { .caution { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+
+/* Droplet check: a schematic droplet beside the straight line of its squared diameter. */
+.drop { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 14px; align-items: center; margin-top: 12px; }
+.drop__view { width: 120px; height: 120px; border: 1px dashed var(--hairline); border-radius: var(--radius); background: var(--sunken); }
+.drop__side { display: grid; gap: 6px; min-width: 0; }
+.drop__line { width: 100%; height: auto; max-height: 170px; }
+.drop__ctl { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.drop__ctl input[type="range"] { width: 100%; }
+.drop__inputs { display: grid; gap: 10px; }
+.drop__inputs .wslider { grid-template-columns: minmax(0, 1fr) 64px; }
+@media (max-width: 520px) { .drop { grid-template-columns: minmax(0, 1fr); justify-items: center; } .drop__side { width: 100%; } }

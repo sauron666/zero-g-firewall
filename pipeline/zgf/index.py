@@ -139,6 +139,13 @@ def build(raw_dir: str, out_dir: str) -> dict:
         for g in gdoc["items"]:
             add("gap:%s" % g["id"], "derived", "Gap measured from NASA's tables: %s" % g["title"].lower(),
                 "%s: %s %s. %s Planned or flown to fill it: %s." % (g["title"], g["measure"], g["unit"], g["why"], "; ".join(p["name"] for p in g["plans"])), "/gaps")
+    if os.path.exists(os.path.join(out_dir, "droplets.json")):
+        dr = load("droplets.json")
+        if dr.get("n_usable"):
+            add("drop:summary", "derived", "Droplet check: the d-squared law against NASA's FLEX columns",
+                "In %d of the %d FLEX tests that state all four values, the d-squared law gives NASA's own burn time within 10%%: the initial diameter squared minus the extinction diameter squared, divided by the burning rate. "
+                "The median of law over stated time is %.2f. %d of %d rows state all four values. %s The check is silent on what follows the visible flame and on any gravity but free fall."
+                % (dr["within"]["10"], dr["n_usable"], dr["ratio"]["median"], dr["n_usable"], dr["n_rows"], dr["rate_unit"]["why"]), "/physics")
     if val:
         o = val["overall"]["closer_convention_per_table"]
         add("val:summary", "model", "Model check against NASA's Tad column",

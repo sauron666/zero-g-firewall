@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { fmtBytes, fmtInt, useData } from "../lib/data";
 import { KLASS, Klass, KlassBadge } from "../lib/klass";
 import type { CuratorDoc } from "../lib/types";
+import { DropletPanel } from "../components/DropletPanel";
 import { ValidationPanel } from "../components/ValidationPanel";
 import { FindingRow } from "./Evidence";
 import { PageProps, stub } from "./stubs";
@@ -102,6 +103,7 @@ export function DataModels({ route, manifest }: PageProps) {
       </section>
 
       <ValidationPanel />
+      <DropletPanel />
 
       <section>
         <div className="section__head"><h2 className="h2">Files this site is built from</h2><span className="note">{arts.length} files · each hash is in manifest.json</span></div>

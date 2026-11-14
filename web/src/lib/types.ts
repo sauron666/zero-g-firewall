@@ -448,3 +448,26 @@ export interface BriefsDoc {
   dropped: { accession: string; problems: string[] }[];
   without_brief: string[];
 }
+
+/** droplets.json: the d-squared law against four columns of NASA's FLEX table, row by row. */
+export interface DropletPoint { r: number; f: string; x: number | null; p: number | null; dil: string; d0: number | null; de: number | null; k: number | null; tb: number | null; end: string; td?: number; q?: number }
+export interface DropletGroup { name: string; n: number; median: number; within10: number }
+export interface DropletDoc {
+  klass: Klass;
+  title: string;
+  source: { accession: string; file: string; artifact: string; sha256: string; ledger_seq: number };
+  columns: Record<string, string>;
+  law: string;
+  rate_unit: { header: string; read_as: string; why: string };
+  n_rows: number;
+  n_usable: number;
+  not_usable: { why: string; rows: number }[];
+  ratio: { median: number; p10: number; p25: number; p75: number; p90: number; min: number; max: number };
+  within: Record<string, number>;
+  by_fuel: DropletGroup[];
+  by_end: DropletGroup[];
+  rate_by_oxygen: { fuel: string; pct: number; n: number; median: number; min: number; max: number }[];
+  points: DropletPoint[];
+  assumptions: string[];
+  limits: string;
+}

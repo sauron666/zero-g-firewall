@@ -266,5 +266,42 @@ class OxygenCoverage(unittest.TestCase):
             V.cover(c, self.env, 15)
 
 
+class Droplets(unittest.TestCase):
+    """Four cells of a row go in, one ratio comes out; a row that lacks a cell is counted with its reason."""
+
+    def setUp(self):
+        from zgf import droplets as D
+        self.D = D
+        cols = list(D.COLS.values())
+        mk = lambda **kw: [str(kw.get(k, "")) for k in D.COLS]
+        self.table = {"columns": cols, "rows": [
+            mk(fuel="Methanol", x=0.21, p=760, he=0, co2=0, d0=2.0, de=1.0, k=0.5, tb=6.0, end="Extinction"),      # (4 - 1) / 0.5 = 6 s
+            mk(fuel="Methanol", x=0.21, p=760, he=0, co2=0, d0=2.0, de=1.0, k=0.5, tb=7.5, end="Extinction"),      # ratio 0.8
+            mk(fuel="Heptane", x=0.30, p=380, he=0.3, co2=0, d0=3.0, de="", k=0.6, tb=5.0, end="Disruption"),      # no extinction diameter
+            mk(fuel="Heptane", x=0.18, p=760, he=0, co2=0.2, d0=3.0, de=3.0, k=0.6, tb=1.0, end="Extinction"),     # went out at once
+        ]}
+
+    def test_the_law_reproduces_a_row_that_obeys_it(self):
+        self.assertAlmostEqual(self.D.d2_time(2.0, 1.0, 0.5), 6.0)
+        res = self.D.check(self.D.read(self.table))
+        self.assertEqual((res["n_rows"], res["n_usable"]), (4, 2))
+        self.assertEqual(res["within"], {"10": 1, "20": 2, "30": 2})
+        self.assertEqual({x["why"]: x["rows"] for x in res["not_usable"]},
+                         {"no diameter at which the visible flame went out": 1, "the flame went out at the initial diameter or above it": 1})
+
+    def test_rates_are_grouped_by_fuel_and_whole_percent_for_nitrogen_only(self):
+        res = self.D.check(self.D.read(self.table))
+        self.assertEqual(res["rate_by_oxygen"], [{"fuel": "Methanol", "pct": 21, "n": 2, "median": 0.5, "min": 0.5, "max": 0.5}])
+
+    def test_pressure_is_converted_and_the_diluent_named(self):
+        rows = self.D.read(self.table)
+        self.assertAlmostEqual(rows[0]["p"], 101.33, places=1)
+        self.assertEqual([r["dil"] for r in rows], ["", "", "helium", "carbon dioxide"])
+
+    def test_a_missing_column_stops_the_build(self):
+        with self.assertRaises(ValueError):
+            self.D.read({"columns": ["Fuel"], "rows": []})
+
+
 if __name__ == "__main__":
     unittest.main()

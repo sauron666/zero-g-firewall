@@ -66,6 +66,8 @@ def check(out_dir: str) -> dict:
             walk(load(name))
     if os.path.exists(os.path.join(out_dir, "matrix.json")):
         n += matrix(load("matrix.json"))
+    if os.path.exists(os.path.join(out_dir, "droplets.json")):
+        n += droplet(load("droplets.json"), tables)
     if os.path.exists(os.path.join(out_dir, "gaps.json")) and load("gaps.json").get("coverage"):
         n += cover(load("gaps.json")["coverage"], load("envelope.json"), sum(tables.values()))
     return {"checks": n, "ok": True}
@@ -113,4 +115,21 @@ def matrix(mx: dict) -> int:
         if s["lunar"] == "supported":
             raise IntegrityError("playbook step %s is marked as supported in lunar gravity, where no measurement exists" % s["id"])
         n += 1
+    return n
+
+
+def droplet(d: dict, tables: dict) -> int:
+    """Every point of the droplet check names a row of NASA's table, and its d-squared time follows from the cells shown."""
+    rows = tables.get(d["source"]["artifact"])
+    if rows is None:
+        raise IntegrityError("the droplet check names a table that is not in the build")
+    n = 0
+    for p in d["points"]:
+        if not (0 <= p["r"] < rows):
+            raise IntegrityError("the droplet check names row %s, which does not exist" % p["r"])
+        if "td" in p and abs((p["d0"] ** 2 - p["de"] ** 2) / p["k"] - p["td"]) > 0.001:
+            raise IntegrityError("droplet row %s: the d-squared time does not follow from its cells" % p["r"])
+        n += 1
+    if sum(1 for p in d["points"] if "td" in p) != d["n_usable"] or d["n_usable"] + sum(x["rows"] for x in d["not_usable"]) != d["n_rows"]:
+        raise IntegrityError("the droplet check's counts do not add up")
     return n

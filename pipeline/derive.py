@@ -8,7 +8,7 @@ Stops with an error if the ledger chain is broken or a file no longer matches it
 """
 import argparse, json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from zgf import briefs, canonical, claims, derive_core, derive_evidence, falsify, index, lessons, matrix, rank, reconcile, validate
+from zgf import briefs, canonical, claims, derive_core, derive_evidence, droplets, falsify, index, lessons, matrix, rank, reconcile, validate
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ap = argparse.ArgumentParser()
@@ -24,6 +24,7 @@ res["falsify"] = falsify.build(a.raw, a.out)
 res["lessons"] = lessons.build(a.raw, a.out)
 res["matrix"] = matrix.build(a.raw, a.out)
 res["briefs"] = briefs.build(a.out)
+res["droplets"] = droplets.build(a.out)
 res["index"] = index.build(a.raw, a.out)
 res["research_area"] = reconcile.build(a.raw, a.out)
 res["integrity"] = validate.check(a.out)          # raises, and so stops the build, if anything can no longer be traced

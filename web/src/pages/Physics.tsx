@@ -5,6 +5,7 @@ import { useData, fmtUtc } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
 import { useWidth } from "../lib/hooks";
 import { useReceipt } from "../components/Receipt";
+import { DropletPanel } from "../components/DropletPanel";
 import { ValidationPanel } from "../components/ValidationPanel";
 import { G0, cabinBound, centripetal, coriolisFraction, gravityGradient, omega } from "../physics/scaling";
 
@@ -267,6 +268,7 @@ export function Physics() {
       </section>
 
       <ValidationPanel />
+      <DropletPanel />
     </div>
   );
 }

@@ -1,14 +1,14 @@
 # Coverage of the plan, feature by feature
 
-Checked on 14 November 2026 at 16:15 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
+Checked on 14 November 2026 at 16:21 Sofia time against the 130 features of the pre-event specification (`docs/pack/01_MASTER_SPEC.md`). Kept truthful: 'done' means it is on the site and tested or visibly working; 'partial' says what is missing.
 
 | Priority | Features | Done | Partial | Not built |
 |---|---|---|---|---|
 | P0 | 28 | 28 | 0 | 0 |
-| P1 | 59 | 35 | 8 | 16 |
+| P1 | 59 | 37 | 7 | 15 |
 | P2 | 38 | 2 | 9 | 27 |
 | P3 | 5 | 0 | 0 | 5 |
-| All | 130 | 65 | 17 | 48 |
+| All | 130 | 67 | 16 | 47 |
 
 ## Definition of done (specification, section 0)
 
@@ -80,7 +80,7 @@ Checked on 14 November 2026 at 16:15 Sofia time against the 130 features of the 
 | B23 | P1 | **not built** | Nearest-evidence finder at row level |  |
 | C01 | P1 | done | Thermochemistry engine validated against NASA's `Tad` and `Zst` columns (PSI-10, PSI-159) | 587 rows, mean difference 2.1 K |
 | C02 | P1 | done | Atmosphere explorer |  |
-| C03 | P1 | **not built** | Droplet engine |  |
+| C03 | P1 | done | Droplet engine | the d-squared law checked on four columns of NASA's FLEX table (195 rows, 152 within 10%), the measured rates against oxygen, and a calculator that takes its rate only from tests near the chosen oxygen |
 | C04 | P1 | done | 2D tracer transport solver (conservative finite volume) with numerical tests |  |
 | C05 | P1 | **partial** | Detection-time calculator (source → transport → sensor) | alarm times in Two realities; no calculator of its own |
 | C06 | P1 | done | Partial-gravity bounding | 'a fan you cannot switch off' on the Flame physics page |
@@ -92,7 +92,7 @@ Checked on 14 November 2026 at 16:15 Sofia time against the 130 features of the 
 | C12 | P2 | **not built** | Multi-zone ventilation graph linked to the twin |  |
 | C13 | P2 | **partial** | Sensitivity analysis and uncertainty bands | ensemble in Two realities; stability in the ranking |
 | C14 | P3 | **not built** | Cool-flame kinetics, true 3D solver |  |
-| D01 | P1 | **partial** | Flame and chamber visual driven by computed quantities (for example a droplet shrinking by the d² law), labelled schematic | flame windows driven by gravity and flow; no droplet visual |
+| D01 | P1 | done | Flame and chamber visual driven by computed quantities (for example a droplet shrinking by the d² law), labelled schematic | flame windows driven by gravity and flow; a droplet drawn at the size the d-squared law gives it, beside the line of its squared diameter, labelled as an illustration |
 | D02 | P2 | **not built** | Conceptual three-module habitat with ventilation paths and sensors |  |
 | D03 | P2 | done | Timeline scrubber and scenario replay | one slider moves both realities |
 | D04 | P2 | **partial** | Legend separating observation, model and synthetic layers | class badges and receipts on every panel |
