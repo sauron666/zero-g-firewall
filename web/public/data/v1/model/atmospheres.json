@@ -1,0 +1,457 @@
+{
+ "klass": "model",
+ "title": "Equilibrium flame temperature across cabin atmospheres",
+ "method": "Constant-pressure adiabatic equilibrium of a stoichiometric fuel and oxidizer mixture, reactants at 298.15 K.",
+ "mechanism": "GRI-Mech 3.0 (gri30.yaml) with Cantera 3.2.0",
+ "assumptions": [
+  "Gaseous fuel, perfectly mixed at stoichiometric proportion, no heat loss.",
+  "A thermodynamic upper bound. It says nothing about ignition, spread rate or solid materials.",
+  "Atmosphere values are published numbers; each row names its source."
+ ],
+ "presets": [
+  {
+   "id": "iss",
+   "name": "Sea level and ISS cabin",
+   "kind": "habitat",
+   "p_psia": 14.696,
+   "p_kpa": 101.33,
+   "x_o2": 0.2095,
+   "ppo2_kpa": 21.23,
+   "ppo2_vs_sea_level": 1.0,
+   "o2_fraction_vs_air": 1.0,
+   "normoxic_x_o2_at_this_pressure": 0.2092,
+   "source": "OCHMO-TB-003 (NASA habitable-atmosphere brief)",
+   "note": "",
+   "Tad_K": {
+    "CH4": 2221.9,
+    "C2H4": 2366.1,
+    "C3H8": 2263.0
+   }
+  },
+  {
+   "id": "challenge_limit",
+   "name": "Lunar habitat, limit named in the challenge",
+   "kind": "habitat",
+   "p_psia": 10.2,
+   "p_kpa": 70.33,
+   "x_o2": 0.3,
+   "ppo2_kpa": 21.1,
+   "ppo2_vs_sea_level": 0.994,
+   "o2_fraction_vs_air": 1.432,
+   "normoxic_x_o2_at_this_pressure": 0.3015,
+   "source": "Challenge text: 30% oxygen or more at 10.2 psi or less",
+   "note": "On the normoxic curve.",
+   "Tad_K": {
+    "CH4": 2504.6,
+    "C2H4": 2624.2,
+    "C3H8": 2539.4
+   }
+  },
+  {
+   "id": "exploration",
+   "name": "Exploration atmosphere",
+   "kind": "habitat",
+   "p_psia": 8.2,
+   "p_kpa": 56.54,
+   "x_o2": 0.34,
+   "ppo2_kpa": 19.22,
+   "ppo2_vs_sea_level": 0.906,
+   "o2_fraction_vs_air": 1.623,
+   "normoxic_x_o2_at_this_pressure": 0.375,
+   "source": "Ferkul et al. 2026, NTRS 20260001966",
+   "note": "Nominal for landers and rovers; band up to 37% oxygen.",
+   "Tad_K": {
+    "CH4": 2570.4,
+    "C2H4": 2683.2,
+    "C3H8": 2603.5
+   }
+  },
+  {
+   "id": "suit",
+   "name": "Spacesuit",
+   "kind": "habitat",
+   "p_psia": 4.3,
+   "p_kpa": 29.65,
+   "x_o2": 1.0,
+   "ppo2_kpa": 29.65,
+   "ppo2_vs_sea_level": 1.397,
+   "o2_fraction_vs_air": 4.773,
+   "normoxic_x_o2_at_this_pressure": 0.7151,
+   "source": "Challenge text; OCHMO-TB-003",
+   "note": "",
+   "Tad_K": {
+    "CH4": 2903.5,
+    "C2H4": 3008.7,
+    "C3H8": 2939.4
+   }
+  }
+ ],
+ "historical": [
+  {
+   "id": "apollo_pad",
+   "name": "Apollo 1 pad test: pure oxygen at 16.7 psi",
+   "kind": "historical",
+   "p_psia": 16.7,
+   "p_kpa": 115.14,
+   "x_o2": 1.0,
+   "ppo2_kpa": 115.14,
+   "ppo2_vs_sea_level": 5.424,
+   "o2_fraction_vs_air": 4.773,
+   "normoxic_x_o2_at_this_pressure": 0.1841,
+   "source": "Apollo 204 Review Board summary (nasa.gov)",
+   "note": "Pressure from the Review Board page, not from the SMA case study.",
+   "Tad_K": {
+    "CH4": 3068.1,
+    "C2H4": 3191.3,
+    "C3H8": 3109.9
+   }
+  },
+  {
+   "id": "apollo_test_6040",
+   "name": "Apollo flammability tests: 60% O2, 40% N2 at 16.2 psi",
+   "kind": "historical",
+   "p_psia": 16.2,
+   "p_kpa": 111.7,
+   "x_o2": 0.6,
+   "ppo2_kpa": 67.02,
+   "ppo2_vs_sea_level": 3.157,
+   "o2_fraction_vs_air": 2.864,
+   "normoxic_x_o2_at_this_pressure": 0.1898,
+   "source": "NASA history: Apollo flammability tests",
+   "note": "",
+   "Tad_K": {
+    "CH4": 2897.1,
+    "C2H4": 3014.4,
+    "C3H8": 2934.0
+   }
+  },
+  {
+   "id": "apollo_test_62",
+   "name": "Apollo flammability tests: pure oxygen at 6.2 psi",
+   "kind": "historical",
+   "p_psia": 6.2,
+   "p_kpa": 42.75,
+   "x_o2": 1.0,
+   "ppo2_kpa": 42.75,
+   "ppo2_vs_sea_level": 2.014,
+   "o2_fraction_vs_air": 4.773,
+   "normoxic_x_o2_at_this_pressure": 0.4959,
+   "source": "NASA history: Apollo flammability tests",
+   "note": "",
+   "Tad_K": {
+    "CH4": 2946.7,
+    "C2H4": 3056.4,
+    "C3H8": 2984.1
+   }
+  }
+ ],
+ "sweep": {
+  "x_o2": [
+   0.12,
+   0.14,
+   0.16,
+   0.18,
+   0.2,
+   0.22,
+   0.24,
+   0.26,
+   0.28,
+   0.3,
+   0.32,
+   0.34,
+   0.36,
+   0.38,
+   0.4,
+   0.42,
+   0.44,
+   0.46,
+   0.48,
+   0.5,
+   0.52,
+   0.54,
+   0.56,
+   0.58,
+   0.6,
+   0.62,
+   0.64,
+   0.66,
+   0.68,
+   0.7,
+   0.72,
+   0.74,
+   0.76,
+   0.78,
+   0.8,
+   0.82,
+   0.84,
+   0.86,
+   0.88,
+   0.9,
+   0.92,
+   0.94,
+   0.96,
+   0.98,
+   1.0
+  ],
+  "series": [
+   {
+    "fuel": "CH4",
+    "p_kpa": 101.325,
+    "label": "101.3 kPa (14.7 psia)",
+    "T_K": [
+     1619.6,
+     1785.4,
+     1934.4,
+     2064.5,
+     2175.4,
+     2269.1,
+     2348.3,
+     2415.7,
+     2473.7,
+     2524.1,
+     2568.3,
+     2607.5,
+     2642.4,
+     2673.8,
+     2702.2,
+     2728.0,
+     2751.6,
+     2773.3,
+     2793.3,
+     2811.8,
+     2829.0,
+     2845.1,
+     2860.1,
+     2874.1,
+     2887.3,
+     2899.7,
+     2911.4,
+     2922.5,
+     2933.0,
+     2943.0,
+     2952.5,
+     2961.5,
+     2970.1,
+     2978.3,
+     2986.2,
+     2993.7,
+     3001.0,
+     3008.0,
+     3014.7,
+     3021.1,
+     3027.4,
+     3033.5,
+     3039.5,
+     3045.4,
+     3052.1
+    ]
+   },
+   {
+    "fuel": "CH4",
+    "p_kpa": 56.54,
+    "label": "56.5 kPa (8.2 psia)",
+    "T_K": [
+     1619.2,
+     1784.0,
+     1930.8,
+     2057.3,
+     2164.0,
+     2253.1,
+     2328.0,
+     2391.4,
+     2445.8,
+     2492.8,
+     2534.0,
+     2570.4,
+     2602.9,
+     2632.0,
+     2658.3,
+     2682.2,
+     2704.1,
+     2724.1,
+     2742.6,
+     2759.7,
+     2775.5,
+     2790.3,
+     2804.1,
+     2817.1,
+     2829.2,
+     2840.6,
+     2851.4,
+     2861.6,
+     2871.3,
+     2880.4,
+     2889.1,
+     2897.4,
+     2905.3,
+     2912.9,
+     2920.1,
+     2927.0,
+     2933.7,
+     2940.1,
+     2946.2,
+     2952.1,
+     2957.9,
+     2963.5,
+     2968.9,
+     2974.3,
+     2980.3
+    ]
+   },
+   {
+    "fuel": "CH4",
+    "p_kpa": 29.65,
+    "label": "29.6 kPa (4.3 psia)",
+    "T_K": [
+     1618.6,
+     1782.1,
+     1926.0,
+     2048.3,
+     2150.0,
+     2234.1,
+     2304.2,
+     2363.3,
+     2413.7,
+     2457.2,
+     2495.3,
+     2528.8,
+     2558.7,
+     2585.5,
+     2609.6,
+     2631.5,
+     2651.6,
+     2669.9,
+     2686.8,
+     2702.5,
+     2717.0,
+     2730.5,
+     2743.1,
+     2754.9,
+     2766.0,
+     2776.5,
+     2786.3,
+     2795.6,
+     2804.4,
+     2812.7,
+     2820.7,
+     2828.2,
+     2835.4,
+     2842.3,
+     2848.9,
+     2855.2,
+     2861.2,
+     2867.0,
+     2872.6,
+     2878.0,
+     2883.2,
+     2888.3,
+     2893.2,
+     2898.1,
+     2903.5
+    ]
+   }
+  ]
+ },
+ "normoxic_curve": {
+  "ppo2_kpa": 21.2,
+  "points": [
+   {
+    "p_kpa": 25,
+    "x_o2": 0.848
+   },
+   {
+    "p_kpa": 30,
+    "x_o2": 0.7067
+   },
+   {
+    "p_kpa": 35,
+    "x_o2": 0.6057
+   },
+   {
+    "p_kpa": 40,
+    "x_o2": 0.53
+   },
+   {
+    "p_kpa": 45,
+    "x_o2": 0.4711
+   },
+   {
+    "p_kpa": 50,
+    "x_o2": 0.424
+   },
+   {
+    "p_kpa": 56.5,
+    "x_o2": 0.3752
+   },
+   {
+    "p_kpa": 60,
+    "x_o2": 0.3533
+   },
+   {
+    "p_kpa": 65,
+    "x_o2": 0.3262
+   },
+   {
+    "p_kpa": 70.3,
+    "x_o2": 0.3016
+   },
+   {
+    "p_kpa": 75,
+    "x_o2": 0.2827
+   },
+   {
+    "p_kpa": 80,
+    "x_o2": 0.265
+   },
+   {
+    "p_kpa": 85,
+    "x_o2": 0.2494
+   },
+   {
+    "p_kpa": 90,
+    "x_o2": 0.2356
+   },
+   {
+    "p_kpa": 95,
+    "x_o2": 0.2232
+   },
+   {
+    "p_kpa": 101.3,
+    "x_o2": 0.2093
+   },
+   {
+    "p_kpa": 110,
+    "x_o2": 0.1927
+   },
+   {
+    "p_kpa": 120,
+    "x_o2": 0.1767
+   }
+  ]
+ },
+ "limit_temperature": {
+  "T_limit_K": 1600,
+  "rows": [
+   {
+    "fuel": "CH4",
+    "N2": 11.8,
+    "CO2": 17.8,
+    "AR": 7.9
+   },
+   {
+    "fuel": "C2H4",
+    "N2": 10.4,
+    "CO2": 15.8,
+    "AR": 7.0
+   },
+   {
+    "fuel": "C3H8",
+    "N2": 11.4,
+    "CO2": 17.2,
+    "AR": 7.7
+   }
+  ],
+  "note": "Oxygen percentage at which the stoichiometric flame temperature falls to 1600 K at 1 atm. An ordering tool for diluents, not a flammability-limit predictor."
+ },
+ "built_at_utc": "2026-11-14T09:50:46Z"
+}

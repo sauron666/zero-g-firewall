@@ -1,0 +1,75 @@
+{
+  "tool": "sync_nasa.py",
+  "version": "1.1.0",
+  "script_sha256": "2b22fdfe93dca1e57b1dad72a7ae3ab8e15318830053094a94e92917977671f4",
+  "python": "3.14.9",
+  "platform": "linux",
+  "started_utc": "2026-11-14T10:52:43Z",
+  "finished_utc": "2026-11-14T10:57:08Z",
+  "ledger_entries": 1219,
+  "ledger_chain_ok": true,
+  "ledger_head": "2f80e83ca20ded09f5518fed46a7a2447f8e3fd142aff166a4d6926b2c531759",
+  "by_kind": {
+    "psi_search": 8,
+    "psi_meta": 26,
+    "psi_file": 1124,
+    "psi_thumb": 26,
+    "official": 10,
+    "extra": 3,
+    "official_child": 9,
+    "ntrs_record": 9,
+    "ntrs_fulltext": 4
+  },
+  "total_bytes": 38451159,
+  "failures": [
+    {
+      "key": "ntrs:text:20260001966:Ferkul-Lunar and Planetary Science Conf 2026 v2.pdf.txt",
+      "kind": "ntrs_fulltext",
+      "relpath": "ntrs/fulltext/20260001966_Ferkul-Lunar and Planetary Science Conf 2026 v2.pdf.txt",
+      "attempts": [
+        {
+          "url": "https://ntrs.nasa.gov/api/citations/20260001966/downloads/Ferkul-Lunar%2520and%2520Planetary%2520Science%2520Conf%25202026%2520v2.pdf.txt",
+          "error": "HTTP 404"
+        }
+      ],
+      "ntrs_id": "20260001966"
+    },
+    {
+      "key": "ntrs:text:20260000646:Ferkul-Lunar and Planetary Science Conference 2026.pdf.txt",
+      "kind": "ntrs_fulltext",
+      "relpath": "ntrs/fulltext/20260000646_Ferkul-Lunar and Planetary Science Conference 2026.pdf.txt",
+      "attempts": [
+        {
+          "url": "https://ntrs.nasa.gov/api/citations/20260000646/downloads/Ferkul-Lunar%2520and%2520Planetary%2520Science%2520Conference%25202026.pdf.txt",
+          "error": "HTTP 404"
+        }
+      ],
+      "ntrs_id": "20260000646"
+    },
+    {
+      "key": "ntrs:text:20250010653:ASGSR 2025-LUCI-Ferkul-Presentation-v2-20250010653.pdf.txt",
+      "kind": "ntrs_fulltext",
+      "relpath": "ntrs/fulltext/20250010653_ASGSR 2025-LUCI-Ferkul-Presentation-v2-20250010653.pdf.txt",
+      "attempts": [
+        {
+          "url": "https://ntrs.nasa.gov/api/citations/20250010653/downloads/ASGSR%25202025-LUCI-Ferkul-Presentation-v2-20250010653.pdf.txt",
+          "error": "HTTP 404"
+        }
+      ],
+      "ntrs_id": "20250010653"
+    },
+    {
+      "key": "ntrs:text:20240002981:Saffire-ICES-2024-ICES-365-accepted final.pdf.txt",
+      "kind": "ntrs_fulltext",
+      "relpath": "ntrs/fulltext/20240002981_Saffire-ICES-2024-ICES-365-accepted final.pdf.txt",
+      "attempts": [
+        {
+          "url": "https://ntrs.nasa.gov/api/citations/20240002981/downloads/Saffire-ICES-2024-ICES-365-accepted%2520final.pdf.txt",
+          "error": "HTTP 404"
+        }
+      ],
+      "ntrs_id": "20240002981"
+    }
+  ],
+  "skipped": []
+}

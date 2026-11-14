@@ -1,0 +1,144 @@
+/*
+  Zero-G Firewall design tokens.
+
+  Principles
+  1. Colour is evidence, chrome is ink. Hue is reserved for physics (gravity regime)
+     and for alarm status. Everything else is neutral.
+  2. Two voices. Serif (STIX Two, the typeface of scientific publishing) carries
+     claims, findings and quotations: things that can be true or false.
+     Sans (B612, designed for cockpit displays) carries the instrument: labels,
+     controls, measurements.
+  3. Evidence class is drawn, not coloured: a glyph and a border style,
+     so it survives colour-blindness, projectors and print.
+*/
+
+:root {
+  color-scheme: light;
+
+  /* surfaces */
+  --page: #f3f5f9;
+  --surface: #ffffff;
+  --raised: #f8f9fc;
+  --sunken: #eceff5;
+  --hairline: #dde2ec;
+  --axis: #b8c0d0;
+
+  /* ink */
+  --ink: #0c1220;
+  --ink-2: #414b60;
+  --ink-3: #68738c;
+  --ink-inverse: #ffffff;
+  --focus: #1f6fd6;
+
+  /* physics: gravity regime (validated all-pairs for colour-vision deficiency on this surface) */
+  --g-micro: #2a78d6;      /* free fall: the blue of a soot-free flame */
+  --g-earth: #eb6834;      /* 1 g: the orange of a buoyant flame */
+  --g-partial: #1baf7a;    /* Moon and Mars: in between, mostly unmeasured */
+  --g-micro-wash: rgba(42, 120, 214, 0.1);
+  --g-earth-wash: rgba(235, 104, 52, 0.1);
+  --g-partial-wash: rgba(27, 175, 122, 0.12);
+
+  /* the second reality in a two-scenario comparison (the first is drawn in ink) */
+  --series-b: #6250d6;
+
+  /* alarm status (reserved; always shown with an icon and a word) */
+  --ok: #0ca30c;
+  --warn: #fab219;
+  --serious: #ec835a;
+  --critical: #d03b3b;
+  --ok-text: #006300;
+
+  /* the receipt: one paper-coloured object in the interface */
+  --paper: #fbf8f1;
+  --paper-ink: #1d1a14;
+  --paper-rule: #d9d2c2;
+
+  /* the chamber: flame windows stay dark in both themes */
+  --chamber: #04070d;
+  --chamber-rim: #2b3650;
+
+  /* type */
+  --font-ui: "B612", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-claim: "STIX Two Text", "Times New Roman", Times, serif;
+  --font-data: "B612 Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --t-12: 0.75rem;
+  --t-13: 0.8125rem;
+  --t-14: 0.875rem;
+  --t-16: 1rem;
+  --t-18: 1.125rem;
+  --t-21: 1.3125rem;
+  --t-26: 1.625rem;
+  --t-34: 2.125rem;
+  --t-46: 2.875rem;
+  --t-hero: clamp(3.25rem, 7.2vw, 6.5rem);
+
+  /* space (4 px grid) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 72px;
+
+  --radius: 5px;
+  --rail: 236px;
+  --bar: 52px;
+  --measure: 68ch;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #070b14;
+    --surface: #0d1320;
+    --raised: #131b2c;
+    --sunken: #0a0f1a;
+    --hairline: #212b41;
+    --axis: #36425e;
+    --ink: #edf1f9;
+    --ink-2: #b6bfd2;
+    --ink-3: #8792aa;
+    --ink-inverse: #0a0f1a;
+    --focus: #8fc0ff;
+    --g-micro: #3987e5;
+    --g-earth: #d95926;
+    --g-partial: #199e70;
+    --series-b: #9085e9;
+    --g-micro-wash: rgba(57, 135, 229, 0.14);
+    --g-earth-wash: rgba(217, 89, 38, 0.14);
+    --g-partial-wash: rgba(25, 158, 112, 0.16);
+    --ok-text: #3fca3f;
+    --paper: #f4efe3;
+    --paper-ink: #1d1a14;
+    --paper-rule: #cfc7b4;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #070b14;
+  --surface: #0d1320;
+  --raised: #131b2c;
+  --sunken: #0a0f1a;
+  --hairline: #212b41;
+  --axis: #36425e;
+  --ink: #edf1f9;
+  --ink-2: #b6bfd2;
+  --ink-3: #8792aa;
+  --ink-inverse: #0a0f1a;
+  --focus: #8fc0ff;
+  --g-micro: #3987e5;
+  --g-earth: #d95926;
+  --g-partial: #199e70;
+  --series-b: #9085e9;
+  --g-micro-wash: rgba(57, 135, 229, 0.14);
+  --g-earth-wash: rgba(217, 89, 38, 0.14);
+  --g-partial-wash: rgba(25, 158, 112, 0.16);
+  --ok-text: #3fca3f;
+  --paper: #f4efe3;
+  --paper-ink: #1d1a14;
+  --paper-rule: #cfc7b4;
+}

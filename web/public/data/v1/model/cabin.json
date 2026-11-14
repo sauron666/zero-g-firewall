@@ -1,0 +1,49 @@
+{
+ "klass": "model",
+ "title": "Well-mixed cabin: what a fire of Saffire scale does to the air",
+ "assumptions": [
+  "Heat release converted to oxygen consumption at 13.1 kJ per gram of oxygen (BASS-II summary report).",
+  "Carbon dioxide from PMMA stoichiometry. Carbon monoxide is not computed.",
+  "Temperature and pressure rises are adiabatic, constant-volume upper bounds; walls absorb most of the heat in reality."
+ ],
+ "cases": [
+  {
+   "label": "3.2 kW for 60 s in 18 m3",
+   "q_kw": 3.2,
+   "t_s": 60,
+   "v_m3": 18.0,
+   "energy_kj": 192.0,
+   "o2_g": 14.656,
+   "co2_ppm": 513.326,
+   "dT_K": 12.422,
+   "dP_frac": 0.042,
+   "moles": 743.589
+  },
+  {
+   "label": "1.5 kW for 60 s in 17 m3",
+   "q_kw": 1.5,
+   "t_s": 60,
+   "v_m3": 17.0,
+   "energy_kj": 90.0,
+   "o2_g": 6.87,
+   "co2_ppm": 254.776,
+   "dT_K": 6.165,
+   "dP_frac": 0.021,
+   "moles": 702.278
+  },
+  {
+   "label": "3.2 kW for 300 s in 18 m3",
+   "q_kw": 3.2,
+   "t_s": 300,
+   "v_m3": 18.0,
+   "energy_kj": 960.0,
+   "o2_g": 73.282,
+   "co2_ppm": 2566.628,
+   "dT_K": 62.11,
+   "dP_frac": 0.211,
+   "moles": 743.589
+  }
+ ],
+ "source": "Fire sizes and volumes from Urban et al., ICES-2024-365 (NTRS 20240002981)",
+ "built_at_utc": "2026-11-14T09:50:46Z"
+}

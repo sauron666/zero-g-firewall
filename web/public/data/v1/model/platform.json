@@ -1,0 +1,48 @@
+{
+ "klass": "model",
+ "title": "How faithful is spun-up gravity? Coriolis and gradient on a rotating platform",
+ "assumptions": [
+  "Rigid rotation at constant rate.",
+  "Gas speed is the speed relative to the rotating sample."
+ ],
+ "luci": {
+  "rpm": 11.0,
+  "radius_m": 1.22,
+  "omega_rad_s": 1.1519,
+  "a_m_s2": 1.619,
+  "g_fraction": 0.1651,
+  "source": "LUCI, NTRS 20250010653"
+ },
+ "coriolis": [
+  {
+   "gas_speed_m_s": 0.05,
+   "coriolis_m_s2": 0.115,
+   "fraction_of_simulated_gravity": 0.071
+  },
+  {
+   "gas_speed_m_s": 0.1,
+   "coriolis_m_s2": 0.23,
+   "fraction_of_simulated_gravity": 0.142
+  },
+  {
+   "gas_speed_m_s": 0.2,
+   "coriolis_m_s2": 0.461,
+   "fraction_of_simulated_gravity": 0.285
+  },
+  {
+   "gas_speed_m_s": 0.3,
+   "coriolis_m_s2": 0.691,
+   "fraction_of_simulated_gravity": 0.427
+  },
+  {
+   "gas_speed_m_s": 0.5,
+   "coriolis_m_s2": 1.152,
+   "fraction_of_simulated_gravity": 0.712
+  }
+ ],
+ "gradient": {
+  "dr_m": 0.1,
+  "fraction": 0.082
+ },
+ "built_at_utc": "2026-11-14T09:50:46Z"
+}

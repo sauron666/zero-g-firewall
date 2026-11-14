@@ -1,0 +1,65 @@
+{
+ "klass": "model",
+ "title": "A fan you cannot switch off: buoyant flow against the most flammable forced flow",
+ "formula": "U_b = (g * alpha * dT/T)^(1/3), with dT/T = 5 and alpha from 2.2e-5 to 1.5e-4 m2/s",
+ "assumptions": [
+  "An order-of-magnitude scale for the flow buoyancy drives near the base of a small flame.",
+  "The coefficient is uncertain; the dependence on the cube root of gravity is the robust part.",
+  "A larger scale, sqrt(g L dT/T), applies higher in the plume.",
+  "Not a prediction of flammability. FM2 is designed to measure the real behaviour on the Moon."
+ ],
+ "bodies": [
+  {
+   "id": "earth",
+   "name": "Earth",
+   "g": 1.0,
+   "buoyant_cm_s": [
+    10.3,
+    19.4
+   ],
+   "ratio_to_earth": 1.0,
+   "plume_cm_s_2cm_flame": 99.0
+  },
+  {
+   "id": "mars",
+   "name": "Mars",
+   "g": 0.38,
+   "buoyant_cm_s": [
+    7.4,
+    14.1
+   ],
+   "ratio_to_earth": 0.724,
+   "plume_cm_s_2cm_flame": 61.0
+  },
+  {
+   "id": "moon",
+   "name": "Moon",
+   "g": 0.165,
+   "buoyant_cm_s": [
+    5.6,
+    10.7
+   ],
+   "ratio_to_earth": 0.548,
+   "plume_cm_s_2cm_flame": 40.0
+  },
+  {
+   "id": "iss",
+   "name": "ISS, free fall",
+   "g": 0.0,
+   "buoyant_cm_s": [
+    0.0,
+    0.0
+   ],
+   "ratio_to_earth": 0.0,
+   "plume_cm_s_2cm_flame": 0.0
+  }
+ ],
+ "reference": {
+  "klass": "literature",
+  "value_cm_s": 10,
+  "statement": "The gas velocity at the minimum of the flammability curve is on the order of 10 cm/s, and it also corresponds to a maximum in the flame spread rate.",
+  "doc_id": "researchers_guide",
+  "locator": "p. 31"
+ },
+ "built_at_utc": "2026-11-14T09:50:46Z"
+}

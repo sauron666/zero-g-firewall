@@ -1,0 +1,17 @@
+node_modules/
+dist/
+dist-preview/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+# raw cache: keep the ledger and the small NASA files, never the archives
+nasa_raw/*.zip
+.DS_Store
+# pre-event research notes and plan: kept local, not part of the published project
+docs/pack/
+# raw cache from NASA: only the ledger and the sync report are committed; the site carries hashes for every file it uses
+nasa_raw/*
+!nasa_raw/ledger/
+!nasa_raw/sync_report.json
