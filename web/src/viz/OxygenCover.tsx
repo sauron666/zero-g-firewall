@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { href } from "../app/router";
 import { fmtInt } from "../lib/data";
-import type { CoverageBlock } from "../lib/types";
+import type { CoverageBlock, DocRef, ReportedDoc } from "../lib/types";
 import { useReceipt } from "../components/Receipt";
 
 /** Four steps of one hue; zero is drawn hatched, never as the palest step. */
@@ -19,6 +19,20 @@ export function coverColumns(c: CoverageBlock) {
   return { lo, hi: c.axis.hi, cols, above };
 }
 
+/** A test NASA reports outside PSI, or plans, placed on the same grid. It is drawn as a mark and never counted in a square. */
+export interface CoverMark { pct: number; kind: string; regime: "micro" | "partial"; state: "reported" | "planned"; who: string; detail: string; ref: DocRef }
+const whole = (pct: number) => Math.floor(Math.round(pct * 1000) / 1000 + 0.5);            // the rule of the squares: halves go upward
+
+export function coverMarks(r: ReportedDoc | null | undefined): CoverMark[] {
+  if (!r) return [];
+  return [
+    ...r.saffire.rows.map((x): CoverMark => ({ pct: whole(x.o2_pct), kind: "solid", regime: "micro", state: "reported", who: `Saffire ${x.id}`, detail: `${x.material}, ${x.o2_pct}% oxygen at ${x.p_kpa} kPa`, ref: r.saffire.refs.conditions })),
+    ...r.luci.oxygen.map((x): CoverMark => ({ pct: whole(x.from_pct), kind: "solid", regime: "partial", state: "reported", who: "LUCI",
+      detail: `${x.sample.toLowerCase()}, simulated lunar gravity; oxygen fell from ${x.approximate ? "about " : ""}${x.from_pct}% to ${x.to_pct}%`, ref: x.ref })),
+    ...r.fm2.tests.map((x): CoverMark => ({ pct: whole(x.o2_pct), kind: "solid", regime: "partial", state: "planned", who: `FM2 test ${x.n}`, detail: `fabric on the Moon, ${x.o2_pct}% oxygen at ${x.p_psia} psia`, ref: r.fm2.ref })),
+  ];
+}
+
 function Target({ size = 15 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="-8 -8 16 16" aria-hidden="true">
@@ -33,7 +47,8 @@ interface Tip { x: number; y: number; title: string; lines: [string, string][]; 
  * Test rows by fuel form and whole percent of oxygen, once for free fall and once for partial gravity.
  * The second block is the same grid with nothing in it: that emptiness is the finding.
  */
-export function OxygenCover({ c }: { c: CoverageBlock }) {
+export function OxygenCover({ c, reported }: { c: CoverageBlock; reported?: ReportedDoc | null }) {
+  const marks = coverMarks(reported);
   const [view, setView] = useState<"chart" | "table">("chart");
   const [tip, setTip] = useState<Tip | null>(null);
   const box = useRef<HTMLDivElement>(null);
@@ -63,6 +78,18 @@ export function OxygenCover({ c }: { c: CoverageBlock }) {
     notes: ["Each row, with its file hash and ledger entry, opens from the atmosphere map and from the record's own table."],
   });
 
+  const outside = (kind: CoverageBlock["kinds"][number], pct: number, where: string, ms: CoverMark[]) => open({
+    title: `${kind.label} at ${pct}% oxygen, ${where}: ${ms.every((x) => x.state === "planned") ? "planned by NASA" : "reported by NASA outside PSI"}`, klass: "literature",
+    rows: ms.flatMap((x): [string, React.ReactNode][] => [
+      [x.who, `${x.state === "planned" ? "planned: " : ""}${x.detail}`],
+      ["document", `${x.ref.source}, ${x.ref.what}`],
+      ["fetched from", <a href={x.ref.url} target="_blank" rel="noreferrer">{x.ref.url}</a>],
+      ["SHA-256 of the file", <span className="hash">{x.ref.sha256}</span>],
+      ["ledger entry", `number ${x.ref.ledger_seq}`],
+    ]),
+    notes: ["Not a row of a PSI table. It is drawn as a mark and is not counted in any square or total on this site."],
+  });
+
   const strip = (kind: CoverageBlock["kinds"][number], regime: "micro" | "partial") => {
     const cells = regime === "micro" ? c.cells[kind.id] ?? {} : {};
     const up = regime === "micro" ? above(kind.id) : 0;
@@ -76,14 +103,17 @@ export function OxygenCover({ c }: { c: CoverageBlock }) {
         {cols.map((p) => {
           const cell = cells[String(p)];
           const n = cell?.n ?? 0;
+          const ms = marks.filter((x) => x.kind === kind.id && x.regime === regime && x.pct === p);
           const cls = `cov__cell cov__cell--${coverStep(n)}${atm.has(p) ? " cov__cell--atm" : ""}`;
-          const t = { title: `${kind.label}, ${p}% oxygen`, lines: [[where, n ? `${fmtInt(n)} ${n === 1 ? "row" : "rows"}` : "no rows"] as [string, string],
+          const t = { title: `${kind.label}, ${p}% oxygen`, lines: [[where, n ? `${fmtInt(n)} ${n === 1 ? "row" : "rows"}` : "no rows in PSI"] as [string, string],
             ...(cell ? Object.entries(cell.records).map(([a, k]) => [a, String(k)] as [string, string]) : []),
-            ...(atm.has(p) ? [["crew atmosphere", atm.get(p)!.label] as [string, string]] : [])], hint: n ? "Click for the receipt" : undefined };
-          return n > 0
-            ? <button key={p} type="button" className={cls} aria-label={`${kind.label}, ${p}% oxygen, ${where}: ${n} rows`}
+            ...ms.map((x) => [x.who, x.state === "planned" ? "planned" : "in a NASA paper"] as [string, string]),
+            ...(atm.has(p) ? [["crew atmosphere", atm.get(p)!.label] as [string, string]] : [])], hint: n || ms.length ? "Click for the receipt" : undefined };
+          const glyph = ms.length > 0 && <i className={`cov__lit cov__lit--${ms.some((x) => x.state === "reported") ? "reported" : "planned"}`} aria-hidden="true" />;
+          return n > 0 || ms.length > 0
+            ? <button key={p} type="button" className={cls} aria-label={`${kind.label}, ${p}% oxygen, ${where}: ${n} rows in PSI${ms.length ? `; ${ms.map((x) => `${x.who}, ${x.state === "planned" ? "planned" : "reported outside PSI"}`).join("; ")}` : ""}`}
                       onMouseEnter={(e) => show(e, t)} onFocus={(e) => show(e, t)} onMouseLeave={() => setTip(null)} onBlur={() => setTip(null)}
-                      onClick={() => receipt(kind, p, n, cell.records)} />
+                      onClick={() => (n > 0 && cell ? receipt(kind, p, n, cell.records) : outside(kind, p, where, ms))}>{glyph}</button>
             : <span key={p} className={cls} onMouseEnter={(e) => show(e, t)} onMouseLeave={() => setTip(null)} />;
         })}
         <span className="cov__break" aria-hidden="true" />
@@ -96,7 +126,7 @@ export function OxygenCover({ c }: { c: CoverageBlock }) {
     );
   };
 
-  const pcts = Array.from(new Set([...Object.values(c.cells).flatMap((k) => Object.keys(k).map(Number)), ...c.atmospheres.map((a) => a.pct)])).sort((a, b) => a - b);
+  const pcts = Array.from(new Set([...Object.values(c.cells).flatMap((k) => Object.keys(k).map(Number)), ...c.atmospheres.map((a) => a.pct), ...marks.map((x) => x.pct)])).sort((a, b) => a - b);
   const atmAt = new Map(c.atmospheres.map((a) => [a.pct, a]));
 
   return (
@@ -120,6 +150,10 @@ export function OxygenCover({ c }: { c: CoverageBlock }) {
           <div className="legend cov__legend">
             {STEP_WORDS.map((w, i) => <span key={w} className="legend__item"><span className={`cov__cell cov__swatch cov__cell--${i}`} aria-hidden="true" />{w}</span>)}
             <span className="legend__item"><Target />atmosphere a crew breathes</span>
+            {marks.length > 0 && <>
+              <span className="legend__item"><span className="cov__cell cov__swatch cov__cell--0" aria-hidden="true"><i className="cov__lit cov__lit--reported" /></span>reported by NASA outside PSI</span>
+              <span className="legend__item"><span className="cov__cell cov__swatch cov__cell--0" aria-hidden="true"><i className="cov__lit cov__lit--planned" /></span>planned by NASA</span>
+            </>}
           </div>
 
           <div className="cov__row cov__row--marks" aria-hidden="true">
@@ -153,16 +187,18 @@ export function OxygenCover({ c }: { c: CoverageBlock }) {
       ) : (
         <div className="table-wrap">
           <table className="table">
-            <thead><tr><th className="r">Oxygen</th>{c.kinds.map((k) => <th key={k.id} className="r">{k.label}</th>)}<th className="r">{partial?.label ?? "Partial gravity"}</th><th style={{ paddingLeft: 18 }}>Crew atmosphere</th></tr></thead>
+            <thead><tr><th className="r">Oxygen</th>{c.kinds.map((k) => <th key={k.id} className="r">{k.label}</th>)}<th className="r">{partial?.label ?? "Partial gravity"}</th><th style={{ paddingLeft: 18 }}>Crew atmosphere</th>
+              {marks.length > 0 && <th>Outside PSI: reported or planned by NASA</th>}</tr></thead>
             <tbody>
               {pcts.map((p) => (
                 <tr key={p}>
                   <td className="r num strong">{p}%</td>
                   {c.kinds.map((k) => <td key={k.id} className="r num">{c.cells[k.id]?.[String(p)]?.n ?? 0}</td>)}
                   <td className="r num">0</td><td style={{ paddingLeft: 18 }}>{atmAt.get(p)?.label ?? ""}</td>
+                  {marks.length > 0 && <td className="note">{marks.filter((x) => x.pct === p).map((x) => `${x.who}${x.state === "planned" ? " (planned)" : ""}`).join(", ")}</td>}
                 </tr>
               ))}
-              <tr><td className="r strong">All</td>{c.kinds.map((k) => <td key={k.id} className="r num strong">{fmtInt(k.rows)}</td>)}<td className="r num strong">{fmtInt(partial?.rows ?? 0)}</td><td /></tr>
+              <tr><td className="r strong">All</td>{c.kinds.map((k) => <td key={k.id} className="r num strong">{fmtInt(k.rows)}</td>)}<td className="r num strong">{fmtInt(partial?.rows ?? 0)}</td><td />{marks.length > 0 && <td className="note">not counted</td>}</tr>
             </tbody>
           </table>
         </div>
@@ -172,6 +208,7 @@ export function OxygenCover({ c }: { c: CoverageBlock }) {
         {c.rule} {fmtInt(c.placed)} of {fmtInt(c.total)} rows are placed. Not placed:{" "}
         {c.not_placed.map((x, i) => <span key={x.id}>{i ? "; " : ""}{fmtInt(x.rows)} because {x.why} ({x.records.join(", ")})</span>)}.
         Pressure is on the <a href={href("/envelope")}>atmosphere map</a>.
+        {marks.length > 0 && <> Diamonds are tests NASA reports in papers or plans; they are not rows of a PSI table and no square counts them.</>}
       </p>
     </section>
   );

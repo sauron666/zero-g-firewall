@@ -29,7 +29,7 @@ export const EVAL: EvalCase[] = [
   { id: "g14", kind: "gold", q: "Can a candle burn in microgravity without any air flow?", expect: /^(myth:still-air|mx:diffusion-fed|guide:)/ },
   { id: "c1", kind: "computed", q: "How many tests are near 30% oxygen at 10.2 psia?", tool: "count_tests_near", want: (k) => String(k.envelope!.near_presets.find((n) => n.id === "challenge_limit")!.n_near) },
   { id: "c2", kind: "computed", q: "How many tests were run near 34% oxygen at 8.2 psia?", tool: "count_tests_near", want: (k) => String(k.envelope!.near_presets.find((n) => n.id === "exploration")!.n_near) },
-  { id: "c3", kind: "computed", q: "Has anything been burned in lunar gravity?", tool: "matrix_coverage", want: () => "none has been measured in lunar gravity" },
+  { id: "c3", kind: "computed", q: "Has anything been burned in lunar gravity?", tool: "matrix_coverage", want: () => "none has been measured on the Moon" },
   { id: "c4", kind: "computed", q: "Rank the investigations for a lunar habitat", tool: "rank_for_mission", want: () => "Ranked for a lunar habitat" },
   { id: "a1", kind: "abstain", q: "What is the capital of France?" },
   { id: "a2", kind: "abstain", q: "Who won the football world cup in 2022?" },

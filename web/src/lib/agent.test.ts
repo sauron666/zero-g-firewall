@@ -114,4 +114,26 @@ describe("poisoned passage", () => {
     expect(demo.survivesCheckerAlone.length).toBe(1);
     expect(demo.survivesCheckerAlone[0]).toMatch(/5 seconds/);
   });
+
+  it("puts what NASA reports outside PSI directly under a count from its tables", () => {
+    const solid = runAgent("What is the most oxygen any solid material was burned at?", kit);
+    expect(solid.steps.map((s) => s.tool)).toContain("outside_psi");
+    expect(solid.answer.lines[0].text.startsWith("The ")).toBe(true);
+    expect(solid.answer.lines[1].text.startsWith("Outside PSI, NASA's paper on Saffire IV to VI")).toBe(true);
+    const lunar = runAgent("Has anything been burned in lunar gravity?", kit);
+    expect(lunar.answer.lines[0].text).toContain("none has been measured on the Moon");
+    expect(lunar.answer.lines[1].text).toContain("simulated by spin");
+    expect(lunar.answer.lines[1].text).toContain("nothing has been burned on the Moon itself");
+    expect(runAgent("Was anything burned above 40% oxygen?", kit).steps.map((s) => s.tool)).not.toContain("outside_psi");   // a count past a level stays a count
+  });
+
+  it("answers from the recording and from the reported numbers", () => {
+    const rec = runAgent("What did the smoke detector record during Saffire-III?", kit);
+    expect(rec.answer.abstained).toBe(false);
+    expect(rec.answer.lines.some((l) => /peak scatter reading of [\d.]+, against [\d.]+ after a smoke wire/.test(l.text))).toBe(true);
+    const rate = runAgent("How fast does a flame spread in lunar gravity?", kit);
+    expect(rate.answer.lines[0].text).toMatch(/spread at [\d.]+ mm\/s against [\d.]+ mm\/s in the same test on Earth/);
+    const fm2 = runAgent("What will FM2 test on the Moon?", kit);
+    expect(fm2.answer.lines[0].text).toMatch(/^NASA plans \d+ burn tests of one fabric on the Moon/);
+  });
 });

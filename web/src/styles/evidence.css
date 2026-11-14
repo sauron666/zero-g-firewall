@@ -12,7 +12,7 @@
 /* gravity regime: the only hue on these pages */
 .gdot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex: none; }
 .gdot--micro { background: var(--g-micro); }
-.gdot--ground { background: var(--g-earth); }
+.gdot--ground, .gdot--earth { background: var(--g-earth); }
 .gdot--partial { background: none; border: 2px solid var(--g-partial); }
 .gdot--unknown { background: none; border: 1.5px dashed var(--ink-3); }
 .greg { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
@@ -214,6 +214,10 @@ button.cov__cell:hover, button.cov__cell:focus-visible { outline: 2px solid var(
 .cov__cell--atm { box-shadow: 0 0 0 1.5px var(--ink); position: relative; z-index: 1; }
 .cov__cell--wide { display: grid; place-items: center; font-size: var(--t-12); }
 .cov__swatch { width: 16px; height: 16px; flex: none; }
+/* a test outside PSI: drawn on the square, never counted in it. Filled: reported by NASA. Hollow: planned. */
+.cov__cell:has(.cov__lit) { position: relative; }
+.cov__lit { position: absolute; inset: 0; margin: auto; width: 8px; height: 8px; transform: rotate(45deg); background: var(--ink); box-shadow: 0 0 0 1.5px var(--surface); border-radius: 1px; pointer-events: none; }
+.cov__lit--planned { background: var(--surface); box-shadow: 0 0 0 1.6px var(--ink); width: 7px; height: 7px; }
 .cov__break { align-self: center; height: 14px; border-left: 1.5px dotted var(--ink-3); margin-left: 3px; }
 .cov__regime { display: flex; align-items: center; gap: 8px; margin: 12px 0 2px; font-size: var(--t-14); font-weight: 700; }
 .cov__regime .note { font-weight: 400; }

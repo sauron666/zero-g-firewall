@@ -270,3 +270,32 @@ a.msg__src:hover { border-color: var(--g-micro); color: var(--ink); }
 .lantern[data-mood="alarm"] { filter: drop-shadow(0 0 12px color-mix(in srgb, var(--critical) 85%, transparent)); }
 @media (max-width: 760px) { .fab { padding: 5px; } .fab__text { display: none; } .chat { width: 100vw; border-left: 0; } }
 @media (prefers-reduced-motion: reduce) { .chain i, .dots i, .top5 i::after, .chat, .msg { animation: none !important; } .ring__arc { transition: none; } }
+
+
+/* A recording that can be played: two strips on one clock */
+.replay { display: grid; gap: 10px; min-width: 0; }
+.replay__bar { grid-template-columns: auto auto minmax(0, 1fr) auto auto; }
+.replay__say { min-height: 2.9em; font-family: var(--font-claim); font-size: 1.02rem; line-height: 1.42; color: var(--ink); max-width: 76ch; }
+.replay__say b { margin-right: 8px; font-family: var(--font-ui); font-size: var(--t-13); color: var(--ink-2); }
+.replay__plot { min-width: 0; }
+.replay__events { list-style: none; margin: 4px 0 0; padding: 0 0 0 46px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 6px 22px; font-size: var(--t-13); }
+.replay__events li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.replay__n { display: inline-grid; place-items: center; width: 18px; height: 18px; border: 1px solid var(--ink-2); border-radius: 50%; font-size: 10px; color: var(--ink); }
+.replay__limits { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 4px; font-size: var(--t-13); color: var(--ink-2); max-width: 92ch; }
+.dpanel .replay__plot svg { filter: none; }
+@media (max-width: 700px) {
+  .replay__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .replay__bar .scrub { flex: 1 1 100%; order: 3; }
+  .replay__bar .transport__time { order: 4; flex: 1 1 auto; text-align: left; min-width: 0; }
+  .replay__bar .seg { order: 5; }
+  .replay__events { padding-left: 0; }
+}
+
+/* A table whose cells carry their own bars: lunar gravity against Earth */
+.rep__table td, .rep__table th { vertical-align: middle; }
+.rep__cell { min-width: 92px; }
+.rep__table th { white-space: normal; }
+.rep__cell .num { display: block; font-weight: 700; color: var(--ink); }
+.rep__bar { display: block; height: 8px; width: var(--w); min-width: 3px; margin-bottom: 4px; border-radius: 0 4px 4px 0; background: var(--c); }
+.rep__bars { align-items: start; }
+@media (max-width: 900px) { .rep__bars { grid-template-columns: minmax(0, 1fr) !important; } }

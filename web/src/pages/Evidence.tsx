@@ -437,9 +437,15 @@ function Card({ inv, findings, profiles, brief }: { inv: Investigation; findings
               </table>
             </div>
           )}
+          {inv.in_ledger && inv.in_ledger.files > 0 && (
+            <p className="note" style={{ marginTop: 12 }}>
+              In this site's ledger: {fmtInt(inv.in_ledger.files)} of these files, {fmtBytes(inv.in_ledger.bytes)}, each with its hash
+              ({Object.entries(inv.in_ledger.folders).sort((a, b) => b[1].files - a[1].files).map(([k, v]) => `${k} ${fmtInt(v.files)}`).join(", ")}).
+            </p>
+          )}
           {inv.core_files && inv.core_files.length > 0 && (
             <div style={{ marginTop: 12 }}>
-              <p className="note">Summary files fetched for this site, each with a receipt:</p>
+              <p className="note">Reports, analysed data and notes of this record in the ledger{inv.in_ledger && inv.in_ledger.documents > inv.core_files.length ? ` (the first ${inv.core_files.length} of ${inv.in_ledger.documents})` : ""}, each with a receipt:</p>
               <ul style={{ marginTop: 6 }}>{inv.core_files.map((c) => (
                 <li key={c.file} className="row" style={{ ["--gap" as string]: "8px", fontSize: 13, padding: "3px 0" }}>
                   <span style={{ overflowWrap: "anywhere" }}>{c.file}</span><span className="note num">{fmtBytes(c.bytes)}</span>

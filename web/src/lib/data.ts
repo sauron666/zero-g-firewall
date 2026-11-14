@@ -69,6 +69,9 @@ export interface Manifest {
     quotes_verified?: number;
     /** passages in the search index */
     passages?: number;
+    /** readings of the one raw recording the site draws, and literature numbers that passed their cross-checks */
+    recorded_readings?: number;
+    reported_values_checked?: number;
     droplet_rows_checked?: number;
     droplet_rows_within_10pct?: number;
   };

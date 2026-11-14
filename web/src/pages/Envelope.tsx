@@ -3,7 +3,7 @@ import { scaleLinear } from "d3-scale";
 import { href } from "../app/router";
 import { fmtInt, useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
-import type { EnvelopeDoc, EnvelopePoint, EnvelopeSeries, RankDoc, TableSummary } from "../lib/types";
+import type { EnvelopeDoc, EnvelopePoint, EnvelopeSeries, RankDoc, TableSummary, DocRef, ReportedDoc } from "../lib/types";
 import { emit } from "../mascot/bus";
 import { Readings, Tile } from "../dash/widgets";
 import { DesignPoint, nearestCsv, nearestRows } from "../lib/nearest";
@@ -13,6 +13,11 @@ import { PageProps, stub } from "./stubs";
 
 const Waiting = stub("/envelope");
 const SHAPE: Record<string, Shape> = { "FLEX droplets": "circle", "CFI droplets": "diamond", "CFI-G gas flames": "square", "Flame Design gas flames": "triangle", "BASS-II solids": "cross", "Saffire solids": "circle" };
+interface Lit { who: string; detail: string; ref: DocRef; planned: boolean }
+const LIT: ScatterGroup[] = [
+  { id: "Saffire IV to VI, in a NASA paper", name: "Saffire IV to VI, in a NASA paper", shape: "square", color: "var(--g-micro)", hollow: true },
+  { id: "FM2, planned on the Moon", name: "FM2, planned on the Moon", shape: "diamond", color: "var(--g-partial)", hollow: true },
+];
 const SHORT: Record<string, { label: string; place: ScatterMark["place"] }> = {
   iss: { label: "ISS cabin", place: "right" },
   challenge_limit: { label: "30% at 10.2 psia", place: "left" },
@@ -132,6 +137,7 @@ export function Envelope({ route, manifest }: PageProps) {
   const atm = useData<AtmDoc>("model/atmospheres.json");
   const idx = useData<{ items: TableSummary[] }>(ready ? "tables/index.json" : null);
   const rank = useData<RankDoc>(ready ? "rank_features.json" : null);
+  const rep = useData<ReportedDoc>(ready && manifest?.artifacts["reported.json"] ? "reported.json" : null);
   const [mission, setMission] = useState(route.query.get("mission") ?? "");
   const lens = rank.data?.lenses.find((l) => l.id === mission);
   const pure = !!lens?.atmospheres.some((a) => a[1] > 0.45);
@@ -190,6 +196,21 @@ export function Envelope({ route, manifest }: PageProps) {
         ...(outs.size ? [["outcomes", Array.from(outs.entries()).map(([k, v]) => `${k} ${v}`).join(", ").slice(0, 40)] as [string, string]] : [])],
     };
   });
+  // tests NASA reports in a paper, or plans: drawn on the same axes, never counted with the rows of PSI
+  const lit: ScatterPoint[] = rep.data ? [
+    ...rep.data.saffire.rows.map((r): ScatterPoint => ({ x: r.p_kpa, y: r.o2_pct / 100, group: LIT[0].id, size: 64, title: `Saffire ${r.id}: ${r.material}`,
+      tip: [["oxygen", `${r.o2_pct}%`], ["pressure", `${r.p_kpa} kPa`], ["gravity", "free fall"], ["from", "a NASA paper, not a PSI row"]],
+      ref: { lit: { who: `Saffire ${r.id}`, detail: `${r.material}, ${r.o2_pct}% oxygen at ${r.p_kpa} kPa, air flow ${r.flow_cm_s} cm/s`, ref: rep.data!.saffire.refs.conditions, planned: false } } })),
+    ...rep.data.fm2.tests.map((t): ScatterPoint => ({ x: t.p_kpa, y: t.o2_pct / 100, group: LIT[1].id, size: 64, title: `FM2 test ${t.n}, planned on the Moon`,
+      tip: [["oxygen", `${t.o2_pct}%`], ["pressure", `${t.p_psia} psia (${t.p_kpa.toFixed(1)} kPa)`], ["gravity", "lunar"], ["state", "planned, not flown"]],
+      ref: { lit: { who: `FM2 test ${t.n}`, detail: `fabric on the Moon, ${t.o2_pct}% oxygen at ${t.p_psia} psia (± ${t.tolerance_psi} psi)`, ref: rep.data!.fm2.ref, planned: true } } })),
+  ].filter((q) => !hidden.has(q.group)) : [];
+  const pickLit = (x: Lit) => open({
+    title: `${x.who}: ${x.planned ? "planned by NASA" : "reported by NASA outside PSI"}`, klass: "literature",
+    rows: [[x.who, x.detail], ["document", `${x.ref.source}, ${x.ref.what}`], ["fetched from", <a href={x.ref.url} target="_blank" rel="noreferrer">{x.ref.url}</a>],
+      ["SHA-256 of the file", <span className="hash">{x.ref.sha256}</span>], ["ledger entry", `number ${x.ref.ledger_seq}`]],
+    notes: ["Not a row of a PSI table. It is drawn for comparison and is not counted in any total on this page."],
+  });
   const pickBin = (b: EnvelopePoint[]) => {
     if (b.length === 1) return pick(b[0]);
     const s = series.get(b[0].s);
@@ -217,7 +238,8 @@ export function Envelope({ route, manifest }: PageProps) {
   const win = d.near ?? { dx: 0.03, dp: 0.15 };
   const regions = (lens?.atmospheres ?? []).map((a) => ({ x0: a[2] * (1 - win.dp), x1: a[2] * (1 + win.dp), y0: a[1] - win.dx, y1: a[1] + win.dx }));
   const lensNear = (lens?.atmospheres ?? []).map((a) => ({ a, n: d.near_presets.find((n) => Math.abs(n.x_o2 - a[1]) < 1e-6 && Math.abs(n.p_kpa - a[2]) < 0.05) }));
-  const counts = Object.fromEntries(d.series.map((s) => [s.id, s.n]));
+  const counts: Record<string, number> = { ...Object.fromEntries(d.series.map((s) => [s.id, s.n])), ...(rep.data ? { [LIT[0].id]: rep.data.saffire.rows.length, [LIT[1].id]: rep.data.fm2.tests.length } : {}) };
+  const allGroups = rep.data ? [...groups, ...LIT] : groups;
   const near = (id: string) => d.near_presets.find((n) => n.id === id);
   const solidsBoth = d.series.filter((s) => s.kind === "solid").reduce((a, s) => a + s.n_with_pressure, 0);
   const toggle = (id: string) => setHidden((h) => { const n = new Set(h); if (n.has(id)) n.delete(id); else n.add(id); return n; });
@@ -268,22 +290,23 @@ export function Envelope({ route, manifest }: PageProps) {
             <button type="button" aria-pressed={zoom === "tests"} onClick={() => setZoom("tests")}>Where the tests are</button>
           </div>
         </div>
-        <ScatterLegend groups={groups} counts={counts} hidden={hidden} onToggle={toggle} extra={
+        <ScatterLegend groups={allGroups} counts={counts} hidden={hidden} onToggle={toggle} extra={
           <>
-            <span className="legend__item"><span className="gdot gdot--partial" aria-hidden="true" />Lunar or Martian gravity (0 rows)</span>
+            <span className="legend__item"><span className="gdot gdot--partial" aria-hidden="true" />Lunar or Martian gravity (0 rows in PSI)</span>
             <span className="legend__item"><svg width="16" height="16" viewBox="-8 -8 16 16" aria-hidden="true"><circle r="4.6" fill="none" stroke="var(--ink)" strokeWidth="1.5" /><path d="M-8 0h4M4 0h4M0-8v4M0 4v4" stroke="var(--ink)" strokeWidth="1.5" /></svg>Atmosphere a crew breathes</span>
             <span className="legend__item"><svg width="14" height="14" viewBox="-7 -7 14 14" aria-hidden="true"><path d={shapePath("diamond", 60)} fill="none" stroke="var(--ink-2)" strokeWidth="1.5" strokeDasharray="3 2" /></svg>Historical, from NASA documents</span>
           </>
         } />
         <div className="mapwrap" style={{ marginTop: 10 }}>
-          <Scatter points={points} groups={groups} xLabel="total pressure, kPa" yLabel="oxygen, mole fraction" xDomain={[0, 320]} yDomain={yDomain} height={H}
-                   marks={marks} curves={curve} regions={regions} onPick={(p) => pickBin(p.ref as EnvelopePoint[])} fmtY={(v) => v.toFixed(2).replace(/0$/, "")}
+          <Scatter points={[...points, ...lit]} groups={allGroups} xLabel="total pressure, kPa" yLabel="oxygen, mole fraction" xDomain={[0, 320]} yDomain={yDomain} height={H}
+                   marks={marks} curves={curve} regions={regions} onPick={(p) => { const r = p.ref as { lit?: Lit } | EnvelopePoint[]; if (!Array.isArray(r) && r?.lit) pickLit(r.lit); else pickBin(r as EnvelopePoint[]); }} fmtY={(v) => v.toFixed(2).replace(/0$/, "")}
                    ariaLabel="Scatter plot of oxygen mole fraction against total pressure for NASA microgravity combustion test rows, with crew atmospheres and historical points" />
           <Strip points={only} groups={groups} yDomain={yDomain} onPick={pick} />
         </div>
         <p className="note" style={{ marginTop: 10 }}>
           {d.note} Crew atmospheres and the dashed curve come from the model page; historical points come from NASA documents and are drawn with a dashed outline.
           Rows left out: {d.series.map((s) => `${s.id} ${s.no_oxygen + s.pressure_not_usable}`).join(", ")} (no oxygen value, or a pressure of 0).
+          {rep.data && <> Hollow squares are the Saffire IV to VI tests as NASA's paper lists them, and green diamonds the four tests NASA plans on the Moon; neither is a row of a PSI table, and no count on this page includes them.</>}
         </p>
       </section>
 

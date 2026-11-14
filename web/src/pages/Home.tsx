@@ -3,7 +3,7 @@ import { ALL_ITEMS, NAV } from "../app/nav";
 import { href } from "../app/router";
 import { Manifest, fmtBytes, fmtInt, fmtUtc, useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
-import type { DropletDoc, GapsDoc, MatrixDoc, MythsDoc, RankDoc, ValidationDoc } from "../lib/types";
+import type { DropletDoc, GapsDoc, MatrixDoc, MythsDoc, RankDoc, ValidationDoc, RecordedDoc } from "../lib/types";
 import { FlameCanvas } from "../components/FlameCanvas";
 import { Porthole } from "../components/Porthole";
 import { FanSwitch } from "../components/FanSwitch";
@@ -13,6 +13,7 @@ import { IconArrow, IconTour } from "../components/icons";
 import { AlarmSpark, Chain, MiniCover, MiniParity, Ring, Tile, TopFive } from "../dash/widgets";
 import { BODIES, buoyantSpeedRange } from "../physics/scaling";
 import { emit, on } from "../mascot/bus";
+import { RecordedFire } from "../viz/Recorded";
 import { Lantern } from "../mascot/Lantern";
 import { pc } from "../viz/OxygenCover";
 
@@ -42,6 +43,7 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
   const rank = useData<RankDoc>(nasa ? "rank_features.json" : null);
   const val = useData<ValidationDoc>(nasa ? "validation.json" : null);
   const drops = useData<DropletDoc>(nasa ? "droplets.json" : null);
+  const rec = useData<RecordedDoc>(manifest?.artifacts["recorded.json"] ? "recorded.json" : null);
   const [q, setQ] = useState("");
   const ask = (text: string) => { const t = text.trim(); if (t) { emit({ type: "ASK", q: t }); setQ(""); } };
 
@@ -154,7 +156,7 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
           {cover ? <MiniCover c={cover} /> : <p className="note">Appears after the NASA sync.</p>}
           {cover && solid && (
             <p className="dpanel__say">
-              Solid materials stop at <b>{pc(solid.max)}</b> oxygen{far.length > 0 && <>; exploration atmospheres hold {far.join(" and ")}</>}. Nothing above <b>{pc(cover.top)}</b>. Nothing in lunar gravity.
+              Solid materials stop at <b>{pc(solid.max)}</b> oxygen{far.length > 0 && <>; exploration atmospheres hold {far.join(" and ")}</>}. No row above <b>{pc(cover.top)}</b>, and none in lunar gravity.
             </p>
           )}
         </section>
@@ -171,9 +173,26 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
         </section>
 
         <section className="dpanel span-4" aria-label="Alarm trust">
-          <header className="dpanel__head"><span className="led led--warn" /><h2>Can you trust the alarm?</h2><a className="dpanel__more" href={href("/alarm/fire_fans_off")}>Alarm lab <IconArrow size={13} /></a></header>
-          <AlarmSpark />
-          <p className="dpanel__foot"><KlassBadge k="synthetic" note="made here to test the alarm" /> Nine such situations in the lab, every reading signed and checked.</p>
+          <header className="dpanel__head"><span className="led led--warn" /><h2>Can you trust the alarm?</h2><a className="dpanel__more" href={href("/alarm")}>Alarm lab <IconArrow size={13} /></a></header>
+          {rec.data ? (
+            <>
+              <RecordedFire doc={rec.data} compact />
+              <div className="spark__legend">
+                <span><i style={{ ["--c" as string]: "var(--g-micro)" }} />flame, four radiometers</span>
+                <span><i style={{ ["--c" as string]: "var(--ink)" }} />smoke detector of the vehicle</span>
+              </div>
+              <p className="dpanel__say" style={{ fontSize: "0.98rem" }}>
+                Recorded in a cargo vehicle, {new Date(rec.data.zero.utc).getUTCFullYear()}: a puff from a smoke wire read <b>{rec.data.derived.scatter.wire.peak}</b>, a burning sheet of fabric <b>{rec.data.derived.scatter.fire.peak}</b>.
+                Time told them apart: {rec.data.derived.scatter.wire.above_mark_s} s against {rec.data.derived.scatter.fire.above_mark_s} s.
+              </p>
+              <p className="dpanel__foot"><KlassBadge k="observed" note="raw data of PSI-100" /> Play the recording in the lab, then nine synthetic situations with signed readings.</p>
+            </>
+          ) : (
+            <>
+              <AlarmSpark />
+              <p className="dpanel__foot"><KlassBadge k="synthetic" note="made here to test the alarm" /> Nine such situations in the lab, every reading signed and checked.</p>
+            </>
+          )}
         </section>
       </div>
 

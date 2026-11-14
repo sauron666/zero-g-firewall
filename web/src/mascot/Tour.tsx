@@ -15,7 +15,7 @@ export const STOPS: Stop[] = [
   { id: "find", to: "envelope", verb: "Find", text: (m) => `Every real test by oxygen and pressure: ${n(m?.nasa?.envelope_points)} rows from NASA's tables. None was taken in lunar or Martian gravity.` },
   { id: "rank", to: "rank--lunar", verb: "Rank", text: () => "The investigations ranked for a lunar habitat by stated factors, with a check of how stable the order is." },
   { id: "summarize", to: "evidence--PSI-25", verb: "Summarize", text: () => "One record: what varied, what stayed constant, a receipt on every row, and the curator's notes on the data." },
-  { id: "map", to: "playbooks?habitat=lunar", verb: "Map", text: () => "Fire behaviours by phase, like an attack matrix. Switch the habitat: in lunar gravity not one behaviour has been measured." },
+  { id: "map", to: "playbooks?habitat=lunar", verb: "Map", text: () => "Fire behaviours by phase, like an attack matrix. Switch the habitat: on the Moon not one behaviour has been measured." },
   { id: "control", to: "alarm--replay", verb: "Control", text: () => "A real fire hidden behind replayed readings. The frames fail their checks, and the alarm stands. Synthetic, and labelled so." },
   { id: "ask", to: "ask?q=Has%20anything%20been%20burned%20in%20lunar%20gravity%3F", verb: "Ask", text: () => "Ask ISKRA in plain words. Numbers are computed, every sentence comes with its NASA source, and it works with no network." },
   { id: "trace", to: "ledger", verb: "Trace", text: (m) => `${n(m?.nasa?.files_in_ledger)} files fetched from NASA, hash-chained. Your browser recomputes the chain while you watch.` },

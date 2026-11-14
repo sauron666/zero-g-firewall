@@ -10,7 +10,7 @@ import type { EnvelopeDoc, MatrixDoc, Passage, RankDoc } from "./types";
  * With no model connected the planner is a set of rules. A connected model may rephrase the passages the
  * tools return; it never calls a tool by itself and never produces a number.
  */
-export type ToolName = "screen_question" | "count_tests_near" | "oxygen_range" | "rank_for_mission" | "matrix_coverage" | "curator_notes" | "get_investigation" | "search_passages" | "compose_answer" | "check_answer";
+export type ToolName = "screen_question" | "count_tests_near" | "oxygen_range" | "rank_for_mission" | "matrix_coverage" | "outside_psi" | "curator_notes" | "get_investigation" | "search_passages" | "compose_answer" | "check_answer";
 export interface Step { tool: ToolName; why: string; args: Record<string, string | number>; out: string; found: number; ms: number }
 export interface Kit { index: Index; envelope?: EnvelopeDoc | null; rank?: RankDoc | null; matrix?: MatrixDoc | null }
 export interface AgentRun { question: string; steps: Step[]; hits: Hit[]; answer: Answer; computed: number; ms: number; planner: "rules"; notes: string[]; refused: boolean }
@@ -20,6 +20,7 @@ export const TOOLS: Record<ToolName, { title: string; reads: string }> = {
   curator_notes: { title: "Fetch the curator's notes on NASA's tables", reads: "index.json" },
   count_tests_near: { title: "Count test rows near an atmosphere", reads: "envelope.json" },
   oxygen_range: { title: "Find the oxygen range of the test rows", reads: "envelope.json" },
+  outside_psi: { title: "Check what NASA reports outside its tables", reads: "index.json (reported.json)" },
   rank_for_mission: { title: "Rank the investigations for a mission", reads: "rank_features.json" },
   matrix_coverage: { title: "Look up what is measured in a habitat", reads: "matrix.json" },
   get_investigation: { title: "Fetch an investigation record", reads: "index.json" },
@@ -134,7 +135,7 @@ function coverage(mx: MatrixDoc, habitat: "iss" | "lunar"): Passage {
   return {
     id: `tool:coverage:${habitat}`, k: "derived", l: "/playbooks",
     t: `Computed here: what is measured in ${name}`,
-    x: `Of the ${mx.cells.length} fire behaviours in this site's matrix, ${c.evidence === 0 ? "none has" : `${c.evidence} have`} been measured in ${name}; ${c.bounded} are bounded by a model or a related test and ${c.gap} have nothing measured.` +
+    x: `Of the ${mx.cells.length} fire behaviours in this site's matrix, ${c.evidence === 0 ? "none has" : `${c.evidence} have`} been measured ${habitat === "lunar" ? "on the Moon" : `in ${name}`}; ${c.bounded} are bounded by a model or a related test and ${c.gap} have nothing measured.` +
       (open.length ? ` Nothing measured for: ${open.slice(0, 6).join("; ")}${open.length > 6 ? `; and ${open.length - 6} more` : ""}.` : "") +
       (habitat === "lunar" ? " NASA's PSI tables hold no row taken in lunar or Martian gravity." : ""),
   };
@@ -227,6 +228,14 @@ export function runAgent(question: string, kit: Kit): AgentRun {
     computed.push(timed("matrix_coverage", "the question asks what is not known or not measured", { habitat: hab },
       () => coverage(kit.matrix!, hab), (p) => [first(p.x), kit.matrix!.coverage[hab].gap]));
   }
+  // A count from NASA's tables is not the whole of what NASA has done. Where a paper or a flight outside PSI bears on the
+  // same question, its passage is fetched by name and stands directly under the count.
+  const beside = (id: string, why: string) => {
+    const p = kit.index.passages.find((x) => x.id === id);
+    if (p) named.push(...timed("outside_psi", why, { passage: id }, () => [p], (r) => [first(r[0].x), r.length]));
+  };
+  if (computed.some((p) => p.id === "tool:coverage:lunar")) beside("rep:luci", "the count is of PSI's tables; one flight outside them burned samples in simulated lunar gravity");
+  if (computed.some((p) => /^tool:oxygen:(solid|all)$/.test(p.id))) beside("rep:saffire", "the range is of PSI's tables; a NASA paper reports solids burned in more oxygen");
   if (QUALITY.test(question) && TABLES.test(question)) {
     named.push(...timed("curator_notes", "the question asks about problems in the data", { nearest: 3 },
       () => curator(question, kit.index), (r) => [first(r[0].x), r.length - 1]));

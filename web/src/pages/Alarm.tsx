@@ -4,7 +4,11 @@ import { href } from "../app/router";
 import { fmtInt, useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
 import { useWidth } from "../lib/hooks";
-import type { InvestigationsDoc } from "../lib/types";
+import type { InvestigationsDoc, RecordedDoc, ReportedDoc } from "../lib/types";
+import { Readings, Tile } from "../dash/widgets";
+import { RecordedFire, recordedSay } from "../viz/Recorded";
+import { SaffireProducts } from "../viz/Reported";
+import { Item } from "./Myths";
 import { IconCheck, IconInfo, IconPause, IconPlay, IconReset, IconWarn } from "../components/icons";
 import { emit } from "../mascot/bus";
 import { auditLog, Checked, checkFrames, DURATION, generate, Keys, LogEntry, makeKeys, Run, SCENARIOS, ScenarioId, scorecard, Score, SENSOR_IDS, SENSORS, SensorId, STEP, timeline, Verdict } from "../trust/lab";
@@ -56,7 +60,68 @@ function Strip({ sid, frames, at, fansOffAt, onPick }: { sid: SensorId; frames: 
   );
 }
 
-export function Alarm({ route }: PageProps) {
+const longDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+
+/** What a real fire did to a real detector, before any synthetic scenario: one recording from PSI and one NASA paper. */
+function Measured({ rec, rep }: { rec: RecordedDoc | null; rep: ReportedDoc | null }) {
+  if (!rec && !rep) return null;
+  const sc = rec?.derived.scatter;
+  const say = rec ? recordedSay(rec) : [];
+  return (
+    <>
+      <Readings>
+        {sc && <Tile label="Peak after a smoke wire" value={sc.wire.peak} decimals={3} sub="peak reading, nothing burning" />}
+        {sc && <Tile label="Peak in the fire" value={sc.fire.peak} decimals={3} sub={`peak, fabric ${String(rec!.samples[0]?.["Sample Length"] ?? "").trim()} long`} tone="flame" />}
+        {sc && <Tile label="Time above one level" value={sc.fire.above_mark_s} unit="s" sub={`the fire; the wire, ${sc.wire.above_mark_s} s`} />}
+        {sc && <Tile label="Half-way to the peak" value={sc.fire.half_s} decimals={0} unit="s" sub="after the igniter fired" />}
+        {rep && <Tile label="Alarm level reached" value={rep.saffire.alarm.t_s} unit="s" sub={`Saffire ${rep.saffire.alarm.test}, on the test clock`} tone="flame" />}
+      </Readings>
+      {rec && (
+        <section className="panel" data-klass="observed" id="recorded">
+          <div className="panel__head">
+            <div>
+              <h2 className="panel__title">Recorded: a fire aboard a cargo vehicle, {longDate(rec.zero.utc)}</h2>
+              <p className="panel__sub">Saffire-III, in a Cygnus vehicle that had left the station. The lower strip is the vehicle's own smoke detector, from its telemetry.</p>
+            </div>
+            <KlassBadge k="observed" note="raw data of PSI-100" />
+          </div>
+          <RecordedFire doc={rec} />
+          <p className="claim claim--m" style={{ marginTop: 16, maxWidth: "62ch" }}>{say[0]}</p>
+          {say.slice(1).map((x) => <p key={x} className="doc" style={{ fontSize: "1rem", marginTop: 8, maxWidth: "76ch" }}>{x}</p>)}
+          <p className="note" style={{ marginTop: 14 }}>What this recording cannot say</p>
+          <ul className="replay__limits" style={{ marginTop: 4 }}>{rec.limits.map((l) => <li key={l}>{l}</li>)}</ul>
+          <details className="howto" style={{ marginTop: 10 }}>
+            <summary>How the file was read</summary>
+            <ul className="replay__limits" style={{ marginTop: 4 }}>
+              {rec.derived.rules.map((r) => <li key={r}>{r}</li>)}
+              {rec.findings.map((f) => <li key={f.kind}>{f.detail}</li>)}
+              <li>Other vehicle channels over the same window, as recorded: obscuration reading {rec.derived.obscuration.min} to {rec.derived.obscuration.max};{" "}
+                {Object.entries(rec.derived.cabin).map(([k, v]) => `${k === "fan" ? "fan pressure" : k} ${v.min} to ${v.max}`).join("; ")}.</li>
+            </ul>
+          </details>
+        </section>
+      )}
+      {rep && (
+        <section className="panel" data-klass="literature" id="reported">
+          <div className="panel__head">
+            <div>
+              <h2 className="panel__title">Reported: what rose in the cabin in five larger fires</h2>
+              <p className="panel__sub">Saffire IV to VI, from NASA's paper. Heat stayed near the fire. Carbon monoxide and carbon dioxide did not.</p>
+            </div>
+            <KlassBadge k="literature" note={`${rep.saffire.checks.length} cross-checks pass`} />
+          </div>
+          <SaffireProducts doc={rep} />
+          <div className="balance" style={{ marginTop: 14 }}>
+            <section className="evgroup">{rep.quotes.saffire.slice(0, 1).map((it, i) => <Item key={i} it={it} />)}</section>
+            <section className="evgroup">{rep.quotes.saffire.slice(2, 3).map((it, i) => <Item key={i} it={it} />)}</section>
+          </div>
+        </section>
+      )}
+    </>
+  );
+}
+
+export function Alarm({ route, manifest }: PageProps) {
   const [keys, setKeys] = useState<Keys | null>(null);
   const [sc, setSc] = useState<ScenarioId>((SCENARIOS.find((s) => s.id === route.segs[1])?.id ?? "replay") as ScenarioId);
   const [seed, setSeed] = useState(7);
@@ -70,6 +135,8 @@ export function Alarm({ route }: PageProps) {
   const [prog, setProg] = useState<number | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const inv = useData<InvestigationsDoc>("investigations.json");
+  const rec = useData<RecordedDoc>(manifest?.artifacts["recorded.json"] ? "recorded.json" : null);
+  const rep = useData<ReportedDoc>(manifest?.artifacts["reported.json"] ? "reported.json" : null);
   const raf = useRef(0);
 
   useEffect(() => { makeKeys().then(setKeys).catch((e) => setErr(String(e?.message ?? e))); }, []);
@@ -107,7 +174,9 @@ export function Alarm({ route }: PageProps) {
   return (
     <div className="stack" style={{ ["--gap" as string]: "20px" }}>
       <h1 className="page-title">Alarm trust lab</h1>
-      <p className="lede">Can you trust the alarm that shuts off your air? Nine situations, from a quiet cabin to a real fire hidden behind replayed "all clear" data. Every reading is signed; every decision is logged.</p>
+      <p className="lede">Can you trust the alarm that shuts off your air? First, what a spacecraft's own smoke detector recorded during a fire. Then nine synthetic situations, from a quiet cabin to a fire hidden behind replayed "all clear" data.</p>
+      <Measured rec={rec.data} rep={rep.data} />
+      <h2 className="h2" id="lab">The lab: nine situations, every reading signed</h2>
       <div className="banner banner--synthetic"><IconWarn /><div><b>Synthetic.</b> These readings are generated in your browser from this site's smoke model and seeded noise, with the truth declared. No real sensor is read and nothing is controlled.
         Signatures are real: {run ? run.alg : "…"} keys are made here, one per sensor, and never leave the page.</div></div>
       {err && <p className="callout"><IconWarn size={16} /><span>The lab could not start in this browser: {err}</span></p>}

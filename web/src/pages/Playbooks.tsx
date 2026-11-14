@@ -204,7 +204,7 @@ export function Playbooks(props: PageProps) {
             <div key={c} className="mx__count"><span className="mx__num">{cov[c]}</span><span className="mx__lab"><CoverMark c={c} />{COVER[c]}{c === "bounded" && <span className="note"> by a model or a related test</span>}</span></div>
           ))}
           <p className="mx__say claim claim--m">{hab === "lunar"
-            ? `Of ${total} behaviours, none has been measured in lunar gravity.`
+            ? `Of ${total} behaviours, none has been measured on the Moon.`
             : `Of ${total} behaviours, ${cov.evidence} have been measured in free fall.`}</p>
         </div>
         <div className="mx__grid" style={{ ["--cols" as string]: doc.phases.length }}>

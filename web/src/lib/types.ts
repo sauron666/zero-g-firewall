@@ -80,7 +80,10 @@ export interface Investigation {
   psi_url: string;
   mission?: string;
   proposal_title?: string;
-  core_files?: (SourceRef & { file: string; bytes: number })[];
+  /** files of this record in the ledger that are neither the experimental table nor raw data, each with a receipt */
+  core_files?: (SourceRef & { file: string; bytes: number; folder?: string })[];
+  /** what the ledger holds of this record, by NASA's own folders */
+  in_ledger?: { files: number; bytes: number; folders: Record<string, { files: number; bytes: number }>; documents: number; documents_listed: number };
   missing?: string;
 }
 
@@ -408,6 +411,66 @@ export interface CoverageBlock {
   top: number;
   not_placed: { id: string; why: string; rows: number; records: string[] }[];
 }
+/** recorded.json: one raw data file of PSI-100, the Saffire-III fire as the vehicle's own sensors recorded it. Times are seconds from the ignition of sample S1. */
+export interface RecordedRadiometer { id: string; column: string; baseline: number; peak: number; peak_t: number; rise_t: number; back_t: number; opposed_rise: number; opposed_t: number }
+export interface RecordedEvent { id: string; kind: "smoke_wire" | "igniter"; t: number; to: number; label: string; column: string }
+export interface RecordedDoc {
+  klass: Klass;
+  title: string;
+  source: SourceRef & { file: string; bytes: number; lines: number; columns: number; starts_utc: string; ends_utc: string; table: { artifact: string; sha256: string; ledger_seq: number; file: string } };
+  samples: Record<string, string | number>[];
+  zero: { what: string; utc: string; file_s: number };
+  window: { from_t: number; to_t: number; rule: string };
+  events: RecordedEvent[];
+  series: { t: number[]; radiometers: number[][]; anemometers: number[][] };
+  detector: { scatter: [number, number][]; obscuration: [number, number][] };
+  units: string;
+  derived: {
+    klass: Klass;
+    rules: string[];
+    radiometers: RecordedRadiometer[];
+    flame: { from_t: number; until_t: number; first_peak_t: number; last_peak_t: number; ended_in_file: boolean };
+    scatter: {
+      column: string; n: number; typical_step_s: number; mark: number;
+      quiet: { n: number; max: number; minutes: number };
+      wire: { t: number; first_above_quiet_after_s: number | null; peak: number; peak_t: number; peak_after_s: number; above_mark_s: number };
+      wire_again: null | { t: number; before: number; peak: number; peak_after_s: number; rise: number };
+      between: { max: number; min: number };
+      fire: { before: number; first_above_before_s: number | null; half: number; half_s: number; peak: number; peak_s: number; above_mark_s: number; last: number; last_s: number };
+    };
+    obscuration: { column: string; n: number; min: number; max: number; distinct: number };
+    cabin: Record<string, { column: string; n: number; min: number; max: number; first: number; last: number }>;
+  };
+  findings: { kind: string; detail: string }[];
+  limits: string[];
+}
+
+/** reported.json: numbers NASA reported in papers and presentations, read from the stored text; none is in a PSI table. */
+export type DocRef = SourceRef & { loc?: string; source: string; what: string };
+export interface ReportedCheck { what: string; ok: boolean }
+export interface SaffireRow { id: string; material: string; direction: string; length_cm: number; flow_cm_s: number; p_kpa: number; o2_pct: number; volume_m3: number;
+  t_outlet_c: number; t_far_c: number; co2_ppm: number; co2_mmhg: number; co_ppm: number }
+export interface LuciRow { id: string; sample: string; measure: string; lunar: number; earth: number; ratio: number; unit: string; as_stated?: string; ref: DocRef }
+export interface ReportedDoc {
+  klass: Klass;
+  note: string;
+  saffire: {
+    title: string; rows: SaffireRow[]; columns: Record<string, string>;
+    limits: { co_1h_ppm: number; co_24h_ppm: number; co2_1h_mmhg: number };
+    alarm: { threshold_mg_m3: number; t_s: number; test: string; flow_reduced_s?: number; flow_from_cm_s?: number; flow_to_cm_s?: number; flow_stopped_s?: number };
+    refs: { conditions: DocRef; products: DocRef; limits: DocRef }; checks: ReportedCheck[]; not_used: string;
+  };
+  luci: {
+    title: string; rows: LuciRow[]; checks: ReportedCheck[];
+    spin: { rpm: number; radius_m: number; accel_m_s2: number; g: number; rule: string; ref: DocRef; lunar_g_stated?: number; lunar_g_ref?: DocRef };
+    oxygen: { sample: string; from_pct: number; to_pct: number; approximate: boolean; ref: DocRef }[];
+    launched: null | { as_stated: string; ref: DocRef };
+  };
+  fm2: { title: string; state: string; tests: { n: number; p_psia: number; tolerance_psi: number; o2_pct: number; p_kpa: number }[]; ref: DocRef; checks: ReportedCheck[] };
+  quotes: Record<"saffire" | "luci" | "lunar" | "fm2", MythItem[]>;
+  n_quotes: number; n_quotes_verified: number; n_checks: number;
+}
+
 export interface GapsDoc { klass: Klass; coverage?: CoverageBlock; note: string; searches: Record<string, number>; outside_the_combustion_search: string[]; outside_note: string; items: Gap[] }
 export interface LessonCard { id: string; title: string; when?: string; resource: string; what: MythItem[]; ties: MythItem[] }
 export interface LessonsDoc {
