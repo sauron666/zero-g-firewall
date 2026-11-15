@@ -163,45 +163,67 @@ async function scene(name, n, setup, per, stills = []) {
 const up = (i, a, b) => ease((i - a) / (b - a));
 const ROWS = JSON.parse(fs.readFileSync(path.join(DIST, "data", "v1", "envelope.json"), "utf8")).gravity_counts.micro.toLocaleString("en-US");
 // 1. the incident (5.0 s): what the crew told, and nothing about a cause, which is not public
-await scene("incident", 150, async () => { await page.evaluate(() => { window.__zgf.fab(false); window.__zgf.end(0); window.__zgf.open([0, 0, 0, 0, 0], 1); }); await cap(""); return []; },
-  async (i) => { await page.evaluate(([us, f]) => window.__zgf.open(us, f), [[up(i, 2, 10), up(i, 14, 24), up(i, 34, 46), up(i, 70, 84), up(i, 46, 58)], 1 - up(i, 138, 149)]); }, [64, 130]);
+await scene("incident", 138, async () => { await page.evaluate(() => { window.__zgf.fab(false); window.__zgf.end(0); window.__zgf.open([0, 0, 0, 0, 0], 1); }); await cap(""); return []; },
+  async (i) => { await page.evaluate(([us, f]) => window.__zgf.open(us, f), [[up(i, 2, 10), up(i, 12, 22), up(i, 30, 42), up(i, 62, 76), up(i, 42, 54)], 1 - up(i, 126, 137)]); }, [58, 120]);
 
 // 2. the question (3.4 s)
-await scene("question", 102, async () => {
+await scene("question", 96, async () => {
   await page.evaluate(() => { window.__zgf.open([0, 0, 0, 0, 0], 0); window.__zgf.fab(false); });
   await cap("In one NASA test, a flame went out two seconds after its airflow was cut.");
   const b = await boxOf(".fanswitch");
   await scrollToY((await scrollY()) + b.y + b.height - 596);
   const [x, y] = await centre(".fanswitch__track");
   await pointer(900, 200);
-  return [glide(x, y, 10, 32)];
+  return [glide(x, y, 8, 28)];
 }, async (i) => {
-  if (i === 36) await click();
-  if (i === 52) await cap("On the Moon, gravity is a fan nobody can switch off.");
-}, [30, 96]);
+  if (i === 32) await click();
+  if (i === 46) await cap("On the Moon, gravity is a fan nobody can switch off.");
+}, [26, 90]);
 
 // 3. NASA's evidence, both sides (2.6 s)
-await scene("evidence", 78, async () => {
+await scene("evidence", 66, async () => {
   await go("myths--fans", ".myth");
   await putAt(".myth[open]", 64);
   await cap("NASA's own guide lists that rule among its misconceptions.");
   await pointer(1010, 300);
   const y0 = await scrollY();
-  return [glideScroll(y0 + 380, 16, 70)];
-}, null, [60]);
+  return [glideScroll(y0 + 340, 12, 60)];
+}, null, [50]);
 
 // 4. where NASA has tested, in 3-D (3.6 s): every row on one floor, the floors of the Moon and Mars empty
-await scene("space", 108, async () => {
+await scene("space", 100, async () => {
   await go("envelope?at=space", "#space canvas");
   await page.waitForTimeout(1500);
   await putAt("#space", 62);
   await cap(`Every NASA test row by oxygen and pressure: ${ROWS}, all in free fall.`);
   await pointer(1150, 560);
   return [];
-}, async (i) => { if (i === 58) await cap("The floors of the Moon and Mars are empty."); }, [40, 100]);
+}, async (i) => { if (i === 54) await cap("The floors of the Moon and Mars are empty."); }, [40, 94]);
+
+// 4b. ISKRA appears (2.5 s): the companion is on every page, and answers with its sources
+await scene("iskra", 74, async () => {
+  await page.evaluate(() => window.__zgf.fab(true));
+  await cap("Ask ISKRA on any page. Every sentence comes with its NASA source.");
+  const [x, y] = await centre(".fab");
+  await pointer(x - 300, y - 150);
+  return [glide(x - 30, y, 2, 16)];
+}, async (i) => {
+  if (i === 18) {
+    await click();
+    await page.waitForSelector(".chat #chatq");
+    await page.waitForSelector(".chat .chipbtn");
+    await page.waitForTimeout(900);                       // the search index arrives from the local server
+    await page.evaluate(() => window.__zgf.capRight(430));
+    const chip = page.locator(".chat .chipbtn", { hasText: "lunar gravity" });
+    const [cx, cy] = await centre((await chip.count()) ? chip.first() : page.locator(".chat .chipbtn").first());
+    await pointer(cx, cy);
+  }
+  if (i === 30) { await click(); await page.waitForSelector(".chat .msg__meta", { timeout: 20000 }); await pointer(760, 300); }
+}, [14, 26, 68]);
 
 // 5. the Fire Lab (5.0 s): a concept cabin, the site's transport model drawn in 3-D, then the three sensors
-await scene("firelab", 150, async () => {
+await scene("firelab", 138, async () => {
+  await page.evaluate(() => { window.__zgf.fab(false); window.__zgf.capRight(0); });
   await go("lab?scene=habitat", "input[aria-label=\"Time\"]");
   await page.locator(".seg[aria-label=\"Render quality\"] button", { hasText: "High" }).click().catch(() => {});
   await page.waitForTimeout(2500);
@@ -210,23 +232,23 @@ await scene("firelab", 150, async () => {
   await cap("Fire Lab in 3-D: a fire starts, and the fans stop at 60 seconds.");
   await pointer(1180, 420);
   const b = await boxOf(page.getByText("Smoke at the three sensors").first());
-  return [glideScroll((await scrollY()) + b.y - 74, 86, 110)];
+  return [glideScroll((await scrollY()) + b.y - 74, 78, 100)];
 }, async (i) => {
-  await page.evaluate((v) => window.__zgf.scrub(v, "input[aria-label=\"Time\"]"), Math.round(lerp(0, 210, i / 146)));
-  if (i === 86) await cap("Which detector still sees the smoke? A model, labelled as one.");
-}, [60, 144]);
+  await page.evaluate((v) => window.__zgf.scrub(v, "input[aria-label=\"Time\"]"), Math.round(lerp(0, 210, i / 134)));
+  if (i === 78) await cap("Which detector still sees the smoke? A model, labelled as one.");
+}, [56, 132]);
 
 // 6. the model that refuses (2.6 s)
-await scene("model", 78, async () => {
+await scene("model", 72, async () => {
   await go("model", ".demo-row");
   await cap("Asked for PMMA on the Moon, the model trained on NASA's data abstains.");
   const [x, y] = await centre(page.locator("button", { hasText: "PMMA on the Moon" }));
   await pointer(x - 240, y + 130);
-  return [glide(x, y, 6, 20)];
-}, async (i) => { if (i === 24) await click(); }, [70]);
+  return [glide(x, y, 6, 18)];
+}, async (i) => { if (i === 22) await click(); }, [64]);
 
 // 7. the second problem: the signal (4.4 s)
-await scene("alarm", 132, async () => {
+await scene("alarm", 120, async () => {
   await go("alarm--replay", ".verdictcard");
   await putAt(".verdictcard", 96);
   await cap("A synthetic attack: old \"all clear\" readings replayed over a real fire.");
@@ -234,13 +256,13 @@ await scene("alarm", 132, async () => {
   await pointer(1090, 500);
   return [];
 }, async (i) => {
-  const t = Math.round(lerp(0, 240, ease(i / 92)) / 2) * 2;
-  if (i <= 94) await page.evaluate((v) => window.__zgf.scrub(v, ".transport input.scrub"), t);
-  if (i === 70) await cap("The replayed frames are rejected. The fire alarm stands.");
-}, [40, 124]);
+  const t = Math.round(lerp(0, 240, ease(i / 84)) / 2) * 2;
+  if (i <= 86) await page.evaluate((v) => window.__zgf.scrub(v, ".transport input.scrub"), t);
+  if (i === 64) await cap("The replayed frames are rejected. The fire alarm stands.");
+}, [40, 112]);
 
 // 8. why to believe any of it (2.2 s)
-await scene("ledger", 66, async () => {
+await scene("ledger", 60, async () => {
   await page.evaluate(() => window.__zgf.capRight(0));
   await go("ledger", ".statline");
   await page.waitForSelector(".btn--primary:not([disabled])");
@@ -248,10 +270,10 @@ await scene("ledger", 66, async () => {
   await cap(`${FILES} NASA files, hash-chained. Change one character, and the chain breaks.`);
   const [x, y] = await centre(page.locator("button", { hasText: "Change one character of a file hash" }));
   await pointer(x + 300, y + 90);
-  return [glide(x, y, 6, 24)];
+  return [glide(x, y, 4, 20)];
 }, async (i) => {
-  if (i === 28) { await click(); await page.waitForSelector("section.panel[data-klass=\"synthetic\"] .verdict-line", { timeout: 20000 }); }
-}, [60]);
+  if (i === 24) { await click(); await page.waitForSelector("section.panel[data-klass=\"synthetic\"] .verdict-line", { timeout: 20000 }); }
+}, [54]);
 
 // 9. the end card (1.2 s)
 await scene("end", 36, async () => [], async (i) => { await page.evaluate((u) => window.__zgf.end(u), ease(i / 8)); }, [30]);
