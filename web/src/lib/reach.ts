@@ -34,7 +34,7 @@ export function markScrollers(root: ParentNode = document): number {
 /** Keeps the marks true while the page changes: after new content arrives and when the window is resized. */
 export function keepScrollersReachable(): () => void {
   let timer = 0;
-  const later = () => { window.clearTimeout(timer); timer = window.setTimeout(() => markScrollers(), 120); };
+  const later = () => { if (timer) return; timer = window.setTimeout(() => { timer = 0; markScrollers(); }, 120); };      // at most every 120 ms, even while a page animates
   const seen = new MutationObserver(later);
   seen.observe(document.body, { childList: true, subtree: true });
   window.addEventListener("resize", later);

@@ -1,5 +1,18 @@
 # What to build next, in order
 
+## Hand-off (15 November, morning): start here
+
+New since the evening: the laboratory (Fire Lab, Material Evidence, Model Lab, Alarm Trust additions), the FLEX regressor, the signed release and the new opening composition. See `docs/IMPLEMENTATION_STATUS.md`, "Added on 15 November".
+
+Before publishing:
+1. **Re-sign the release with the team key** on the team machine: `python tools/release/sign_release.py --new-key` the first time (the key goes to `~/.zgf/release_ed25519.pem`, never into the repo), afterwards without `--new-key`. Run it after every data change (`train_flex.py` included); `--verify-only` checks a release on disk.
+2. Retrain only if the FLEX table changes: `PYTHONPATH=pipeline python pipeline/train_flex.py` (pinned versions in `pipeline/requirements-ml.txt`), then re-sign.
+3. Try Enter VR / Enter AR on a real headset over HTTPS and record the platform; until then the status stays "implemented, device-unverified".
+4. Re-record the video scenes that changed (opening page, the three lab pages, Alarm Trust).
+
+Still not built from the new specification: Flame Vision (G01 to G04), MCP server (F09), live ISS (M01, M02), FDS template and run (L02, L05), knowledge graph (B12), EN/BG toggle (H10, I05), narration (F11), explain-chart tool (F12), workbook parser for SAME/DAFT (A12, E01), "Prepare offline demo" for the 3-D bundle.
+
+
 ## Hand-off (14 November, evening): start here
 
 The site is live from `main` at https://sauron666.github.io/zero-g-firewall/. All 28 must-have features of `docs/COVERAGE.md` are done. Tests: 76 Python, 175 TypeScript, all passing; the integrity check runs 1,994 checks at each derivation. The accessibility audit (`node tools/a11y/audit.mjs web/dist`, about five minutes, needs Playwright) found no violation on the last build; run it again after any change to colours, tables or controls.

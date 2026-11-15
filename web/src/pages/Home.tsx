@@ -30,7 +30,62 @@ const STOPS: { to: string; verb: string; text: string }[] = [
 ];
 const STARTERS = ["Will a fire go out if the fans are stopped?", "Has anything been burned in lunar gravity?", "What is the most oxygen any solid material was burned at?"];
 
-const FAN_FLOW = 0.1;                                              // m/s: the forced flow drawn in both windows while the fans run
+const FAN_FLOW = 0.1;
+const HERO_G: [number, string][] = [[0, "Free fall"], [BODIES.moon.g, "Moon"], [1, "Earth"]];
+const MODES = [
+  { to: "/lab", name: "Fire Lab", tag: "3D", text: "A FLEX droplet, a concept habitat with the transport solution, and gravity side by side." },
+  { to: "/material", name: "Material Evidence", tag: "PMMA", text: "Your habitat question against NASA's recorded PMMA tests, condition by condition." },
+  { to: "/model", name: "Model Lab", tag: "ML", text: "A regressor trained on FLEX droplets, scored on regimes it never saw, refusing the rest." },
+  { to: "/alarm", name: "Alarm Trust", tag: "SOC", text: "A validly signed old reading rejected while the fire alarm stays latched." },
+];
+
+/** The opening composition: one message, one question, one scene, one primary action. */
+function Hero({ manifest }: { manifest: Manifest | null }) {
+  const [g, setG] = useState(BODIES.moon.g);
+  const ml = (manifest as (Manifest & { ml?: { flex_k?: { mae_selected: number; mae_fuel_median: number; groups: number } } }) | null)?.ml?.flex_k;
+  const nasa = manifest?.nasa;
+  const label = HERO_G.find(([x]) => x === g)?.[1] ?? "";
+  return (
+    <>
+      <section className="hero2" aria-label="Zero-G Firewall">
+        <div className="hero2__text">
+          <p className="hero2__eyebrow">NASA Space Apps 2026 · Flame in Freefall</p>
+          <h1 className="hero2__title">Fire behaves differently in freefall.</h1>
+          <p className="hero2__lede">Explore NASA experiments, compare conditions and see what the evidence supports, and where it stops.</p>
+          <p className="hero2__q">The station's first response to a fire is to stop the fans. <b>Kill the fans?</b> The answer depends on conditions NASA has and has not tested.</p>
+          <div className="hero2__cta">
+            <a className="btn btn--primary hero2__go" href={href("/lab")}>Enter the lab</a>
+            <a className="btn btn--quiet" href={href("/material")}>Explore NASA evidence</a>
+          </div>
+          <a className="hero2__methods" href={href("/about")}>Methods, classes of evidence and limits</a>
+        </div>
+        <div className="hero2__scene">
+          <div className="hero2__chamber">
+            <div className="hero2__badges"><KlassBadge k="illustrative" note="shape follows the gravity scaling" /></div>
+            <div className="hero2__flames">
+              <figure><Porthole tag="0 g"><FlameCanvas g={0} flow={FAN_FLOW} strength={1} seed={3} label="Schematic flame in free fall" /></Porthole><figcaption>free fall</figcaption></figure>
+              <figure><Porthole tag={`${g === 0 ? "0" : g.toFixed(3)} g`}><FlameCanvas g={g} flow={FAN_FLOW} strength={1} seed={11} uncertain={g > 0 && g < 1} label={`Schematic flame at ${label}`} /></Porthole><figcaption>{label === "Moon" ? "lunar gravity" : label.toLowerCase()}</figcaption></figure>
+            </div>
+            <div className="hero2__ctl">
+              <span className="label">Gravity on the right</span>
+              <div className="seg" role="group" aria-label="Gravity of the right-hand flame">{HERO_G.map(([x, l]) => <button key={l} type="button" aria-pressed={g === x} onClick={() => setG(x)}>{l}</button>)}</div>
+              <a className="hero2__open" href={`${href("/lab")}?scene=gravity&g=${g || 0.165}`}>Open in 3D</a>
+            </div>
+            <p className="hero2__cap">{g === 0 ? "Both in free fall: no buoyancy, a round blue flame." : g < 1 ? "Lunar gravity: buoyancy returns, about half the 1 g flow speed by the cube-root scaling. No PSI table holds a partial-gravity test; LUCI is the nearest NASA evidence." : "At 1 g buoyancy stretches the flame and feeds it from below."}</p>
+          </div>
+        </div>
+      </section>
+      <section className="hero2__facts" aria-label="Three results">
+        <a href={href("/evidence")}><span className="stat__value num">{nasa ? fmtInt(nasa.table_rows) : "–"}</span><span className="label">NASA test rows from {nasa?.investigations_in_scope ?? "–"} investigations, each with a receipt</span></a>
+        <a href={href("/model")}><span className="stat__value num">{ml ? `${(ml.mae_fuel_median / ml.mae_selected).toFixed(1)}×` : "–"}</span><span className="label">lower error than a per-fuel median on {ml?.groups ?? "–"} droplet regimes the model never saw</span></a>
+        <a href={`${href("/alarm")}--replay`}><span className="stat__value num">0</span><span className="label">fire alarms lowered by tampered data in the seeded synthetic runs of Alarm Trust</span></a>
+      </section>
+      <nav className="hero2__modes" aria-label="Laboratory modes">
+        {MODES.map((m) => <a key={m.to} href={href(m.to)}><span className="hero2__mtag">{m.tag}</span><b>{m.name}</b><span>{m.text}</span></a>)}
+      </nav>
+    </>
+  );
+}                                              // m/s: the forced flow drawn in both windows while the fans run
 
 export function Home({ manifest }: { manifest: Manifest | null }) {
   const [fans, setFansState] = useState(true);
@@ -49,6 +104,7 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
   const inv = useData<InventoryDoc>(manifest?.artifacts["inventory.json"] ? "inventory.json" : null);      // what the BASS-II table itself says, in words, about how its tests ended
   const words = inv.data?.flow_words.tables.find((w) => w.accession === "PSI-25");
   const wOut = words?.classes.find((c) => c.id === "went_out"), wZero = words?.classes.find((c) => c.id === "zero");
+  const noEnding = !!inv.data && !inv.data.items.find((i) => i.accession === "PSI-25")?.cells.ending;            // the table has no column for how a test ended
   const [q, setQ] = useState("");
   const ask = (text: string) => { const t = text.trim(); if (t) { emit({ type: "ASK", q: t }); setQ(""); } };
 
@@ -72,29 +128,25 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
 
   return (
     <div className="deck">
+      <Hero manifest={manifest} />
       <div className="deck__strip" role="group" aria-label="State of the evidence">
         <Tile label="Investigations" value={nasa?.investigations_in_scope ?? null} of={nasa ? `of ${nasa.search_hits}` : undefined} sub="combustion records in PSI" to={href("/evidence")} />
         <Tile label="Test rows" value={nasa?.table_rows ?? null} sub={nasa ? `in ${nasa.tables} NASA tables` : "after the NASA sync"} to={href("/envelope")} />
         <Tile label="Measured on station" value={mx.data?.coverage.iss.evidence ?? null} of={mx.data ? `of ${mx.data.cells.length}` : undefined} sub="fire behaviours" to={href("/playbooks")} />
         <Tile label="Measured on Moon" value={mx.data?.coverage.lunar.evidence ?? null} of={mx.data ? `of ${mx.data.cells.length}` : undefined} sub="fire behaviours" to={`${href("/playbooks")}?habitat=lunar`} tone="partial" />
-        <Tile label="Model against NASA" value={nasa?.validation_mean_abs_K ?? null} decimals={1} unit="K" sub={nasa ? `mean gap over ${nasa.validation_rows} rows` : "after the NASA sync"} to={href("/physics")} tone="flame" />
+        <Tile label="Model against NASA's tabulated Tad" value={nasa?.validation_mean_abs_K ?? null} decimals={1} unit="K" sub={nasa ? `mean gap over ${nasa.validation_rows} rows, pressure convention per table` : "after the NASA sync"} to={href("/physics")} tone="flame" />
         <Tile label="Files with receipt" value={nasa?.files_in_ledger ?? null} sub={nasa?.ledger_chain_ok ? "hash chain verified" : "evidence ledger"} to={href("/ledger")} tone="ok" led={!!nasa?.ledger_chain_ok} />
       </div>
 
       <div className="deck__row">
         <section className="dpanel span-8" aria-label="The question">
-          <h1 className="hero__title">Kill the fans?</h1>
+          <h2 className="hero__title">Kill the fans?</h2>
           <div className="hero">
             <div>
               <p className="hero__lede">
                 In microgravity, airflow can decide how a flame burns.{brief ? " On the space station, a fire alarm stops the ventilation in the affected module." : ""}{" "}
                 <b>In NASA's BASS-II experiment, a flame went out within two seconds once its airflow was cut.</b>
               </p>
-              {words && wOut && wOut.rows > 0 && (
-                <p className="hero__fact">
-                  <a href={`${href("/evidence/measured")}?at=words`}>The table of that experiment</a>: {wOut.rows} of {words.n_rows} rows say the flame went out{wZero && wZero.rows > 0 ? <>; in {wZero.rows} a display reads 0 and the row has no word on the flame</> : null}.
-                </p>
-              )}
               <p className="hero__ask">
                 Does the same hold for other fuels, atmospheres and gravity levels?
                 {myth?.myth_verified ? <> NASA's own guide files <q>{myth.myth.replace(/\.$/, "")}</q> under misconceptions.</> : " NASA's own guide files that belief under misconceptions."}
@@ -104,6 +156,15 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
                 <a className="btn btn--quiet" href={href("/paradox")}>Compare conditions</a>
                 <a className="btn btn--quiet" href="#?tour=1"><IconTour size={16} />90-second tour</a>
               </div>
+              {words && wOut && wOut.rows > 0 && (
+                <details className="hero__more">
+                  <summary>What the BASS-II table itself records</summary>
+                  <p>
+                    {wOut.rows} of {words.n_rows} rows say in words that the flame went out{wZero && wZero.rows > 0 ? <>; in {wZero.rows} a display reads 0 and the row has no word on the flame</> : null}.
+                    {noEnding ? " The table has no column for the ending." : ""} <a href={`${href("/evidence/measured")}?at=words`}>Read the rows</a>.
+                  </p>
+                </details>
+              )}
               <p className="hero__src">
                 <span>Sources:</span>
                 {brief && brief.kind === "quote" && <SourceBtn title={brief.source} sref={{ ...brief.ref, page: brief.ref.loc }} klass="literature" label="the station's response" extra={[["quotation", brief.quote]]} />}
@@ -195,12 +256,12 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
                 Recorded in a cargo vehicle, {new Date(rec.data.zero.utc).getUTCFullYear()}: a puff from a smoke wire read <b>{rec.data.derived.scatter.wire.peak}</b>, a burning sheet of fabric <b>{rec.data.derived.scatter.fire.peak}</b>.
                 Time told them apart: {rec.data.derived.scatter.wire.above_mark_s} s against {rec.data.derived.scatter.fire.above_mark_s} s.
               </p>
-              <p className="dpanel__foot"><KlassBadge k="observed" note="raw data of PSI-100" /> Play the recording in the lab, then nine synthetic situations with signed readings.</p>
+              <p className="dpanel__foot"><KlassBadge k="observed" note="raw data of PSI-100" /> Play the recording in the lab, then fourteen synthetic situations with signed readings.</p>
             </>
           ) : (
             <>
               <AlarmSpark />
-              <p className="dpanel__foot"><KlassBadge k="synthetic" note="made here to test the alarm" /> Nine such situations in the lab, every reading signed and checked.</p>
+              <p className="dpanel__foot"><KlassBadge k="synthetic" note="made here to test the alarm" /> Fourteen such situations in the lab, every reading signed and checked.</p>
             </>
           )}
         </section>
@@ -212,7 +273,8 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
           <div className="checks2">
             <a className="check" href={href("/physics")}>
               <MiniParity pts={tad} lo={1300} hi={2900} label="Flame temperature: model against NASA's column" />
-              <div><div className="check__num">{nasa?.validation_mean_abs_K != null ? `${nasa.validation_mean_abs_K.toFixed(1)} K` : "–"}</div><div className="check__lab">flame temperature, mean gap to NASA's own column over {nasa?.validation_rows ? fmtInt(nasa.validation_rows) : "–"} tests</div></div>
+              <div><div className="check__num">{nasa?.validation_mean_abs_K != null ? `${nasa.validation_mean_abs_K.toFixed(1)} K` : "–"}</div><div className="check__lab">flame temperature, mean gap to NASA's tabulated Tad over {nasa?.validation_rows ? fmtInt(nasa.validation_rows) : "–"} tests, each table at the pressure convention its column fits
+                {val.data?.overall.row_pressure.mean_abs != null ? `; ${val.data.overall.row_pressure.mean_abs.toFixed(1)} K with the row's pressure throughout` : ""}</div></div>
             </a>
             <a className="check" href={`${href("/physics")}`}>
               <MiniParity pts={d2} lo={0} hi={40} label="Droplet burn time: d-squared law against NASA's column" />

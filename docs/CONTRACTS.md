@@ -73,3 +73,17 @@ What each record's experimental table states. `quantities` is the ordered list o
 ## `reported.json` (class NASA document)
 
 Numbers NASA reported outside PSI, read from the stored text of each document by a pattern: `saffire.rows` (five tests: conditions and what rose in the cabin), `saffire.limits`, `saffire.alarm`, `saffire.scale` (the fire sizes in kW and the free volumes in cubic metres, from the paper's own sentence; checked against the volumes of Table 1 in whole cubic metres); `luci.rows` (spread rates in simulated lunar gravity and on Earth), `luci.spin`, `luci.oxygen`, `luci.launched`; `fm2.tests` (planned). Every set has `checks`, each `{what, ok}`; a failed check stops the build. Every value has a `ref` with the ledger entry, the SHA-256, the address and the page. `atmospheres.items` are the cabin atmospheres the site marks (`id`, `kind`, `name`, `label`, `o2_pct`, `p_psia`, `p_kpa`, `note`), each with `words`, the sentence of the NASA document that states the pair, and its `ref`; the list itself lives in `pipeline/zgf/atmospheres.py`, and `model/atmospheres.json` may hold no other atmosphere. `quotes` are checked quotations in the same shape as on the Myths page. None of these numbers may be added to a count of PSI rows.
+
+## Laboratory contracts (15 November)
+
+Types in `web/src/lib/scenario.ts`; SI inside (m, s, m/s, kPa, O2 mole fraction, g as a fraction of 9.80665 m/s²). The 3-D world is in metres, +y up in the drawing; with g > 0 gravity points along −y.
+
+| Contract | Fields | Rule |
+|---|---|---|
+| `ScenarioState` | v, material, form, size_m, o2, p_kpa, u_m_s, g, preset, evidence[], layers[], seed, t_s | null means unknown and is never replaced by a default; URL keys v, m, f, size, o2, p, u, g, pre, ev, lay, seed, t ("na" = unknown) |
+| `EvidenceMatch` | id, title, checks[] (dim, asked, recorded, status, why, tolerance), missing[], similarity, role, joint, klass, source, observed[] | status ∈ match, near, different, not_reported; joint only when every check of one test matches |
+| `ModelResult` | task, model_id, target, unit, input, estimate (null on abstain), status, reasons[], uncertainty, nearest[] | no number when status is abstain |
+| `LabRun` | kind "LabRun", model, params, seed, t[], series{}, labels{} | a model or synthetic run; never a NASA record |
+| `ViewState` | camera, selected, speed, quality | never changes scientific data |
+
+Artifacts added: `ml/flex_k_model.json` (model, support, training rows, golden vectors; class model), `ml/flex_k_eval.json` (audit, OOF rows, metrics, stress test), `ml/MODEL_CARD_FLEX.md`, `release/release.json`, `release/release.sig`, `release/pubkey.json` (not in the manifest: they sign it). Alarm policy: `zgf-alarm-policy/1` in `web/src/trust/policy.ts`; run export `zgf-alarm-run/1`; research plan export `zgf-research-plan/1`.

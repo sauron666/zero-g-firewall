@@ -11,7 +11,10 @@ import { SaffireProducts } from "../viz/Reported";
 import { Item } from "./Myths";
 import { IconCheck, IconInfo, IconPause, IconPlay, IconReset, IconWarn } from "../components/icons";
 import { emit } from "../mascot/bus";
-import { auditLog, Checked, checkFrames, DURATION, generate, Keys, LogEntry, makeKeys, Run, SCENARIOS, ScenarioId, SCORE_SEEDS, scorecard, Score, SENSOR_IDS, SENSORS, SensorId, STEP, timeline, Verdict } from "../trust/lab";
+import { ALL_SCENARIOS, auditLog, Checked, checkFrames, CompareRow, compareReceivers, delivery, DURATION, EXTRA_SCENARIOS, exportRun, generate, Keys, LogEntry, makeKeys, Run, SCENARIOS, ScenarioId, SCORE_SEEDS, scorecard, Score, SENSOR_IDS, SENSORS, SensorId, STEP, timeline, Verdict } from "../trust/lab";
+import { DEFAULT_POLICY, policyHash } from "../trust/policy";
+import { Axes, Comparison, Inspector, PolicyPanel, TrustZones } from "../trust/TrustParts";
+import { LabTabs } from "../components/LabTabs";
 import { PageProps } from "./stubs";
 
 const STATE_ICON = { "FIRE ALARM": <IconWarn size={22} />, CHECK: <IconInfo size={22} />, CLEAR: <IconCheck size={22} /> };
@@ -123,10 +126,10 @@ function Measured({ rec, rep }: { rec: RecordedDoc | null; rep: ReportedDoc | nu
 
 export function Alarm({ route, manifest }: PageProps) {
   const [keys, setKeys] = useState<Keys | null>(null);
-  const [sc, setSc] = useState<ScenarioId>((SCENARIOS.find((s) => s.id === route.segs[1])?.id ?? "replay") as ScenarioId);
+  const [sc, setSc] = useState<ScenarioId>((ALL_SCENARIOS.find((s) => s.id === route.segs[1])?.id ?? "replay") as ScenarioId);
   // The lab plays, and the companion speaks about it, once the reader has asked for a scenario or touched a control.
   // Until then the page belongs to the recording above it.
-  const [touched, setTouched] = useState(SCENARIOS.some((s) => s.id === route.segs[1]));
+  const [touched, setTouched] = useState(ALL_SCENARIOS.some((s) => s.id === route.segs[1]));
   const touchedRef = useRef(touched);
   touchedRef.current = touched;
   const [seed, setSeed] = useState(7);
@@ -136,9 +139,19 @@ export function Alarm({ route, manifest }: PageProps) {
   const [log, setLog] = useState<LogEntry[]>([]);
   const [at, setAt] = useState(DURATION);
   const [playing, setPlaying] = useState(false);
-  const [score, setScore] = useState<{ rows: Score[]; suppressed: number; fireRuns: number; frames: number } | null>(null);
+  const [score, setScore] = useState<{ rows: Score[]; suppressed: number; fireRuns: number; frames: number; deliveryFailed: number } | null>(null);
   const [prog, setProg] = useState<number | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [verifyPolicy, setVerifyPolicy] = useState(true);
+  const [phash, setPhash] = useState("");
+  const [cmp, setCmp] = useState<CompareRow[] | null>(null);
+  const [cmpProg, setCmpProg] = useState<number | null>(null);
+  const scrolled = useRef(false);
+  useEffect(() => { policyHash(DEFAULT_POLICY).then(setPhash).catch(() => {}); }, []);
+  useEffect(() => {                      // a link that names a scenario selects it, and after it has rendered brings its container into view
+    const id = ALL_SCENARIOS.find((s) => s.id === route.segs[1])?.id;
+    if (id) { setSc(id as ScenarioId); setTouched(true); scrolled.current = false; }
+  }, [route.segs[1]]);
   const inv = useData<InvestigationsDoc>("investigations.json");
   const rec = useData<RecordedDoc>(manifest?.artifacts["recorded.json"] ? "recorded.json" : null);
   const rep = useData<ReportedDoc>(manifest?.artifacts["reported.json"] ? "reported.json" : null);
@@ -151,12 +164,17 @@ export function Alarm({ route, manifest }: PageProps) {
     (async () => {
       const r = await generate(sc, seed, keys);
       const c = await checkFrames(r, keys);
-      const t = timeline(c, r.fansOffAt);
+      const t = timeline(c, r.fansOffAt, { policyEvents: r.policyEvents, verifyPolicy });
       const l = await auditLog(t, c);
-      if (live) { setRun(r); setChecked(c); setTl(t); setLog(l); setAt(touchedRef.current ? 0 : DURATION); setPlaying(touchedRef.current); }
+      if (live) { const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches; const go = touchedRef.current && !still; setRun(r); setChecked(c); setTl(t); setLog(l); setAt(go ? 0 : DURATION); setPlaying(go); }
     })().catch((e) => live && setErr(String(e?.message ?? e)));
     return () => { live = false; };
-  }, [keys, sc, seed]);
+  }, [keys, sc, seed, verifyPolicy]);
+  useEffect(() => {
+    if (!run || scrolled.current || !ALL_SCENARIOS.some((s) => s.id === route.segs[1])) return;
+    scrolled.current = true;
+    requestAnimationFrame(() => { const el = document.getElementById("lab"); el?.scrollIntoView({ block: "start" }); (el as HTMLElement | null)?.focus({ preventScroll: true }); });
+  }, [run]);
   useEffect(() => {
     if (!playing) return;
     let last = performance.now();
@@ -169,7 +187,8 @@ export function Alarm({ route, manifest }: PageProps) {
     return () => cancelAnimationFrame(raf.current);
   }, [playing]);
 
-  const scenario = SCENARIOS.find((s) => s.id === sc)!;
+  const scenario = ALL_SCENARIOS.find((s) => s.id === sc)!;
+  const out = delivery(tl, run?.outputDropAt ?? null, at);
   const v = tl.length ? tl[Math.min(tl.length - 1, Math.floor(at / STEP))] : null;
   const accepted = checked.filter((f) => f.ok).length;
   const vState = v?.state, vAnomaly = v?.integrity.anomaly ?? false;
@@ -178,21 +197,23 @@ export function Alarm({ route, manifest }: PageProps) {
 
   return (
     <div className="stack" style={{ ["--gap" as string]: "20px" }}>
-      <h1 className="page-title">Alarm trust lab</h1>
-      <p className="lede">Can you trust the alarm that shuts off your air? First, what a spacecraft's own smoke detector recorded during a fire. Then nine synthetic situations, from a quiet cabin to a fire hidden behind replayed "all clear" data.</p>
+      <LabTabs at="/alarm" />
+      <h1 className="page-title">Alarm Trust</h1>
+      <p className="lede">Can you trust the alarm that shuts off your air? First, what a spacecraft's own smoke detector recorded during a fire. Then {ALL_SCENARIOS.length} synthetic situations, from a quiet cabin to a fire hidden behind replayed "all clear" data, with every frame open for inspection.</p>
+      <div className="row"><a className="btn btn--primary btn--sm" href="#alarm--replay">Show the replay attack</a><a className="btn btn--quiet btn--sm" href="#alarm--threshold_tamper">Show policy tampering</a><a className="btn btn--quiet btn--sm" href="#alarm--coordinated">Show a coordinated attack</a></div>
       <Measured rec={rec.data} rep={rep.data} />
-      <h2 className="h2" id="lab">The lab: nine situations, every reading signed</h2>
+      <h2 className="h2" id="lab" tabIndex={-1}>The lab: {ALL_SCENARIOS.length} situations, every reading signed</h2>
       <div className="banner banner--synthetic"><IconWarn /><div><b>Synthetic.</b> These readings are generated in your browser from this site's smoke model and seeded noise, with the truth declared. No real sensor is read and nothing is controlled.
         Signatures are real: {run ? run.alg : "…"} keys are made here, one per sensor, and never leave the page.</div></div>
       {err && <p className="callout"><IconWarn size={16} /><span>The lab could not start in this browser: {err}</span></p>}
 
       <div className="soc">
         <aside className="soc__list" aria-label="Scenarios">
-          {SCENARIOS.map((s) => (
+          {ALL_SCENARIOS.map((s, i) => (<div key={s.id} style={{ display: "contents" }}>{i === SCENARIOS.length && <div className="note" style={{ margin: "10px 4px 4px" }}>Added attacks and failures</div>}
             <button key={s.id} type="button" className="scn" aria-pressed={s.id === sc} onClick={() => { setTouched(true); if (s.id === sc) { setAt(0); setPlaying(true); } else setSc(s.id); }}>
               <span className="scn__name">{s.name}</span>
               <span className="scn__tags"><span className="tag">truth: {s.truth}</span>{s.sparta && <span className="tag mono" title={s.sparta.name}>{s.sparta.id}</span>}</span>
-            </button>
+            </button></div>
           ))}
         </aside>
 
@@ -204,6 +225,7 @@ export function Alarm({ route, manifest }: PageProps) {
               <button className="btn btn--quiet btn--sm" onClick={() => { setTouched(true); setAt(0); setPlaying(true); }}><IconReset size={16} />From the start</button>
               <input className="scrub" type="range" min={0} max={DURATION} step={STEP} value={Math.round(at)} aria-label="Lab time, seconds" onChange={(e) => { setTouched(true); setPlaying(false); setAt(+e.target.value); }} />
               <div className="transport__time">{Math.round(at)} s</div>
+              {sc === "threshold_tamper" && <label className="row" style={{ ["--gap" as string]: "6px", fontSize: 13 }}><input type="checkbox" checked={verifyPolicy} onChange={(e) => setVerifyPolicy(e.target.checked)} /> verify the policy hash</label>}
               <label className="row" style={{ ["--gap" as string]: "6px", fontSize: 13 }}>seed <input type="number" min={1} max={9999} value={seed} onChange={(e) => { setTouched(true); setSeed(Math.max(1, +e.target.value || 1)); }} style={{ width: 70 }} className="select" /></label>
             </div>
           </div>
@@ -223,11 +245,13 @@ export function Alarm({ route, manifest }: PageProps) {
             </div>
           )}
 
+          {v && <Axes v={v} out={out} dropAt={run?.outputDropAt ?? null} />}
           <div className="grid cols-2" style={{ ["--gap" as string]: "8px 20px" }}>
             {SENSOR_IDS.map((sid) => <Strip key={sid} sid={sid} frames={checked} at={at} fansOffAt={run?.fansOffAt ?? null} onPick={(t) => { setPlaying(false); setAt(t); }} />)}
           </div>
           <p className="note">Line: readings that passed every check. Crosses: frames that were rejected and not used. Click a chart to move the time. {fmtInt(accepted)} of {fmtInt(checked.length)} frames of this run are accepted.</p>
 
+          <Inspector checked={checked} at={at} />
           {v && (
             <div className="grid cols-2" style={{ ["--gap" as string]: "20px", alignItems: "start" }}>
               <section>
@@ -260,7 +284,13 @@ export function Alarm({ route, manifest }: PageProps) {
                   a.href = url; a.download = `zgf_alarm_log_${run?.scenario.id ?? "run"}_seed${run?.seed ?? 0}.json`;
                   document.body.appendChild(a); a.click(); a.remove();
                   window.setTimeout(() => URL.revokeObjectURL(url), 2000);
-                }}>Save the log</button></span></div>
+                }}>Save the log</button>
+                <button type="button" className="btn btn--quiet btn--sm" disabled={!run} onClick={async () => {
+                  if (!run) return;
+                  const body = await exportRun(run, checked, tl, log, phash);
+                  const u = URL.createObjectURL(new Blob([body], { type: "application/json" })); const a = document.createElement("a");
+                  a.href = u; a.download = `zgf_alarm_run_${run.scenario.id}_seed${run.seed}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(u), 1500);
+                }}>Export the whole run</button></span></div>
             <div className="table-wrap scroll-y" style={{ maxHeight: 220 }}>
               <table className="datatable"><thead><tr><th>s</th><th>Event</th><th>Entry hash</th></tr></thead>
                 <tbody>{log.filter((l) => l.at <= at).map((l) => <tr key={l.n}><td className="num">{l.at}</td><td>{l.event}</td><td className="hash" title={`previous ${l.prev}`}>{l.hash.slice(0, 16)}…</td></tr>)}</tbody></table>
@@ -270,13 +300,13 @@ export function Alarm({ route, manifest }: PageProps) {
       </div>
 
       <section>
-        <div className="section__head"><h2 className="h2">Scorecard: the same nine situations over many seeds</h2>
-          <button type="button" className="btn btn--quiet btn--sm" disabled={!keys || prog != null} onClick={async () => { if (!keys) return; setProg(0); setScore(await scorecard(keys, SCORE_SEEDS, (d, t) => setProg(d / t))); setProg(null); }}>
-            {prog != null ? `Running… ${Math.round(prog * 100)}%` : score ? "Run again" : `Run ${SCENARIOS.length * SCORE_SEEDS.length} seeded runs`}</button></div>
+        <div className="section__head"><h2 className="h2">Scorecard: every situation over many seeds</h2>
+          <button type="button" className="btn btn--quiet btn--sm" disabled={!keys || prog != null} onClick={async () => { if (!keys) return; setProg(0); setScore(await scorecard(keys, SCORE_SEEDS, (d, t) => setProg(d / t), ALL_SCENARIOS)); setProg(null); }}>
+            {prog != null ? `Running… ${Math.round(prog * 100)}%` : score ? "Run again" : `Run ${ALL_SCENARIOS.length * SCORE_SEEDS.length} seeded runs`}</button></div>
         {score ? (
           <>
             <p className={`verdict-line`} role="status">{score.suppressed === 0 ? <IconCheck size={20} /> : <IconWarn size={20} />}
-              <span><b>Fire alarms lowered by tampering: {score.suppressed} of {score.fireRuns / 2} tampered fire runs.</b> Across all {score.fireRuns} runs with a real fire, the alarm was raised in {score.rows.filter((r) => r.scenario.fire).reduce((a, r) => a + r.fireAlarms, 0)}. {score.frames.toLocaleString("en-US")} signed frames were checked.</span></p>
+              <span><b>Fire alarms lowered by tampering: {score.suppressed} of {score.fireRuns / 2} tampered fire runs.</b> Across all {score.fireRuns} runs with a real fire, the alarm was raised in {score.rows.filter((r) => r.scenario.fire).reduce((a, r) => a + r.fireAlarms, 0)}. {score.frames.toLocaleString("en-US")} signed frames were checked. Alarms decided but not acknowledged by the output: {score.deliveryFailed}.</span></p>
             <div className="table-wrap" style={{ marginTop: 8 }}>
               <table className="table">
                 <thead><tr><th>Situation</th><th>Declared truth</th><th className="r">Runs</th><th className="r">Fire alarm</th><th className="r">Alert</th><th className="r">Clear</th><th className="r">Judged right</th><th className="r">Median time to alarm</th></tr></thead>
@@ -290,6 +320,14 @@ export function Alarm({ route, manifest }: PageProps) {
         ) : <p className="note">Runs every situation with {SCORE_SEEDS.length} different seeds in your browser and counts how often the lab reaches the declared truth.</p>}
       </section>
 
+      <section>
+        <div className="section__head"><h2 className="h2">Three receivers, the same frames: what each check buys</h2>
+          <button type="button" className="btn btn--quiet btn--sm" disabled={!keys || cmpProg != null} onClick={async () => { if (!keys) return; setCmpProg(0); setCmp(await compareReceivers(keys, SCORE_SEEDS.slice(0, 6), ALL_SCENARIOS, (d, t) => setCmpProg(d / t))); setCmpProg(null); }}>
+            {cmpProg != null ? `Running… ${Math.round(cmpProg * 100)}%` : cmp ? "Run again" : `Compare on ${ALL_SCENARIOS.length * 6} runs`}</button></div>
+        {cmp ? <Comparison rows={cmp} /> : <p className="note">A single-threshold receiver, one that corroborates physical signs but believes every frame, and this lab, on identical seeded runs of all {ALL_SCENARIOS.length} situations.</p>}
+      </section>
+      <PolicyPanel hash={phash} />
+      <TrustZones />
       <section className="grid cols-2" style={{ ["--gap" as string]: "20px", alignItems: "start" }}>
         <div className="panel panel--tight" data-klass="derived">
           <h2 className="panel__title">What acting on the alarm costs</h2>

@@ -1,3 +1,4 @@
+import { ReleaseCheck } from "../components/ReleaseCheck";
 import { useEffect, useMemo, useState } from "react";
 import { fmtBytes, fmtInt, fmtUtc, useData } from "../lib/data";
 import { KlassBadge } from "../lib/klass";
@@ -116,6 +117,7 @@ export function Ledger({ route, manifest }: PageProps) {
         Every NASA file behind this site was fetched during the event and written to a ledger: address, time and SHA-256, each entry chained to the one before.
         Change one byte anywhere and the chain breaks. You can re-compute it here.
       </p>
+      <ReleaseCheck />
 
       <section className="panel" data-klass="observed">
         <div className="statline" style={{ marginBottom: 18 }}>

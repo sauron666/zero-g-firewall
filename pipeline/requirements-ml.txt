@@ -1,0 +1,4 @@
+# Pinned for pipeline/train_flex.py (FLEX regressor)
+numpy==2.5.3
+scikit-learn==1.9.1
+scipy==1.18.1

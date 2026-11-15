@@ -1,5 +1,25 @@
 # Implementation status
 
+## Added on 15 November (laboratory build)
+
+Kept to the same rule: nothing below is listed as working without a passing test or a visible result. Verified in a headless Chrome (SwiftShader WebGL) at 390, 768, 1366 and 1440 px; tests: 220 TypeScript, 91 Python; integrity check 1,997 checks; release signature verifies over 83 files.
+
+| Part | State | Evidence |
+|---|---|---|
+| Shared contracts (`web/src/lib/scenario.ts`) | working | ScenarioState, EvidenceMatch, ModelResult, LabRun, ViewState; SI units inside; versioned URL and JSON with validation (NaN, negative pressure, fractions above 1, wrong version); unknown stays unknown. 4 tests. |
+| FLEX burning-rate regressor (`pipeline/zgf/ml_flex.py`, `pipeline/train_flex.py`) | working | 257 of 274 FLEX rows used (17 excluded with reasons), 78 regimes, 5-fold GroupKFold with nested selection. Out-of-fold MAE 0.0485 mm²/s (R² 0.703) against 0.1027 for a per-fuel median and 0.1069 for the global median; ExtraTrees 0.0555. Leave-one-atmosphere-out stress test published. Scaling inside the pipeline, forbidden columns never used, groups disjoint (tests). Model card `docs/MODEL_CARD_FLEX.md`. 11 Python tests. |
+| Browser inference and support gate (`web/src/ml/`) | working | Exported ridge reproduces Python on 6 golden vectors to 1e-9; abstains with reasons for PMMA, other fuels, any gravity but free fall, forced flow, unknown inputs, compositions that do not add up, unseen fuel-diluent-pressure regimes and points far from the data jointly. 9 tests. |
+| Model Lab page (`#model`) | working | Estimate or abstention, contributions, d² curve against the two nearest measured tests, parity and residual plots of the real OOF rows, every candidate on the same rows, stress test, dataset audit, OOF CSV, model card. Two demo buttons. |
+| Material Evidence page (`#material`, `web/src/lib/pmma.ts`) | working | PMMA records from BASS-II (PSI-25), Saffire-II (PSI-99), BASS (PSI-26) and NASA documents (Saffire VI-3/VI-4, LUCI rod) compared on six conditions with Match / Near / Different / Not reported; joint match only within one test; varying oxygen is at best Near; unreported pressure never matches; similarity separate from role. Recorded test and future habitat question; brief as Markdown, print/PDF (light page), CSV and link. 11 tests. |
+| Research planner (under Material Evidence, `web/src/lib/planner.ts`) | working | Registry v1.0.0, deduplication, hypothetical candidates with unweighted coverage gain, FM² planned overlap marked planned. 3 tests. |
+| Fire Lab (`#lab`, Three.js 0.187, lazy chunk) | working | Droplet chamber: drawn size from the d² law, visible extinction at the recorded Dext kept apart from the law's zero; habitat: three concept modules with the 2-D transport solution on one slice, three sensors (one movable), fans stopping at a chosen time, cutaway, flow arrows, particles as a seeded sample; gravity comparison with "gravity only" and "mission preset". One clock drives scene, chart and table; renders only on change; pauses in a hidden tab; disposes everything on unmount; WebGL failure or context loss shows a working 2-D view (force with `?webgl=0`). 5 tests on the shared state. Measured 18 to 36 fps in software WebGL (SwiftShader) in the build environment; not measured on a GPU. |
+| XR (Fire Lab) | implemented, device-unverified | Capability detection; Enter VR / Enter AR shown only when supported; controller ray picks sensors and pins; floating panel; session end restores the desktop view. No headset was available. |
+| Alarm Trust additions (`web/src/trust/policy.ts`, `TrustParts.tsx`) | working | Versioned policy with schema and hash; five added scenarios (drift, silent feed, threshold tampering, alarm-output suppression, coordinated replay); physical evidence, data integrity and output delivery shown as separate axes; frame inspector with every Checked field; receiver comparison on the same seeded runs; full run export; trust-zone panel; scenario links scroll to the lab. The nine earlier scenarios and their 9 tests unchanged; 11 new tests. |
+| Signed release (K03) | working | `tools/release/sign_release.py` (Ed25519, key outside the repo); verification and tamper buttons on the Evidence ledger page. 4 Python, 3 TypeScript tests. **The signature in this build was made with a throw-away key of the build environment; re-sign with the team key before publishing (see NEXT).** |
+| New opening composition | working | Message, question and one primary action beside a two-flame chamber with one gravity control; three results and the four lab modes below; mission control follows. |
+
+## Earlier state (14 November)
+
 Updated: 14 November 2026, 14:38 Sofia time. Kept truthful: nothing is listed as working without a passing test or a visible result.
 
 ## Working

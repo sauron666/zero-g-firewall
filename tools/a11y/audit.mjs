@@ -24,7 +24,7 @@ const AXE_VERSION = JSON.parse(fs.readFileSync(path.resolve(HERE, "../../web/nod
 
 const DIST = path.resolve(process.argv[2] ?? "web/dist");
 const OUT = process.argv[3] ? path.resolve(process.argv[3]) : null;
-const ROUTES = ["", "paradox", "evidence", "evidence--measured", "evidence--PSI-25", "envelope", "gaps", "lessons", "rank", "myths", "playbooks", "physics", "alarm", "ask", "falsify", "ledger", "data", "about"];
+const ROUTES = ["", "lab", "lab?scene=habitat", "material", "model", "alarm--replay", "paradox", "evidence", "evidence--measured", "evidence--PSI-25", "envelope", "gaps", "lessons", "rank", "myths", "playbooks", "physics", "alarm", "ask", "falsify", "ledger", "data", "about"];
 const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 const VIEWS = [["dark", 1440, 900], ["light", 1440, 900], ["dark", 390, 844], ["light", 390, 844]];
 

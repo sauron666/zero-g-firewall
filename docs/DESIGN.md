@@ -59,3 +59,9 @@ Visible keyboard focus, `aria-label` on every canvas and SVG, controls reachable
 ## Components you already have
 
 `Tile`, `Ring`, `MiniCover`, `MiniParity`, `TopFive`, `Chain`, `AlarmSpark` (mission control), `OxygenCover`, `DropletPanel`, `IskraChat`, `KlassBadge`, `ReceiptProvider/useReceipt`, `Porthole`, `FlameCanvas` (schematic flame that follows gravity and flow), `FanSwitch`, `SmokeView`, `LineChart`, `useWidth`, `useData`, `.panel`, `.statline`, `.table`, `.kv`, `.seg`, `.chip`, `.banner`, `.empty`, `.choice`, `details.fold`. Reuse them before writing new ones.
+
+## The laboratory and the new opening (15 November)
+
+- The opening page starts with a composition, not a strip of readings: message and one question at about 38% of the width, a chamber with two flames and one gravity control at about 62%, one primary action ("Enter the lab"), one quieter one ("Explore NASA evidence") and methods as a plain link. Below it, three results and the four lab modes; the mission-control strip follows. The earlier rule that readings come first no longer applies to the opening page.
+- Four lab modes share one layout (`styles/lab.css`): controls left, a large viewport in the centre, evidence on the right; below 1560 px the drawer drops below, below 860 px the viewport comes first. Lab classes are scoped (`.lab*`, `.lc*`, `.hero2*`, `.viewport*`); `.ctl` belongs to the playbook page.
+- 3-D scenes stay dark in both themes like the other chambers; every HUD carries a class badge. The scalar field is drawn in a single neutral luminance with its own name, never in alarm colours. No automatic camera rotation.

@@ -1,0 +1,7 @@
+{
+ "alg": "Ed25519",
+ "key_id": "f24bd8e8f71f6363",
+ "public_key_raw_b64": "0LKMBfgemIUejwVigb0cyOJH79lZj+pUZab+rea09dY=",
+ "signs": "release/release.json, byte for byte",
+ "trust_model": "This key is held by the Zero-G Firewall team, outside the repository. A valid signature shows that the listed files are the ones this team released. It is not a NASA signature and does not show that any measurement is true."
+}

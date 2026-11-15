@@ -28,12 +28,16 @@ import { Playbooks } from "../pages/Playbooks";
 import { Alarm } from "../pages/Alarm";
 import { Ask } from "../pages/Ask";
 import { Falsify } from "../pages/Falsify";
+import { FireLab } from "../pages/FireLab";
+import { Material } from "../pages/Material";
+import { ModelLab } from "../pages/ModelLab";
 import { keepScrollersReachable } from "../lib/reach";
 
 /** Every route is registered here once. To build a page, edit its file in ../pages; this table does not change. */
 const PAGES: Record<string, (p: PageProps) => React.ReactNode> = {
   "/evidence": Evidence, "/rank": Rank, "/envelope": Envelope, "/gaps": Gaps, "/myths": Myths, "/lessons": Lessons,
   "/ledger": Ledger, "/data": DataModels, "/playbooks": Playbooks, "/alarm": Alarm, "/ask": Ask, "/falsify": Falsify,
+  "/lab": FireLab, "/material": Material, "/model": ModelLab,
 };
 
 const ENGINE: Record<string, string> = { offline: "built in, works offline", browser: "model in this browser", local: "local model", cloud: "cloud model", hybrid: "local and cloud" };

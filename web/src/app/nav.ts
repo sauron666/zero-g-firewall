@@ -25,6 +25,15 @@ export const NAV: NavGroup[] = [
     ],
   },
   {
+    name: "Laboratory",
+    items: [
+      { path: "/lab", label: "Fire Lab", icon: "Flame", about: "A 3-D laboratory: a FLEX droplet, a concept habitat with the transport solution, gravity side by side" },
+      { path: "/material", label: "Material Evidence", icon: "Scales", about: "PMMA against NASA's recorded tests, condition by condition, with a brief to export", needs: "nasa" },
+      { path: "/model", label: "Model Lab", icon: "Gauge", about: "A regressor trained on FLEX droplets, scored on unseen regimes, that refuses what it was not taught", needs: "nasa" },
+      { path: "/alarm", label: "Alarm Trust", icon: "Shield", about: "Is the alarm real: smoke, dust, a failing sensor or tampered data" },
+    ],
+  },
+  {
     name: "Explore",
     items: [
       { path: "/evidence", label: "Investigations", icon: "Stack", about: "Every combustion record in NASA's repository, with its table", needs: "nasa" },
@@ -45,7 +54,6 @@ export const NAV: NavGroup[] = [
     name: "Simulate",
     items: [
       { path: "/physics", label: "Flame physics", icon: "Gauge", about: "Scaling with gravity, and two models checked against NASA's numbers" },
-      { path: "/alarm", label: "Alarm trust lab", icon: "Shield", about: "Is the alarm real: smoke, dust, a failing sensor or tampered data" },
     ],
   },
   {

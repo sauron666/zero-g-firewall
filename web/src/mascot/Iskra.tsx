@@ -7,7 +7,7 @@ import { Mood } from "./Lantern";
 export const PAGE_KLASS: Record<string, Klass> = {
   "/": "illustrative", "/paradox": "model", "/myths": "literature", "/evidence": "observed", "/rank": "derived", "/envelope": "observed", "/gaps": "derived",
   "/lessons": "literature", "/physics": "model", "/alarm": "synthetic", "/playbooks": "derived", "/ask": "derived", "/falsify": "literature", "/ledger": "observed",
-  "/data": "derived", "/about": "illustrative",
+  "/data": "derived", "/about": "illustrative", "/lab": "model", "/material": "literature", "/model": "model",
 };
 const KEY = "zgf.iskra";
 /** Short, dry, never about data: a line only says what the page is doing. */

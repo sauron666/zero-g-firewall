@@ -424,10 +424,35 @@
    "sha256": "5d196ad4898d15def10d6a08542b5e7f1bc21ead6dfed20f7af96ca4c380a622",
    "bytes": 71734,
    "klass": "derived"
+  },
+  "ml/flex_k_model.json": {
+   "sha256": "f66f0b9e522b90ae374b1f21f24fe9776fc6312fc5b477d465d020605a8fdea0",
+   "bytes": 55663,
+   "klass": "model"
+  },
+  "ml/flex_k_eval.json": {
+   "sha256": "7322a21071ea5318737003bae431113879f86e44b5a409b353388d1508a04a59",
+   "bytes": 71500,
+   "klass": "model"
+  },
+  "ml/MODEL_CARD_FLEX.md": {
+   "sha256": "a8240286da8a783c2b1d4440ec11557bb36f28ce0a261de7907b1fff3f0d41e0",
+   "bytes": 3482,
+   "klass": "model"
   }
  },
  "brand": "Zero-G Firewall",
  "team": "The Rule of Flame",
  "mascot": "ISKRA",
- "built_at_utc": "2026-11-14T19:18:14Z"
+ "built_at_utc": "2026-11-14T19:18:14Z",
+ "ml": {
+  "flex_k": {
+   "model_id": "flex-k-ridge_phys-e0291280b6",
+   "dataset_sha256": "e0291280b68a7291660b606b52b4e192deaa06947433661cb7befa7f9550d3a0",
+   "rows": 257,
+   "groups": 78,
+   "mae_selected": 0.0485,
+   "mae_fuel_median": 0.1027
+  }
+ }
 }
