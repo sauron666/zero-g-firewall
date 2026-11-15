@@ -10,7 +10,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install cantera numpy
+      - run: pip install cantera numpy scipy scikit-learn cryptography
       - run: python -m unittest discover -s pipeline/tests -v
   web:
     runs-on: ubuntu-latest
