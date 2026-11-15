@@ -1,4 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { layoutSpace } from "../lib/space";
+import { BODIES } from "../physics/scaling";
+import { webglAvailableCached } from "../three/support";
 import { scaleLinear } from "d3-scale";
 import { href } from "../app/router";
 import { fmtInt, useData } from "../lib/data";
@@ -151,6 +154,8 @@ function Nearest({ d, at, setAt, files, onPick }: { d: EnvelopeDoc; at: DesignPo
   );
 }
 
+const EvidenceSpace = lazy(() => import("../three/EvidenceSpace"));
+
 export function Envelope({ route, manifest }: PageProps) {
   const ready = !!manifest?.nasa;
   const env = useData<EnvelopeDoc>(ready ? "envelope.json" : null);
@@ -158,6 +163,11 @@ export function Envelope({ route, manifest }: PageProps) {
   const idx = useData<{ items: TableSummary[] }>(ready ? "tables/index.json" : null);
   const rank = useData<RankDoc>(ready ? "rank_features.json" : null);
   const rep = useData<ReportedDoc>(ready && manifest?.artifacts["reported.json"] ? "reported.json" : null);
+  const space = useMemo(() => (env.data ? layoutSpace(env.data, rep.data ?? null) : null), [env.data, rep.data]);
+  const hasSpace = !!space;
+  useEffect(() => {                                                // #envelope?at=space opens on the 3-D view
+    if (hasSpace && route.query.get("at") === "space") window.setTimeout(() => document.getElementById("space")?.scrollIntoView({ block: "start" }), 300);
+  }, [hasSpace]);                                                  // eslint-disable-line react-hooks/exhaustive-deps
   const [mission, setMission] = useState(route.query.get("mission") ?? "");
   const lens = rank.data?.lenses.find((l) => l.id === mission);
   const pure = !!lens?.atmospheres.some((a) => a[1] > 0.45);
@@ -335,6 +345,22 @@ export function Envelope({ route, manifest }: PageProps) {
         </p>
       </section>
 
+      {space && (
+      <section className="panel" data-klass="observed" id="space">
+        <div className="panel__head">
+          <div>
+            <h2 className="panel__title">The same rows in 3-D: gravity is the third axis</h2>
+            <p className="panel__sub">{fmtInt(space.counts.micro)} rows stand on the free-fall floor. The floors of the Moon and Mars hold {space.counts.lunar === 0 ? "none" : fmtInt(space.counts.lunar)}{space.planned.length ? `; NASA plans ${space.planned.length} tests on the Moon` : ""}. Drag to turn it.</p>
+          </div>
+          <KlassBadge k="observed" note="placed by oxygen and pressure" />
+        </div>
+        {webglAvailableCached()
+          ? <Suspense fallback={<p className="note">Loading the 3-D view…</p>}><EvidenceSpace layout={space} names={{ micro: `Free fall: ${fmtInt(space.counts.micro)} rows`, lunar: `Moon, ${BODIES.moon.g} g: ${fmtInt(space.counts.lunar)} rows`, mars: `Mars, ${BODIES.mars.g} g: ${fmtInt(space.counts.mars)} rows` }}
+              summary={`Three floors by gravity. ${fmtInt(space.counts.micro)} test rows on the free-fall floor, placed by oxygen and pressure; ${fmtInt(space.counts.lunar)} on the floors of the Moon and Mars; ${space.planned.length} planned tests marked on the Moon floor.`} /></Suspense>
+          : <p className="note">This browser offers no WebGL. The flat map above shows the same rows.</p>}
+        <p className="note" style={{ marginTop: 8, maxWidth: "96ch" }}>Dots are rows of NASA's tables; those in front state no pressure. Rings are tests NASA plans on the Moon: marks, not rows. Each upright line is a crew atmosphere, the same on every floor. The flat map and its table hold the same rows.</p>
+      </section>
+      )}
       <Nearest d={d} at={at} setAt={setAt} files={files} onPick={pick} />
 
       <section>

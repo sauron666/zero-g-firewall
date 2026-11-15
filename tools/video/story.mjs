@@ -167,7 +167,7 @@ await scene("incident", 210, async () => { await page.evaluate(() => { window.__
 
 // 2. the question (4.6 s)
 await scene("question", 138, async () => {
-  await page.evaluate(() => { window.__zgf.open([0, 0, 0, 0, 0], 0); window.__zgf.fab(true); });
+  await page.evaluate(() => { window.__zgf.open([0, 0, 0, 0, 0], 0); window.__zgf.fab(false); });
   await cap("In one NASA test, a flame went out two seconds after its airflow was cut.");
   const b = await boxOf(".fanswitch");
   await scrollToY((await scrollY()) + b.y + b.height - 596);
@@ -188,6 +188,18 @@ await scene("evidence", 120, async () => {
   const y0 = await scrollY();
   return [glideScroll(y0 + 420, 30, 104)];
 }, async (i) => { if (i === 62) await cap(`Both sides in NASA's words: ${QUOTES} quotations, each checked against the stored document.`); }, [24, 108]);
+
+// 3b. where NASA has tested, in 3-D (4.6 s): every row on one floor, the floors of the Moon and Mars empty
+const ROWS = JSON.parse(fs.readFileSync(path.join(DIST, "data", "v1", "envelope.json"), "utf8")).gravity_counts.micro.toLocaleString("en-US");
+await scene("space", 138, async () => {
+  await page.evaluate(() => window.__zgf.fab(false));
+  await go("envelope?at=space", "#space canvas");
+  await page.waitForTimeout(1500);
+  await putAt("#space", 62);
+  await cap(`Every test row NASA holds, by oxygen and pressure: ${ROWS}, all in free fall.`);
+  await pointer(1150, 560);
+  return [];
+}, async (i) => { if (i === 70) await cap(`The floors of the Moon and Mars are empty. ${PLANNED} tests are planned.`); }, [40, 126]);
 
 // 4. the Fire Lab (9.0 s): a concept cabin, the site's transport model drawn in 3-D, then the three sensors
 let chartY = 0;

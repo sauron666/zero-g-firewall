@@ -15,7 +15,7 @@ export const STOPS: Stop[] = [
   { id: "simulate", to: "lab?scene=habitat", verb: "Simulate", text: () => "Fire Lab: a concept cabin in 3-D, driven by this site's transport model. Stop the fans and read the smoke at three sensors. A model, and labelled as one." },
   { id: "compare", to: "material", verb: "Compare", text: () => "A habitat question about PMMA set against NASA's recorded tests, condition by condition: what matches, and what no test covers." },
   { id: "predict", to: "model", verb: "Predict", text: () => "A model trained on NASA's FLEX droplets and scored on regimes it never saw. Ask it for PMMA on the Moon, and it abstains." },
-  { id: "find", to: "envelope", verb: "Find", text: (m) => `Every real test by oxygen and pressure: ${n(m?.nasa?.envelope_points)} rows from NASA's tables. None was taken in lunar or Martian gravity.` },
+  { id: "find", to: "envelope?at=space", verb: "Find", text: (m) => `Every real test by oxygen and pressure, with gravity as the third axis: ${n(m?.nasa?.envelope_points)} rows from NASA's tables on one floor. None was taken in lunar or Martian gravity.` },
   { id: "rank", to: "rank--lunar", verb: "Rank", text: () => "The investigations ranked for a lunar habitat by stated factors, with a check of how stable the order is." },
   { id: "summarize", to: "evidence--PSI-25", verb: "Summarize", text: () => "One record: what varied, what stayed constant, a receipt on every row, and the curator's notes on the data." },
   { id: "map", to: "playbooks?habitat=lunar", verb: "Map", text: () => "Fire behaviours by phase, like an attack matrix. Switch the habitat: on the Moon not one behaviour has been measured." },
