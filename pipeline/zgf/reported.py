@@ -54,6 +54,11 @@ def where(lib: Library, key: str, unit: dict, what: str) -> dict:
     return {**lib.ref(key, unit), "source": NAMES[key], "what": what}
 
 
+def slide(unit: dict) -> str:
+    """How a receipt names the slide a sentence stands on."""
+    return "slide %d" % unit["page_pdf"] if unit.get("page_pdf") else "the slide at %s" % unit.get("loc", "this place")
+
+
 def row_after(text: str, label: str, n: int) -> list[float]:
     m = re.search(re.escape(label) + r"\s+((?:%s\s+){%d}%s)" % (NUM, n - 1, NUM), text)
     if not m:
@@ -190,7 +195,18 @@ def luci(lib: Library) -> dict:
             launched = {"as_stated": m.group(1), "ref": where(lib, LUCI, u, "slide %d" % u["page_pdf"])}
     except ReportedError:
         pass
-    return {"title": "Two samples in simulated lunar gravity, and the same on Earth (LUCI)", "rows": rows, "spin": spin, "oxygen": oxygen, "launched": launched, "checks": checks}
+    atmosphere = None                                                 # what the two samples burned in, in the slide's words
+    try:
+        u, t = page_with(lib, LUCI, "burned simultaneously in")
+        m = re.search(r"Two samples are burned simultaneously (in air at normal pressure)", t)
+        if m:
+            atmosphere = {"as_stated": m.group(1), "ref": where(lib, LUCI, u, slide(u))}
+            checks.append({"what": "LUCI: the slide names both samples with the atmosphere they burned in (“%s”)" % m.group(1),
+                           "ok": bool(re.search(r"rod of acrylic plastic \(polymethyl", t)) and "abric" in t})
+    except ReportedError:
+        pass
+    return {"title": "Two samples in simulated lunar gravity, and the same on Earth (LUCI)", "rows": rows, "spin": spin, "oxygen": oxygen, "launched": launched,
+            "atmosphere": atmosphere, "checks": checks}
 
 
 def fm2(lib: Library) -> dict:
@@ -201,9 +217,26 @@ def fm2(lib: Library) -> dict:
         raise ReportedError("FM2: expected four planned tests, found %d" % len(tests))
     for x in tests:
         x["p_kpa"] = round(x["p_psia"] * 6.894757, 2)
-    return {"title": "The four tests planned on the Moon (FM2)", "tests": tests, "ref": where(lib, LUNAR_SLIDES, u, "slide 10"),
-            "state": "planned", "checks": [{"what": "four tests, each at the same pressure, in falling order of oxygen",
-                                             "ok": len({x["p_psia"] for x in tests}) == 1 and [x["o2_pct"] for x in tests] == sorted((x["o2_pct"] for x in tests), reverse=True)}]}
+    checks = [{"what": "four tests, each at the same pressure, in falling order of oxygen",
+               "ok": len({x["p_psia"] for x in tests}) == 1 and [x["o2_pct"] for x in tests] == sorted((x["o2_pct"] for x in tests), reverse=True)}]
+    out = {"title": "The four tests planned on the Moon (FM2)", "tests": tests, "ref": where(lib, LUNAR_SLIDES, u, "slide 10"), "state": "planned", "checks": checks}
+    m = re.search(r"Fuel and mounting (Fabric sheets \([^)]{3,40}\))", t)   # what the four tests burn, on the same slide
+    if m:
+        out["fuel"] = {"as_stated": m.group(1), "ref": where(lib, LUNAR_SLIDES, u, "slide 10")}
+    # Tests of what the payload vents after a burn: the slide gives material, oxygen, pressure and how many, and not where they were run.
+    try:
+        u2, t2 = page_with(lib, LUNAR_SLIDES, "Post combustion vent gases for FM2")
+    except ReportedError:
+        return out
+    vent = [{"material": mat, "o2_pct": float(o), "p_psi": float(p), "p_kpa": round(float(p) * 6.894757, 2), "tests": int(n)}
+            for mat, o, p, n in re.findall(r"([A-Z]+ (?:rod|fabric)) in (\d+)%% O2 balance N2 at (%s) psi \((\d+) tests\)" % NUM, t2)]
+    if vent:
+        again = {(mat.split()[0], float(o), float(p)) for mat, o, p in re.findall(r"([A-Z]+)(?: fabric)?; (\d+)%% O2; (%s) psi; up to" % NUM, t2)}
+        checks.append({"what": "the vent-gas slide gives each test atmosphere twice, and both agree: %s" % "; ".join("%s, %g%% oxygen at %g psi" % (v["material"], v["o2_pct"], v["p_psi"]) for v in vent),
+                       "ok": {(v["material"].split()[0], v["o2_pct"], v["p_psi"]) for v in vent} == again})
+        out["vent_tests"] = {"rows": vent, "ref": where(lib, LUNAR_SLIDES, u2, slide(u2)),
+                             "note": "Tests of what the payload vents after a burn. The slide states material, oxygen, pressure and the number of tests; it does not state the gravity or an air flow."}
+    return out
 
 
 def atmospheres(lib: Library, by_key: dict) -> dict:

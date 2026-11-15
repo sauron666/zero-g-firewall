@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { scaleLinear } from "d3-scale";
 import { href } from "../app/router";
 import { fmtInt, useData } from "../lib/data";
@@ -6,7 +6,9 @@ import { KlassBadge } from "../lib/klass";
 import type { EnvelopeDoc, EnvelopePoint, EnvelopeSeries, RankDoc, TableSummary, DocRef, ReportedDoc } from "../lib/types";
 import { emit } from "../mascot/bus";
 import { Readings, Tile } from "../dash/widgets";
-import { DesignPoint, nearestCsv, nearestRows } from "../lib/nearest";
+import { DesignPoint, Gravity, nearestCsv, nearestRows } from "../lib/nearest";
+import { ASPECTS, Aspect, CaseSource, FLOW_NEAR, Fit, caseSay, caseSources } from "../lib/casefit";
+import { IconCheck, IconClose } from "../components/icons";
 import { useReceipt } from "../components/Receipt";
 import { Scatter, ScatterGroup, ScatterLegend, ScatterMark, ScatterPoint, Shape, shapePath } from "../viz/Scatter";
 import { PageProps, stub } from "./stubs";
@@ -78,34 +80,59 @@ function Strip({ points, groups, yDomain, onPick }: { points: EnvelopePoint[]; g
 const PSI = 6.894757;
 const FORMS: [string | null, string][] = [[null, "All"], ["solid", "Solids"], ["droplet", "Droplets"], ["gas", "Gas flames"]];
 
+const GRAVITIES: [Gravity, string][] = [["micro", "Free fall"], ["lunar", "Moon"], ["mars", "Mars"]];
+const ASPECT_HEAD: Record<Aspect, string> = { material: "Material", oxygen: "Oxygen", pressure: "Pressure", flow: "Air flow", gravity: "Gravity" };
+const FIT_SAY: Record<Fit, string> = { same: "agrees", differs: "differs", unstated: "not stated", open: "not asked" };
+/** How one source stands to the case in one thing: a full ring where it agrees, a broken ring where it differs, a dotted ring where it does not say. */
+function FitMark({ fit }: { fit: Fit }) {
+  if (fit === "open") return null;
+  return <span className={`fit fit--${fit}`} role="img" aria-label={FIT_SAY[fit]}>{fit === "same" ? <IconCheck size={11} /> : fit === "differs" ? <IconClose size={10} /> : null}</span>;
+}
+
 /** The rows of NASA's tables closest to a cabin the reader describes, ready to save for a model. */
-function Nearest({ d, at, setAt, files, onPick }: { d: EnvelopeDoc; at: DesignPoint; setAt: (p: DesignPoint) => void; files: Map<string, { file: string; sha256: string; ledger_seq: number }>; onPick: (p: EnvelopePoint) => void }) {
+function Nearest({ d, rep, at, setAt, files, onPick, worked }: { d: EnvelopeDoc; rep: ReportedDoc | null; at: DesignPoint; setAt: (p: DesignPoint) => void; files: Map<string, { file: string; sha256: string; ledger_seq: number }>;
+  onPick: (p: EnvelopePoint) => void; worked: DesignPoint | null }) {
   const [unit, setUnit] = useState<"kPa" | "psia">("psia");
   const [k, setK] = useState(12);
+  const open = useReceipt();
   const res = useMemo(() => nearestRows(d, at, k), [d, at, k]);
+  const fmtP = (kpa: number) => (unit === "kPa" ? `${kpa.toFixed(1)} kPa` : `${(kpa / PSI).toFixed(1)} psia`);
+  const sources = useMemo(() => (at.material ? caseSources(d, rep, at, fmtP) : []), [d, rep, at, unit]);    // eslint-disable-line react-hooks/exhaustive-deps
   const shownP = at.p == null ? "" : unit === "kPa" ? String(Number(at.p.toFixed(1))) : String(Number((at.p / PSI).toFixed(2)));
   const save = () => {
     const csv = nearestCsv(nearestRows(d, at, k).rows, at, files);
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
     const a = document.createElement("a");
-    a.href = url; a.download = `zgf_nearest_o2-${Math.round(at.x * 100)}${at.p == null ? "" : `_p-${Math.round(at.p)}kPa`}${at.kind ? `_${at.kind}` : ""}.csv`;
+    a.href = url; a.download = `zgf_nearest_o2-${Math.round(at.x * 100)}${at.p == null ? "" : `_p-${Math.round(at.p)}kPa`}${at.kind ? `_${at.kind}` : ""}${at.material ? `_${at.material.replace(/[^A-Za-z0-9]+/g, "-")}` : ""}.csv`;
     document.body.appendChild(a); a.click(); a.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 2000);
   };
   const first = res.rows[0];
+  const isWorked = !!worked && at.material === worked.material && at.gravity === worked.gravity && at.flow === worked.flow && Math.abs(at.x - worked.x) < 1e-6 && at.p != null && worked.p != null && Math.abs(at.p - worked.p) < 0.05;
+  const asked = (a: Aspect) => (a === "material" ? at.material ?? "" : a === "oxygen" ? `${Number((at.x * 100).toFixed(1))}%` : a === "pressure" ? (at.p == null ? "any" : fmtP(at.p)) : a === "flow" ? (at.flow == null ? "any" : `${at.flow} cm/s`)
+    : GRAVITIES.find((g) => g[0] === (at.gravity ?? "micro"))![1].replace("Free fall", "free fall"));
+  const pickSource = (c: CaseSource) => c.ref && open({
+    title: `${c.title}: ${c.kind === "planned" ? "planned by NASA" : "reported by NASA outside PSI"}`, klass: "literature",
+    rows: [["what it states", ASPECTS.map((a) => `${ASPECT_HEAD[a].toLowerCase()}: ${c.cells[a].text}`).join("; ")], ["where", `${c.ref.source}${c.ref.loc ? ", " + c.ref.loc : ""}${c.refWhat ? ` (${c.refWhat})` : ""}`],
+      ["fetched from", <a href={c.ref.url} target="_blank" rel="noreferrer">{c.ref.url}</a>], ["SHA-256 of the file", <span className="hash">{c.ref.sha256}</span>], ["ledger entry", `number ${c.ref.ledger_seq}`],
+      ["note", "Not a row of a PSI table. No count of test rows on this page includes it."]],
+  });
   return (
     <section className="panel" data-klass="derived" id="nearest">
       <div className="panel__head">
         <div>
-          <h2 className="panel__title">Nearest tests to a design point</h2>
-          <p className="panel__sub">Describe a cabin. The rows of NASA's tables closest to it are listed and can be saved as a CSV for a model. The point is drawn on the map above.</p>
+          <h2 className="panel__title">Nearest tests to a design case</h2>
+          <p className="panel__sub">Describe a cabin and what burns in it. NASA's closest tests are listed with what each one lacks, and the rows can be saved as a CSV for a model.</p>
         </div>
         <KlassBadge k="derived" note="distance in near windows" />
       </div>
       <div className="near__ctl">
         <div className="msg__chips">
+          {worked && <button type="button" className="chipbtn chipbtn--lead" aria-pressed={isWorked} onClick={() => setAt(worked)}>Worked case: a PMMA panel in a lunar habitat</button>}
           {d.near_presets.map((n) => <button key={n.id} type="button" className="chipbtn" aria-pressed={Math.abs(at.x - n.x_o2) < 1e-6 && at.p != null && Math.abs(at.p - n.p_kpa) < 0.05} onClick={() => setAt({ ...at, x: n.x_o2, p: n.p_kpa })}>{n.label}</button>)}
         </div>
+        <label className="field near__f near__f--wide"><span>Material, as NASA writes it</span>
+          <input type="text" value={at.material ?? ""} placeholder="any, or PMMA, SIBAL, Nomex" spellCheck={false} onChange={(e) => setAt({ ...at, material: e.target.value.trim() ? e.target.value : null })} /></label>
         <label className="field near__f"><span>Oxygen, %</span>
           <input type="number" min={5} max={100} step={0.5} value={Number((at.x * 100).toFixed(1))} onChange={(e) => { const v = Number(e.target.value); if (v > 0 && v <= 100) setAt({ ...at, x: v / 100 }); }} /></label>
         <label className="field near__f"><span>Pressure, {unit}</span>
@@ -114,26 +141,61 @@ function Nearest({ d, at, setAt, files, onPick }: { d: EnvelopeDoc; at: DesignPo
           {(["psia", "kPa"] as const).map((u) => <button key={u} type="button" aria-pressed={unit === u} onClick={() => setUnit(u)}>{u}</button>)}
           <button type="button" aria-pressed={at.p == null} onClick={() => setAt({ ...at, p: at.p == null ? 101.325 : null })}>any pressure</button>
         </div>
+        <label className="field near__f"><span>Air flow, cm/s</span>
+          <input type="number" min={0} step={1} value={at.flow ?? ""} placeholder="any" onChange={(e) => { const v = Number(e.target.value); setAt({ ...at, flow: e.target.value === "" || !(v >= 0) ? null : v }); }} /></label>
+        <div className="seg" role="group" aria-label="Gravity">
+          {GRAVITIES.map(([id, label]) => <button key={id} type="button" aria-pressed={(at.gravity ?? "micro") === id} onClick={() => setAt({ ...at, gravity: id })}>{label}</button>)}
+        </div>
         <div className="seg" role="group" aria-label="What burns">
           {FORMS.map(([id, label]) => <button key={label} type="button" aria-pressed={at.kind === id} onClick={() => setAt({ ...at, kind: id })}>{label}</button>)}
         </div>
       </div>
-      <p className="claim claim--m" style={{ maxWidth: "62ch", margin: "14px 0 10px" }} role="status">
-        {res.pool === 0 ? "No row of that kind states what is asked."
+
+      {sources.length > 0 && (
+        <div className="casefit">
+          <p className="claim claim--m" style={{ maxWidth: "70ch", margin: "16px 0 10px" }} role="status">{caseSay(sources, at)}</p>
+          <div className="table-wrap">
+            <table className="table casefit__table">
+              <thead><tr><th>What NASA has</th>{ASPECTS.map((a) => <th key={a}>{ASPECT_HEAD[a]}<small>asked: {asked(a)}</small></th>)}<th className="r">Agrees in</th></tr></thead>
+              <tbody>
+                {sources.map((c) => (
+                  <tr key={c.id} className={c.kind === "planned" ? "is-planned" : ""}>
+                    <td className="strong">
+                      {c.accession ? <a href={href(`/evidence/${c.accession}`)}>{c.title}</a> : c.ref ? <button type="button" className="linklike" onClick={() => pickSource(c)}>{c.title}</button> : c.title}
+                      <small>{c.count}{c.kind === "outside" ? ", outside PSI" : ""}</small>
+                    </td>
+                    {ASPECTS.map((a) => <td key={a} className={`casefit__cell casefit__cell--${c.cells[a].fit}`} data-th={ASPECT_HEAD[a]}><span><FitMark fit={c.cells[a].fit} /><span>{c.cells[a].text}</span></span></td>)}
+                    <td className="r num strong" data-th="Agrees in">{c.agree} of {c.asked}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="note" style={{ marginTop: 8, maxWidth: "96ch" }}>
+            <span className="fit fit--same" aria-hidden="true"><IconCheck size={11} /></span> agrees, <span className="fit fit--differs" aria-hidden="true"><IconClose size={10} /></span> differs, <span className="fit fit--unstated" aria-hidden="true" /> not stated.
+            Oxygen and pressure agree inside the map's near window ({d.near_rule.replace("within ", "")}), air flow within {FLOW_NEAR} cm/s. What a source does not state is never counted as agreeing.
+            Sources outside PSI are NASA's papers and slides: none is a row of a PSI table and no count of rows includes them.
+          </p>
+        </div>
+      )}
+
+      <p className={sources.length ? "note" : "claim claim--m"} style={{ maxWidth: "70ch", margin: "14px 0 10px" }} role="status">
+        {res.pool + res.byOxygen === 0 ? (at.material ? "No row on the map names this material." : "No row of that kind states what is asked.")
+          : res.pool === 0 ? <>{fmtInt(res.byOxygen)} {res.byOxygen === 1 ? "row names" : "rows name"} it and {res.byOxygen === 1 ? "states" : "state"} no pressure: they are listed by oxygen alone, and none can count as near.</>
           : <>{res.within === 0 ? "No row lies" : `${fmtInt(res.within)} ${res.within === 1 ? "row lies" : "rows lie"}`} inside the near window of this point, out of {fmtInt(res.pool)} that can be compared.
-            {first && res.within === 0 && <> The closest is {first.d.toFixed(1)} windows away.</>}</>}
-        {at.p != null && at.kind === "solid" && res.pool === 0 && " The solid-material tables state no pressure: choose any pressure to compare them by oxygen."}
+            {first && res.within === 0 && <> The closest is {first.d.toFixed(1)} windows away.</>}{res.byOxygen > 0 && <> {fmtInt(res.byOxygen)} more state no pressure and follow, by oxygen alone.</>}</>}
       </p>
       {res.rows.length > 0 && (
         <div className="table-wrap">
           <table className="table">
-            <thead><tr><th>Record</th><th>Experiment</th><th className="r">Row</th><th className="r">Oxygen</th><th className="r">Pressure, kPa</th><th style={{ paddingLeft: 18 }}>Fuel, as written</th><th>Outcome, as written</th><th className="r">Distance</th></tr></thead>
+            <thead><tr><th>Record</th><th className="r">Row</th><th style={{ paddingLeft: 18 }}>Fuel, as written</th><th className="r">Oxygen</th><th className="r">Pressure, kPa</th><th style={{ paddingLeft: 18 }}>Air flow, as written</th><th>Outcome, as written</th><th className="r">Distance</th></tr></thead>
             <tbody>
               {res.rows.map((r) => (
                 <tr key={r.pt.t + r.pt.r} onClick={() => onPick(r.pt)} style={{ cursor: "pointer" }} title="Click for the receipt of this row">
-                  <td className="strong"><a href={href(`/evidence/${r.pt.a}`)} onClick={(e) => e.stopPropagation()}>{r.pt.a}</a></td><td>{r.pt.s}</td><td className="r num">{r.pt.r + 1}</td>
+                  <td className="strong"><a href={href(`/evidence/${r.pt.a}`)} onClick={(e) => e.stopPropagation()}>{r.pt.a}</a><small>{r.pt.s}</small></td><td className="r num">{r.pt.r + 1}</td>
+                  <td style={{ paddingLeft: 18 }}>{r.pt.f || "(empty)"}</td>
                   <td className="r num">{(r.pt.x * 100).toFixed(1)}%</td><td className="r num">{r.pt.p == null ? "not stated" : r.pt.p.toFixed(1)}</td>
-                  <td style={{ paddingLeft: 18 }}>{r.pt.f || "(empty)"}</td><td>{r.pt.o ?? ""}</td><td className="r num strong">{r.d.toFixed(2)}</td>
+                  <td style={{ paddingLeft: 18 }}>{r.pt.w ?? "not stated"}</td><td>{r.pt.o ?? ""}</td><td className="r num strong">{r.d.toFixed(2)}{r.byOxygen ? <small>oxygen only</small> : null}</td>
                 </tr>
               ))}
             </tbody>
@@ -162,7 +224,19 @@ export function Envelope({ route, manifest }: PageProps) {
   const lens = rank.data?.lenses.find((l) => l.id === mission);
   const pure = !!lens?.atmospheres.some((a) => a[1] > 0.45);
   const [zoom, setZoom] = useState<"all" | "tests">("all");
-  const [at, setAt] = useState<DesignPoint>({ x: 0.3, p: 70.33, kind: null });
+  const [at, setAt] = useState<DesignPoint>({ x: 0.3, p: 70.33, kind: null, material: null, flow: null, gravity: "micro" });
+  const scl = useData<{ reference: { value_cm_s: number } }>("model/scaling.json");                 // the forced flow NASA's guide gives as the most flammable
+  const worked = useMemo<DesignPoint | null>(() => {                                                 // every number of the worked case is read from the data
+    const cabin = env.data?.near_presets.find((n) => n.id === "exploration");
+    return cabin && scl.data ? { x: cabin.x_o2, p: cabin.p_kpa, kind: "solid", material: "PMMA", flow: scl.data.reference.value_cm_s, gravity: "lunar" } : null;
+  }, [env.data, scl.data]);
+  const asked = useRef(false);
+  useEffect(() => {                                                                                  // #envelope?case=pmma-lunar opens the worked case
+    if (worked && !asked.current && route.query.get("case") === "pmma-lunar") {
+      asked.current = true; setAt(worked);
+      window.setTimeout(() => document.getElementById("nearest")?.scrollIntoView({ block: "start" }), 250);
+    }
+  }, [worked]);                                                                                      // eslint-disable-line react-hooks/exhaustive-deps
   const files = useMemo(() => new Map((idx.data?.items ?? []).filter((x) => x.artifact).map((x) => [x.artifact as string, { file: x.file, sha256: x.sha256, ledger_seq: x.ledger_seq }])), [idx.data]);
   useEffect(() => { if (lens) setZoom(pure ? "all" : "tests"); }, [lens?.id, pure]);
   useEffect(() => { if (lens) emit({ type: "CONTEXT", g: lens.gravity === "partial" ? (lens.id === "mars" ? 0.3794 : 0.1654) : 0, source: "mission" }); }, [lens?.id, lens?.gravity]);
@@ -335,7 +409,7 @@ export function Envelope({ route, manifest }: PageProps) {
         </p>
       </section>
 
-      <Nearest d={d} at={at} setAt={setAt} files={files} onPick={pick} />
+      <Nearest d={d} rep={rep.data ?? null} at={at} setAt={setAt} files={files} onPick={pick} worked={worked} />
 
       <section>
         <div className="section__head"><h2 className="h2">How much evidence sits near each crew atmosphere</h2><KlassBadge k="derived" note={`near means ${d.near_rule}`} /></div>

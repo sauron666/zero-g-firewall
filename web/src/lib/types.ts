@@ -234,7 +234,11 @@ export interface EnvelopePoint {
   f: string;           // fuel or material, as written
   o?: string;          // outcome, as written
   approx?: string;     // the cell text, when the oxygen value was read from wording such as "~ 21.5"
+  w?: string;          // air flow as written, column by column
+  v?: number;          // air flow in cm/s, only where the column states a speed
 }
+/** A row of a solid-fuel table that names what burned and states no oxygen: it cannot be placed on the map. */
+export interface UnplacedRow { s: string; a: string; t: string; r: number; f: string; w?: string; v?: number }
 export interface EnvelopeSeries {
   id: string;
   kind: "droplet" | "gas" | "solid";
@@ -260,6 +264,8 @@ export interface EnvelopeDoc {
   points: EnvelopePoint[];
   near_presets: { id: string; label: string; x_o2: number; p_kpa: number; n_near: number; by_kind: Record<string, number> }[];
   gravity_counts: { micro: number; partial: number; note: string };
+  unplaced?: { rule: string; rows: UnplacedRow[] };
+  flow_rule?: string;
 }
 
 /** validation.json: the equilibrium model against NASA's own Tad and Zst columns. */
@@ -474,8 +480,13 @@ export interface ReportedDoc {
     spin: { rpm: number; radius_m: number; accel_m_s2: number; g: number; rule: string; ref: DocRef; lunar_g_stated?: number; lunar_g_ref?: DocRef };
     oxygen: { sample: string; from_pct: number; to_pct: number; approximate: boolean; ref: DocRef }[];
     launched: null | { as_stated: string; ref: DocRef };
+    atmosphere?: null | { as_stated: string; ref: DocRef };
   };
-  fm2: { title: string; state: string; tests: { n: number; p_psia: number; tolerance_psi: number; o2_pct: number; p_kpa: number }[]; ref: DocRef; checks: ReportedCheck[] };
+  fm2: {
+    title: string; state: string; tests: { n: number; p_psia: number; tolerance_psi: number; o2_pct: number; p_kpa: number }[]; ref: DocRef; checks: ReportedCheck[];
+    fuel?: { as_stated: string; ref: DocRef };
+    vent_tests?: { rows: { material: string; o2_pct: number; p_psi: number; p_kpa: number; tests: number }[]; ref: DocRef; note: string };
+  };
   quotes: Record<"saffire" | "luci" | "lunar" | "fm2", MythItem[]>;
   n_quotes: number; n_quotes_verified: number; n_checks: number;
 }

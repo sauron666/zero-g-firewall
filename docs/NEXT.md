@@ -2,7 +2,7 @@
 
 ## Hand-off (14 November, evening): start here
 
-The site is live from `main` at https://sauron666.github.io/zero-g-firewall/. All 28 must-have features of `docs/COVERAGE.md` are done. Tests: 76 Python, 175 TypeScript, all passing; the integrity check runs 1,994 checks at each derivation. The accessibility audit (`node tools/a11y/audit.mjs web/dist`, about five minutes, needs Playwright) found no violation on the last build; run it again after any change to colours, tables or controls.
+The site is live from `main` at https://sauron666.github.io/zero-g-firewall/. All 28 must-have features of `docs/COVERAGE.md` are done. Tests: 79 Python, 183 TypeScript, all passing; the integrity check runs 1,996 checks at each derivation. The accessibility audit (`node tools/a11y/audit.mjs web/dist`, about five minutes, needs Playwright) found no violation on the last build; run it again after any change to colours, tables or controls.
 
 **Which raw cache.** Since 14 November 17:20 the site is built from the larger cache: 4,959 files, 330.9 MB, folder `nasa_raw2` on the team's machine, written by `sync_nasa_async.py` 2.0.0. The repository tracks that cache's ledger at `nasa_raw/ledger/ledger.jsonl` and its report at `nasa_raw/sync_report.json`. On the team's machine derive with `python pipeline/derive.py --raw nasa_raw2`, or rename the folders so that `nasa_raw2` becomes `nasa_raw`. The older, smaller folder no longer matches the tracked ledger.
 
@@ -49,7 +49,7 @@ Not used yet, in order of value:
 4. Atmosphere map: real test points, the lunar-habitat region, the empty partial-gravity cell, the Apollo 1 historical point, the ISS point live when the feed is up. *(done, except the live point)*
 5. Ranking for a lunar habitat with the breakdown and the stability figure. *(done)*
 6. What varied in one investigation, and the sensor inventory. *(done: what varied on every record card; the inventory under Investigations, "What was measured")*
-7. Parity plot of the flame model against NASA's own `Tad` column, with N and error. *(done: 587 rows, 2.1 K mean)*
+7. Parity plot of the flame model against NASA's own `Tad` column, with N and error. *(done: 587 rows, 2.1 K mean with the convention per table, 12.8 K at row pressure throughout)*
 8. "A fan you cannot switch off". *(done: Flame physics page)*
 9. Alarm trust lab: a spoofed reading flagged, the detector-lineage chart, the cost of acting.
 10. A provenance receipt opened from a chart, and the signed release verified in the browser. *(receipts and the chain check: done; signature: not yet)*

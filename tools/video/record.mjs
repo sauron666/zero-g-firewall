@@ -208,7 +208,7 @@ await scene("model", 84, async () => {
   await go("physics", ".deck__strip--page");
   await page.waitForSelector("#droplets .plot svg");
   await putAt(page.locator("p.claim", { hasText: "the model lands within" }), 84);
-  await cap(`Models checked against NASA's own numbers: within ${TAD} K over ${TAD_N} flame tests.`);
+  await cap(`Flame model against NASA's tabulated temperature: mean gap ${TAD} K over ${TAD_N} tests, pressure convention per table.`);
   await pointer(980, 300);
   const y = (await scrollY()) + (await boxOf("#droplets .plot")).y - 250;
   return [glideScroll(y, 34, 54)];

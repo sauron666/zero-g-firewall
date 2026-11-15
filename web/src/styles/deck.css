@@ -92,17 +92,17 @@ details.howto > summary::after { margin-left: 2px; }
 
 /* ---------- the opening page: mission control ---------- */
 .deck { display: grid; gap: 14px; }
-.deck__strip { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.deck__strip { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; grid-auto-rows: auto; }
 .deck__strip--page { grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); }
 .tile {
-  position: relative; display: grid; align-content: start; gap: 2px; min-width: 0; padding: 12px 14px 12px; border: 1px solid var(--hairline); border-radius: var(--radius);
+  position: relative; display: grid; grid-row: span 3; grid-template-rows: subgrid; row-gap: 2px; min-width: 0; padding: 12px 14px 12px; border: 1px solid var(--hairline); border-radius: var(--radius);
   background: linear-gradient(180deg, var(--panel-wash), var(--surface) 70%); color: var(--ink); text-decoration: none; overflow: hidden;
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ink) 7%, transparent);
   transition: border-color 0.2s, transform 0.2s;
 }
 a.tile:hover { border-color: var(--tone, var(--g-micro)); transform: translateY(-1px); }
 .tile::before { content: ""; position: absolute; left: 0; top: 0; width: 34px; height: 2px; background: var(--tone, var(--g-micro)); box-shadow: 0 0 10px var(--tone, var(--g-micro)); }
-.tile__label { font-family: var(--font-data); font-size: 11px; letter-spacing: 0.02em; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile__label { font-family: var(--font-data); font-size: 11px; line-height: 1.3; letter-spacing: 0.02em; color: var(--ink-3); text-wrap: balance; align-self: end; }   /* a label is shown whole; the rows of one strip line up through the subgrid */
 .tile__value { font-size: clamp(1.8rem, 2.6vw, 2.45rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
 :root[data-theme="dark"] .tile__value { text-shadow: 0 0 22px color-mix(in srgb, var(--tone, var(--g-micro)) 55%, transparent); }
 .tile__value small { font-size: 0.46em; font-weight: 400; color: var(--ink-3); letter-spacing: 0; margin-left: 6px; text-shadow: none; }
@@ -141,8 +141,11 @@ a.tile:hover { border-color: var(--tone, var(--g-micro)); transform: translateY(
 .iskra-hero:hover { transform: scale(1.06); }
 .hero__lede { font-family: var(--font-claim); font-size: clamp(1.05rem, 1.25vw, 1.2rem); line-height: 1.5; color: var(--ink-2); max-width: 46ch; }
 .hero__lede b { color: var(--ink); font-weight: 500; }
-.hero__fact { margin-top: 8px; max-width: 52ch; font-size: var(--t-13); line-height: 1.45; color: var(--ink-2); }
-.hero__fact a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--axis); text-underline-offset: 3px; }
+.hero__more { margin-top: 14px; max-width: 52ch; font-size: var(--t-13); line-height: 1.45; color: var(--ink-2); }
+.hero__more summary { cursor: pointer; color: var(--ink-2); width: fit-content; min-height: 24px; }
+.hero__more summary:hover { color: var(--ink); }
+.hero__more p { margin-top: 6px; }
+.hero__more a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--axis); text-underline-offset: 3px; }
 .hero__ask { font-family: var(--font-claim); font-size: clamp(1.05rem, 1.25vw, 1.2rem); line-height: 1.45; color: var(--ink); max-width: 46ch; margin-top: 10px; }
 .hero__cta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .hero__src { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 14px; font-size: var(--t-12); color: var(--ink-3); }

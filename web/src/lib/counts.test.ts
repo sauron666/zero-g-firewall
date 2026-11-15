@@ -33,6 +33,15 @@ describe("counts written as words", () => {
     ["pages/Lessons.tsx", /The challenge's (\w+) resources/, data<{ nasa: { official_resources_total: number } }>("manifest.json").nasa.official_resources_total],
   ];
 
+  it("the model's gap to NASA is written with its pressure convention, and the figures in the README are the computed ones", () => {
+    const o = data<{ overall: Record<"closer_convention_per_table" | "row_pressure" | "one_atmosphere", { mean_abs: number; n: number }> }>("validation.json").overall;
+    const readme = readFileSync(new URL("../../../README.md", import.meta.url), "utf8");
+    expect(readme).toContain(`${o.closer_convention_per_table.n} rows; mean gap ${o.closer_convention_per_table.mean_abs.toFixed(1)} K with each table at the pressure convention its column fits, ${o.row_pressure.mean_abs.toFixed(1)} K with the row's pressure throughout`);
+    expect(page("pages/Home.tsx")).toContain("pressure convention per table");
+    expect(page("pages/Home.tsx")).toContain("K with the row's pressure throughout");
+    expect(page("pages/Physics.tsx")).toContain("pressure convention per table");
+  });
+
   it("the tour says nothing has been measured on the Moon only while that is so", () => {
     expect(page("mascot/Tour.tsx")).toContain("on the Moon not one behaviour has been measured");
     expect(data<MatrixDoc>("matrix.json").coverage.lunar.evidence).toBe(0);

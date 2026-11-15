@@ -78,7 +78,7 @@ Checked on 14 November 2026 at 18:58 Sofia time against the 130 features of the 
 | B21 | P1 | done | Myth vs Evidence | three cards, 25 quotations checked |
 | B22 | P1 | done | Gap-to-plan map |  |
 | B23 | P1 | done | Nearest-evidence finder at row level | on the atmosphere map: a design point (oxygen, pressure or any pressure, fuel form), the nearest rows of NASA's tables with their distance in near windows, a receipt on each, and a CSV with source file and SHA-256; counts agree with the map's own near rule (tested) |
-| C01 | P1 | done | Thermochemistry engine validated against NASA's `Tad` and `Zst` columns (PSI-10, PSI-159) | 587 rows, mean difference 2.1 K |
+| C01 | P1 | done | Thermochemistry engine validated against NASA's `Tad` and `Zst` columns (PSI-10, PSI-159) | 587 rows, mean difference 2.1 K with each table at the pressure convention its column fits; 12.8 K with the row's pressure throughout |
 | C02 | P1 | done | Atmosphere explorer |  |
 | C03 | P1 | done | Droplet engine | the d-squared law checked on four columns of NASA's FLEX table (195 rows, 152 within 10%), the measured rates against oxygen, and a calculator that takes its rate only from tests near the chosen oxygen |
 | C04 | P1 | done | 2D tracer transport solver (conservative finite volume) with numerical tests |  |

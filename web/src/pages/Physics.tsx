@@ -187,7 +187,7 @@ export function Physics() {
       </div>
       {(val.data || drops.data) && (
         <Readings>
-          {val.data && <Tile label="Flame temperature" value={val.data.overall.closer_convention_per_table.mean_abs ?? null} decimals={1} unit="K" sub="mean gap to NASA's own column" tone="flame" to="#physics" />}
+          {val.data && <Tile label="Flame temperature" value={val.data.overall.closer_convention_per_table.mean_abs ?? null} decimals={1} unit="K" sub="mean gap to NASA's tabulated Tad, pressure convention per table" tone="flame" to="#physics" />}
           {val.data && <Tile label="Tests compared" value={val.data.overall.closer_convention_per_table.n} sub={`in ${val.data.tables.length} NASA tables`} />}
           {drops.data && <Tile label="Droplet burn time" value={drops.data.within["10"]} of={`of ${drops.data.n_usable}`} sub="d² law within 10% of NASA" />}
           {drops.data && <Tile label="Law over stated time" value={drops.data.ratio.median} decimals={2} sub="median, FLEX droplets" />}

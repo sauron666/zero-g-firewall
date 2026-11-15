@@ -49,6 +49,7 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
   const inv = useData<InventoryDoc>(manifest?.artifacts["inventory.json"] ? "inventory.json" : null);      // what the BASS-II table itself says, in words, about how its tests ended
   const words = inv.data?.flow_words.tables.find((w) => w.accession === "PSI-25");
   const wOut = words?.classes.find((c) => c.id === "went_out"), wZero = words?.classes.find((c) => c.id === "zero");
+  const noEnding = !!inv.data && !inv.data.items.find((i) => i.accession === "PSI-25")?.cells.ending;            // the table has no column for how a test ended
   const [q, setQ] = useState("");
   const ask = (text: string) => { const t = text.trim(); if (t) { emit({ type: "ASK", q: t }); setQ(""); } };
 
@@ -77,7 +78,7 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
         <Tile label="Test rows" value={nasa?.table_rows ?? null} sub={nasa ? `in ${nasa.tables} NASA tables` : "after the NASA sync"} to={href("/envelope")} />
         <Tile label="Measured on station" value={mx.data?.coverage.iss.evidence ?? null} of={mx.data ? `of ${mx.data.cells.length}` : undefined} sub="fire behaviours" to={href("/playbooks")} />
         <Tile label="Measured on Moon" value={mx.data?.coverage.lunar.evidence ?? null} of={mx.data ? `of ${mx.data.cells.length}` : undefined} sub="fire behaviours" to={`${href("/playbooks")}?habitat=lunar`} tone="partial" />
-        <Tile label="Model against NASA" value={nasa?.validation_mean_abs_K ?? null} decimals={1} unit="K" sub={nasa ? `mean gap over ${nasa.validation_rows} rows` : "after the NASA sync"} to={href("/physics")} tone="flame" />
+        <Tile label="Model against NASA's tabulated Tad" value={nasa?.validation_mean_abs_K ?? null} decimals={1} unit="K" sub={nasa ? `mean gap over ${nasa.validation_rows} rows, pressure convention per table` : "after the NASA sync"} to={href("/physics")} tone="flame" />
         <Tile label="Files with receipt" value={nasa?.files_in_ledger ?? null} sub={nasa?.ledger_chain_ok ? "hash chain verified" : "evidence ledger"} to={href("/ledger")} tone="ok" led={!!nasa?.ledger_chain_ok} />
       </div>
 
@@ -90,11 +91,6 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
                 In microgravity, airflow can decide how a flame burns.{brief ? " On the space station, a fire alarm stops the ventilation in the affected module." : ""}{" "}
                 <b>In NASA's BASS-II experiment, a flame went out within two seconds once its airflow was cut.</b>
               </p>
-              {words && wOut && wOut.rows > 0 && (
-                <p className="hero__fact">
-                  <a href={`${href("/evidence/measured")}?at=words`}>The table of that experiment</a>: {wOut.rows} of {words.n_rows} rows say the flame went out{wZero && wZero.rows > 0 ? <>; in {wZero.rows} a display reads 0 and the row has no word on the flame</> : null}.
-                </p>
-              )}
               <p className="hero__ask">
                 Does the same hold for other fuels, atmospheres and gravity levels?
                 {myth?.myth_verified ? <> NASA's own guide files <q>{myth.myth.replace(/\.$/, "")}</q> under misconceptions.</> : " NASA's own guide files that belief under misconceptions."}
@@ -104,6 +100,15 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
                 <a className="btn btn--quiet" href={href("/paradox")}>Compare conditions</a>
                 <a className="btn btn--quiet" href="#?tour=1"><IconTour size={16} />90-second tour</a>
               </div>
+              {words && wOut && wOut.rows > 0 && (
+                <details className="hero__more">
+                  <summary>What the BASS-II table itself records</summary>
+                  <p>
+                    {wOut.rows} of {words.n_rows} rows say in words that the flame went out{wZero && wZero.rows > 0 ? <>; in {wZero.rows} a display reads 0 and the row has no word on the flame</> : null}.
+                    {noEnding ? " The table has no column for the ending." : ""} <a href={`${href("/evidence/measured")}?at=words`}>Read the rows</a>.
+                  </p>
+                </details>
+              )}
               <p className="hero__src">
                 <span>Sources:</span>
                 {brief && brief.kind === "quote" && <SourceBtn title={brief.source} sref={{ ...brief.ref, page: brief.ref.loc }} klass="literature" label="the station's response" extra={[["quotation", brief.quote]]} />}
@@ -212,7 +217,8 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
           <div className="checks2">
             <a className="check" href={href("/physics")}>
               <MiniParity pts={tad} lo={1300} hi={2900} label="Flame temperature: model against NASA's column" />
-              <div><div className="check__num">{nasa?.validation_mean_abs_K != null ? `${nasa.validation_mean_abs_K.toFixed(1)} K` : "–"}</div><div className="check__lab">flame temperature, mean gap to NASA's own column over {nasa?.validation_rows ? fmtInt(nasa.validation_rows) : "–"} tests</div></div>
+              <div><div className="check__num">{nasa?.validation_mean_abs_K != null ? `${nasa.validation_mean_abs_K.toFixed(1)} K` : "–"}</div><div className="check__lab">flame temperature, mean gap to NASA's tabulated Tad over {nasa?.validation_rows ? fmtInt(nasa.validation_rows) : "–"} tests, each table at the pressure convention its column fits
+                {val.data?.overall.row_pressure.mean_abs != null ? `; ${val.data.overall.row_pressure.mean_abs.toFixed(1)} K with the row's pressure throughout` : ""}</div></div>
             </a>
             <a className="check" href={`${href("/physics")}`}>
               <MiniParity pts={d2} lo={0} hi={40} label="Droplet burn time: d-squared law against NASA's column" />

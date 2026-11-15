@@ -35,7 +35,7 @@ Read files only through `ledger.read(raw_dir, entry)`: it re-checks the hash.
 | `ledger.jsonl`, `ledger_index.json` | `LedgerEntry` per line, `LedgerIndex` | observed | the raw ledger exactly as the sync wrote it (the browser re-computes the chain from it, see `lib/ledger.ts`); the index lists the head, counts and the entries this build read |
 | `profiles.json` | `ProfilesDoc` | derived | per table and column: filled, distinct, range, role (varied, constant, identifier, when, notes). This is "what varied, what stayed constant" |
 | `curator_report.json` | `CuratorDoc` | derived | findings by stated rule, each with table, column and rows; hand notes carry the cells they rest on and vanish if those cells change |
-| `envelope.json` | `EnvelopeDoc` | observed | one point per table row that states oxygen; `p` is null when the table gives no pressure (never assumed); `near_presets` counts rows near each crew atmosphere |
+| `envelope.json` | `EnvelopeDoc` | observed | one point per table row that states oxygen; `p` is null when the table gives no pressure (never assumed); `near_presets` counts rows near each crew atmosphere; `w` is the air flow of a row as NASA wrote it, column by column, and `v` a speed in cm/s only where the column states one; `unplaced.rows` are rows of solid-fuel tables that name what burned and state no oxygen (never on the map, never in a count of it) |
 | `validation.json` | `ValidationDoc` | model | equilibrium model against NASA's `Tad` and `Zst` (PSI-10, PSI-159), per row, at the row's pressure and at one atmosphere |
 | `model/atmospheres.json`, `scaling.json`, `platform.json`, `cabin.json` | see `pages/Physics.tsx` | model | built by `build_models.py` |
 

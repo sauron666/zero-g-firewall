@@ -307,16 +307,40 @@ ENVELOPE = [
     {"acc": "PSI-159", "file": "Normal", "series": "CFI-G gas flames", "kind": "gas", "x": ("XO2 before test", 1.0), "p": ("approx p (bar)", KPA["bar"]),
      "fuel": "Fuel", "outcome": "Self-ext or flow term"},
     {"acc": "PSI-10", "file": "Normal", "series": "Flame Design gas flames", "kind": "gas", "x": ("XO2 (init)", 1.0), "p": ("pinit (atm)", KPA["atm"]), "fuel": "Fuel"},
-    {"acc": "PSI-25", "series": "BASS-II solids", "kind": "solid", "x": ("Calibrated initial O2 % by vol", 0.01), "p": None, "fuel": "Fuel Sample Material"},
-    {"acc": "PSI-98", "series": "Saffire solids", "kind": "solid", "x": ("Percent O2", 0.01), "p": None, "fuel": "Material", "approx": True},
-    {"acc": "PSI-99", "series": "Saffire solids", "kind": "solid", "x": ("Percent O2 (Note 1)", 0.01), "p": None, "fuel": "Material", "approx": True},
+    {"acc": "PSI-25", "series": "BASS-II solids", "kind": "solid", "x": ("Calibrated initial O2 % by vol", 0.01), "p": None, "fuel": "Fuel Sample Material",
+     "flow": ["Flow restrictor", "Fan display", "Air display"]},
+    {"acc": "PSI-98", "series": "Saffire solids", "kind": "solid", "x": ("Percent O2", 0.01), "p": None, "fuel": "Material", "approx": True,
+     "flow": ["Air Flow (cm/s)", "Flow Direction"], "speed": "Air Flow (cm/s)"},
+    {"acc": "PSI-99", "series": "Saffire solids", "kind": "solid", "x": ("Percent O2 (Note 1)", 0.01), "p": None, "fuel": "Material", "approx": True,
+     "flow": ["Air Flow (cm/s)", "Flow Direction"], "speed": "Air Flow (cm/s)"},
 ]
+# Tables that name what burned and state no oxygen. Their rows cannot be placed on the map; they are listed so that a search by material can count them.
+MATERIAL_ONLY = [
+    {"acc": "PSI-26", "series": "BASS solids", "kind": "solid", "fuel": "Fuel Sample Material"},
+    {"acc": "PSI-100", "series": "Saffire solids", "kind": "solid", "fuel": "Material", "flow": ["Air Flow", "Direction"], "speed": "Air Flow"},
+]
+SPEED = re.compile(r"^~?\s*([+-]?(?:\d+\.?\d*|\.\d+))\s*(?:cm/s)?$")
+
+
+def flow_of(spec: dict, cols: list[str], r: list[str]) -> dict:
+    """Air flow of one row as NASA wrote it ("w"), and as a speed in cm/s ("v") only where the column states one."""
+    out: dict = {}
+    said = [(c, r[cols.index(c)].strip()) for c in spec.get("flow", []) if c in cols and cols.index(c) < len(r)]
+    said = [(c, v) for c, v in said if v and not is_missing(v)]
+    if said:
+        out["w"] = "; ".join("%s: %s" % (c, " ".join(v.split())) for c, v in said)[:160]
+    sp = spec.get("speed")
+    if sp in cols and cols.index(sp) < len(r):
+        m = SPEED.match(r[cols.index(sp)].strip())
+        if m:
+            out["v"] = float(m.group(1))
+    return out
 PRESETS = habitat_atmospheres()                                  # (id, label, oxygen fraction, kPa): written once in atmospheres.py and checked there against NASA's sentences
 NEAR = (0.03, 0.15)
 
 
 def envelope(tables: dict[str, dict]) -> dict:
-    points, series, left_out = [], {}, []
+    points, series, left_out, unplaced = [], {}, [], []
     for spec in ENVELOPE:
         for rel, t in sorted(tables.items()):
             if t["accession"] != spec["acc"] or (spec.get("file") and spec["file"] not in t["file"]):
@@ -340,8 +364,10 @@ def envelope(tables: dict[str, dict]) -> dict:
                 x = first_num(raw) if spec.get("approx") else to_num(raw)
                 if x is None or is_missing(raw):
                     s["no_oxygen"] += 1
+                    if spec["kind"] == "solid" and jf < len(r) and r[jf].strip() and not is_missing(r[jf]):
+                        unplaced.append({"s": spec["series"], "a": spec["acc"], "t": rel, "r": i, "f": r[jf].strip()[:60]} | flow_of(spec, cols, r))
                     continue
-                pt = {"s": spec["series"], "a": spec["acc"], "t": rel, "r": i, "x": round(x * spec["x"][1], 5), "p": None, "f": r[jf].strip()[:60]}
+                pt = {"s": spec["series"], "a": spec["acc"], "t": rel, "r": i, "x": round(x * spec["x"][1], 5), "p": None, "f": r[jf].strip()[:60]} | flow_of(spec, cols, r)
                 if spec.get("approx"):
                     pt["approx"] = raw
                 if jp is not None:
@@ -358,6 +384,18 @@ def envelope(tables: dict[str, dict]) -> dict:
                     pt["o"] = r[jo].strip()
                 s["n"] += 1
                 points.append(pt)
+    for spec in MATERIAL_ONLY:
+        for rel, t in sorted(tables.items()):
+            if t["accession"] != spec["acc"]:
+                continue
+            cols = [norm(c) for c in t["columns"]]
+            if spec["fuel"] not in cols:
+                left_out.append({"table": rel, "reason": "expected column not found: %s" % spec["fuel"]})
+                continue
+            jf = cols.index(spec["fuel"])
+            for i, r in enumerate(t["rows"]):
+                if jf < len(r) and r[jf].strip() and not is_missing(r[jf]):
+                    unplaced.append({"s": spec["series"], "a": spec["acc"], "t": rel, "r": i, "f": r[jf].strip()[:60]} | flow_of(spec, cols, r))
     both = [p for p in points if p["p"] is not None]
     near = []
     for pid, label, x0, p0 in PRESETS:
@@ -371,6 +409,9 @@ def envelope(tables: dict[str, dict]) -> dict:
             "note": "Each point is one row of a NASA experimental table. Rows that state oxygen but no pressure have p null and are drawn on a separate strip, never at an assumed pressure.",
             "near_rule": "within %.2f in oxygen fraction and %d%% in pressure" % (NEAR[0], NEAR[1] * 100), "near": {"dx": NEAR[0], "dp": NEAR[1]},
             "series": list(series.values()), "points": points, "near_presets": near, "left_out": left_out,
+            "unplaced": {"rule": "Rows of solid-fuel tables that name what burned and state no oxygen. They are not on the map and no count of the map includes them.",
+                         "rows": unplaced},
+            "flow_rule": "w is the air flow of a row as NASA wrote it, column by column; v is a speed in cm/s and is given only where the column states one.",
             "gravity_counts": {"micro": len(points), "partial": 0, "note": "No row in any PSI combustion table was taken in lunar or Martian gravity."}}
 
 

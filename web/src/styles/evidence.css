@@ -259,6 +259,26 @@ button.cov__cell:hover, button.cov__cell:focus-visible { outline: 2px solid var(
 .near__ctl .msg__chips { flex-basis: 100%; }
 .near__f { width: 120px; }
 .near__f input { width: 100%; }
+.near__f--wide { width: 240px; }
+.chipbtn--lead { border-color: var(--g-partial); color: var(--ink); }
+.table td small, .table th small { display: block; margin-top: 2px; font-size: var(--t-12); font-weight: 400; color: var(--ink-3); white-space: normal; }
+/* a design case against each source: where it agrees, where it differs, what it does not state */
+.fit { display: inline-grid; place-items: center; flex: none; width: 17px; height: 17px; border-radius: 50%; border: 1.5px solid var(--ink); color: var(--ink); vertical-align: -3px; }
+.fit--differs { border-style: dashed; border-color: var(--ink-2); color: var(--ink-2); }
+.fit--unstated { border-style: dotted; border-color: var(--ink-3); }
+.casefit__table td { vertical-align: top; }
+.casefit__cell > span { display: grid; grid-template-columns: 17px minmax(0, 1fr); gap: 8px; align-items: start; }
+.casefit__cell--open > span { grid-template-columns: minmax(0, 1fr); color: var(--ink-3); }
+.casefit__cell--same { color: var(--ink); font-weight: 700; }
+.casefit__cell--differs, .casefit__cell--unstated { color: var(--ink-2); }
+.casefit__table tr.is-planned td { background: repeating-linear-gradient(135deg, transparent 0 7px, color-mix(in srgb, var(--g-partial) 9%, transparent) 7px 8px); }
+@media (max-width: 760px) {
+  .casefit__table thead { display: none; }
+  .casefit__table tr { display: block; padding: 10px 0; border-top: 1px solid var(--hairline); }
+  .casefit__table td { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 10px; border: 0; padding: 3px 10px; text-align: left; }
+  .casefit__table td:first-child { display: block; }
+  .casefit__table td[data-th]::before { content: attr(data-th); font-size: var(--t-12); font-weight: 400; color: var(--ink-3); }
+}
 .chipbtn[aria-pressed="true"] { border-color: var(--g-micro); color: var(--ink); background: color-mix(in srgb, var(--g-micro) 18%, var(--surface)); }
 
 /* ---- what was measured: records by quantity ---- */

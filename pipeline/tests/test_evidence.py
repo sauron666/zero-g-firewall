@@ -96,6 +96,22 @@ class Envelope(unittest.TestCase):
         self.assertEqual((near["challenge_limit"], near["iss"], near["suit"]), (1, 0, 0))
         self.assertEqual(env["gravity_counts"]["partial"], 0)
 
+    def test_air_flow_is_kept_as_written_and_is_a_speed_only_where_the_column_states_one(self):
+        bass2 = table(["Fuel Sample Material", "Calibrated initial O2 % by vol", "Flow restrictor", "Fan display", "Air display"],
+                      [["1 mm thick PMMA", "21.8", "1", "68 52", "10 5"], ["2 cm SIBAL", "–", "2", "62", "5"]], acc="PSI-25", file="BASS-II.csv")
+        saf2 = table(["Material", "Percent O2 (Note 1)", "Air Flow (cm/s)", "Flow Direction"], [["PMMA", "~ 22.1", "20 cm/s", "Concurrent"], ["", "", "", ""]], acc="PSI-99", file="S2.csv")
+        bass = table(["Fuel Sample Material"], [["PMMA sphere 2 cm"], [""]], acc="PSI-26", file="BASS.csv")
+        env = E.envelope({"tables/b2.json": bass2, "tables/s2.json": saf2, "tables/b.json": bass})
+        pts = {(p["a"], p["r"]): p for p in env["points"]}
+        self.assertEqual(pts[("PSI-25", 0)]["w"], "Flow restrictor: 1; Fan display: 68 52; Air display: 10 5")
+        self.assertNotIn("v", pts[("PSI-25", 0)])                  # a display reading is not a speed
+        self.assertEqual((pts[("PSI-99", 0)]["v"], pts[("PSI-99", 0)]["w"]), (20.0, "Air Flow (cm/s): 20 cm/s; Flow Direction: Concurrent"))
+        un = {(u["a"], u["r"]): u for u in env["unplaced"]["rows"]}   # rows that name what burned and state no oxygen: listed, never placed
+        self.assertEqual(sorted(un), [("PSI-25", 1), ("PSI-26", 0)])
+        self.assertEqual(un[("PSI-25", 1)]["w"], "Flow restrictor: 2; Fan display: 62; Air display: 5")
+        self.assertNotIn(("PSI-25", 1), pts)
+        self.assertEqual(len(env["points"]), 2)
+
     def test_zst_against_a_hand_value(self):
         self.assertAlmostEqual(E.zst("C4H10", 0.031, 0.389), 0.654, places=3)
 
@@ -438,6 +454,36 @@ class Reported(unittest.TestCase):
         self.assertEqual([(t["o2_pct"], t["p_psia"]) for t in d["tests"]], [(37.0, 8.2), (33.0, 8.2), (29.0, 8.2), (25.0, 8.2)])
         with self.assertRaises(P.ReportedError):
             P.fm2(self.Lib({P.LUNAR_SLIDES: [page.replace("Test 4: 8.2 psia (+/- 0.3 psi), 25% O2", "Test 4: to be decided")]}))
+        self.assertNotIn("fuel", d)                                  # a slide without the line names no fuel: none is typed in
+        self.assertNotIn("vent_tests", d)
+
+    def test_what_the_planned_tests_burn_and_the_vent_gas_tests_are_read_from_the_slides(self):
+        from zgf import reported as P
+        plan = ("Initial Chamber Conditions\nTest 1: 8.2 psia (+/- 0.3 psi), 37% O2 , balance nitrogen) Test 2: 8.2 psia (+/- 0.3 psi), 33% O2 , balance nitrogen) "
+                "Test 3: 8.2 psia (+/- 0.3 psi), 29% O2 , balance nitrogen) Test 4: 8.2 psia (+/- 0.3 psi), 25% O2 , balance nitrogen) "
+                "Fuel and mounting Fabric sheets (Synergy Pro “Navy”) mounted between thin metal frames")
+        vent = ("Post combustion vent gases for FM2 on CLPs PMMA rod in 34% O2 balance N2 at 8.2 psi (2 tests) SIBAL fabric in 21% O2 balance N2 at 14.7 psi (2 tests) "
+                "PMMA; 34% O2; 8.2 psi; up to 1.2 g burned Final O2 fraction 13% to 21% SIBAL fabric; 21% O2; 14.7 psi; up to 0.54 g burned")
+        d = P.fm2(self.Lib({P.LUNAR_SLIDES: [plan, vent]}))
+        self.assertEqual(d["fuel"]["as_stated"], "Fabric sheets (Synergy Pro “Navy”)")
+        self.assertEqual([(v["material"], v["o2_pct"], v["p_psi"], v["tests"]) for v in d["vent_tests"]["rows"]], [("PMMA rod", 34.0, 8.2, 2), ("SIBAL fabric", 21.0, 14.7, 2)])
+        self.assertEqual(d["vent_tests"]["ref"]["loc"], "p. 2")
+        self.assertTrue(all(c["ok"] for c in d["checks"]))
+        other = P.fm2(self.Lib({P.LUNAR_SLIDES: [plan, vent.replace("PMMA; 34% O2; 8.2 psi", "PMMA; 30% O2; 8.2 psi")]}))
+        self.assertFalse(all(c["ok"] for c in other["checks"]))      # the slide's two statements of one atmosphere must agree
+
+    def test_the_atmosphere_of_the_lunar_gravity_flight_is_kept_in_the_slide_s_words(self):
+        from zgf import reported as P
+        pages = {P.LUCI: ["SIBAL Flame Spread Fit Comparison\nFlame Spread Rates (from linear fits):\nPartial- G (mm/s)\n1-G (mm/s)\nRatio\nFlame Base\n.9 1.5 .6\nFlame Tip\n1.1 2.8 .39",
+                          "PMMA Flame Tip Comparison\nPartial-G (cm/s)\n1-G (cm/s)\nRatio\n.15 .40 .38\nFlame Tip Spread (from linear fits):",
+                          "A steady vehicle rotation of 11 RPM is established, with an effective radius of rotation of 1.22 m at the experiment location. Two samples are burned simultaneously in air at normal pressure: "
+                          "Cotton-fiberglass composite fabric sheet and a 4-mm diameter rod of acrylic plastic (polymethyl methacrylate)."],
+                 P.LUNAR_SLIDES: ["Upward Spread\nLunar-g = 0.165 gE\n2-cm-wide SIBAL fabric"]}
+        d = P.luci(self.Lib(pages))
+        self.assertEqual((d["atmosphere"]["as_stated"], d["atmosphere"]["ref"]["loc"]), ("in air at normal pressure", "p. 3"))
+        self.assertTrue(all(c["ok"] for c in d["checks"]))
+        pages[P.LUCI][2] = pages[P.LUCI][2].replace("in air at normal pressure", "in a sealed chamber")
+        self.assertIsNone(P.luci(self.Lib(pages))["atmosphere"])
 
 
 class Atmospheres(unittest.TestCase):
