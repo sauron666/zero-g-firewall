@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { ALL_ITEMS, NAV } from "../app/nav";
 import { href } from "../app/router";
@@ -33,14 +34,14 @@ const STARTERS = ["Will a fire go out if the fans are stopped?", "Has anything b
 const FAN_FLOW = 0.1;
 const HERO_G: [number, string][] = [[0, "Free fall"], [BODIES.moon.g, "Moon"], [1, "Earth"]];
 const MODES = [
-  { to: "/lab", name: "Fire Lab", tag: "3D", text: "A FLEX droplet, a concept habitat with the transport solution, and gravity side by side." },
-  { to: "/material", name: "Material Evidence", tag: "PMMA", text: "Your habitat question against NASA's recorded PMMA tests, condition by condition." },
-  { to: "/model", name: "Model Lab", tag: "ML", text: "A regressor trained on FLEX droplets, scored on regimes it never saw, refusing the rest." },
-  { to: "/alarm", name: "Alarm Trust", tag: "SOC", text: "A validly signed old reading rejected while the fire alarm stays latched." },
+  { to: "/lab", name: "Fire Lab", tag: "Simulate", text: "A FLEX droplet, a concept habitat with the transport solution, and gravity side by side." },
+  { to: "/material", name: "Material Evidence", tag: "Compare", text: "Your habitat question against NASA's recorded PMMA tests, condition by condition." },
+  { to: "/model", name: "Model Lab", tag: "Predict", text: "A regressor trained on FLEX droplets, scored on regimes it never saw, refusing the rest." },
+  { to: "/alarm", name: "Alarm Trust", tag: "Defend", text: "A validly signed old reading rejected while the fire alarm stays latched." },
 ];
 
 /** The opening composition: one message, one question, one scene, one primary action. */
-function Hero({ manifest }: { manifest: Manifest | null }) {
+function Hero({ manifest, fans, setFans, sources }: { manifest: Manifest | null; fans: boolean; setFans: (on: boolean) => void; sources: ReactNode }) {
   const [g, setG] = useState(BODIES.moon.g);
   const ml = (manifest as (Manifest & { ml?: { flex_k?: { mae_selected: number; mae_fuel_median: number; groups: number } } }) | null)?.ml?.flex_k;
   const nasa = manifest?.nasa;
@@ -63,16 +64,23 @@ function Hero({ manifest }: { manifest: Manifest | null }) {
           <div className="hero2__chamber">
             <div className="hero2__badges"><KlassBadge k="illustrative" note="shape follows the gravity scaling" /></div>
             <div className="hero2__flames">
-              <figure><Porthole tag="0 g"><FlameCanvas g={0} flow={FAN_FLOW} strength={1} seed={3} label="Schematic flame in free fall" /></Porthole><figcaption>free fall</figcaption></figure>
-              <figure><Porthole tag={`${g === 0 ? "0" : g.toFixed(3)} g`}><FlameCanvas g={g} flow={FAN_FLOW} strength={1} seed={11} uncertain={g > 0 && g < 1} label={`Schematic flame at ${label}`} /></Porthole><figcaption>{label === "Moon" ? "lunar gravity" : label.toLowerCase()}</figcaption></figure>
+              <figure><Porthole tag="0 g"><FlameCanvas g={0} flow={fans ? FAN_FLOW : 0} strength={fans ? 1 : 0} seed={3} label="Schematic flame in free fall" /></Porthole><figcaption>free fall</figcaption></figure>
+              <figure><Porthole tag={`${g === 0 ? "0" : g.toFixed(3)} g`}><FlameCanvas g={g} flow={fans ? FAN_FLOW : 0} strength={fans ? 1 : g > 0 ? 0.8 : 0} seed={11} uncertain={g > 0 && g < 1} label={`Schematic flame at ${label}`} /></Porthole><figcaption>{label === "Moon" ? "lunar gravity" : label.toLowerCase()}</figcaption></figure>
             </div>
             <div className="hero2__ctl">
+              <FanSwitch on={fans} onChange={setFans} />
               <span className="label">Gravity on the right</span>
               <div className="seg" role="group" aria-label="Gravity of the right-hand flame">{HERO_G.map(([x, l]) => <button key={l} type="button" aria-pressed={g === x} onClick={() => setG(x)}>{l}</button>)}</div>
               <a className="hero2__open" href={`${href("/lab")}?scene=gravity&g=${g || 0.165}`}>Open in 3D</a>
             </div>
-            <p className="hero2__cap">{g === 0 ? "Both in free fall: no buoyancy, a round blue flame." : g < 1 ? "Lunar gravity: buoyancy returns, about half the 1 g flow speed by the cube-root scaling. No PSI table holds a partial-gravity test; LUCI is the nearest NASA evidence." : "At 1 g buoyancy stretches the flame and feeds it from below."}</p>
+            <p className="hero2__cap">{!fans
+              ? (g === 0 ? "Fans off, both in free fall: in one NASA test the flame went out within two seconds of its airflow being cut."
+                : g < 1 ? "Fans off. In free fall the flame NASA tested went out within two seconds. In lunar gravity buoyancy still draws air through the flame: no test exists, and it may keep burning."
+                  : "Fans off. At 1 g buoyancy feeds the flame without any fan.")
+              : g === 0 ? "Both in free fall: no buoyancy, a round blue flame." : g < 1 ? "Lunar gravity: buoyancy returns, about half the 1 g flow speed by the cube-root scaling. No PSI table holds a partial-gravity test; LUCI is the nearest NASA evidence." : "At 1 g buoyancy stretches the flame and feeds it from below."}</p>
+
           </div>
+          {sources}
         </div>
       </section>
       <section className="hero2__facts" aria-label="Three results">
@@ -126,9 +134,18 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
   const d2 = useMemo(() => (drops.data?.points ?? []).filter((p) => p.td != null).map((p) => [p.tb as number, p.td as number] as [number, number]), [drops.data]);
   const tech = NAV.find((g) => g.technical)?.items ?? [];
 
+  const sources = (
+    <p className="hero__src">
+      <span>Sources:</span>
+      {brief && brief.kind === "quote" && <SourceBtn title={brief.source} sref={{ ...brief.ref, page: brief.ref.loc }} klass="literature" label="the station's response" extra={[["quotation", brief.quote]]} />}
+      {bass && bass.kind === "quote" && <SourceBtn title={bass.source} sref={{ ...bass.ref, page: bass.ref.loc }} klass="literature" label="BASS-II report" extra={[["quotation", bass.quote]]} />}
+      {myth && <SourceBtn title="A Researcher's Guide to: Combustion Science" sref={{ ...myth.myth_ref, page: myth.myth_ref.loc }} klass="literature" label={`NASA's guide${myth.myth_ref.loc ? ", " + myth.myth_ref.loc : ""}`} extra={[["quotation", myth.myth]]} />}
+      {!nasa && <span>appear after the NASA sync</span>}
+    </p>
+  );
   return (
     <div className="deck">
-      <Hero manifest={manifest} />
+      <Hero manifest={manifest} fans={fans} setFans={setFans} sources={sources} />
       <div className="deck__strip" role="group" aria-label="State of the evidence">
         <Tile label="Investigations" value={nasa?.investigations_in_scope ?? null} of={nasa ? `of ${nasa.search_hits}` : undefined} sub="combustion records in PSI" to={href("/evidence")} />
         <Tile label="Test rows" value={nasa?.table_rows ?? null} sub={nasa ? `in ${nasa.tables} NASA tables` : "after the NASA sync"} to={href("/envelope")} />
@@ -136,76 +153,10 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
         <Tile label="Measured on Moon" value={mx.data?.coverage.lunar.evidence ?? null} of={mx.data ? `of ${mx.data.cells.length}` : undefined} sub="fire behaviours" to={`${href("/playbooks")}?habitat=lunar`} tone="partial" />
         <Tile label="Model against NASA's tabulated Tad" value={nasa?.validation_mean_abs_K ?? null} decimals={1} unit="K" sub={nasa ? `mean gap over ${nasa.validation_rows} rows, pressure convention per table` : "after the NASA sync"} to={href("/physics")} tone="flame" />
         <Tile label="Files with receipt" value={nasa?.files_in_ledger ?? null} sub={nasa?.ledger_chain_ok ? "hash chain verified" : "evidence ledger"} to={href("/ledger")} tone="ok" led={!!nasa?.ledger_chain_ok} />
+
       </div>
 
       <div className="deck__row">
-        <section className="dpanel span-8" aria-label="The question">
-          <h2 className="hero__title">Kill the fans?</h2>
-          <div className="hero">
-            <div>
-              <p className="hero__lede">
-                In microgravity, airflow can decide how a flame burns.{brief ? " On the space station, a fire alarm stops the ventilation in the affected module." : ""}{" "}
-                <b>In NASA's BASS-II experiment, a flame went out within two seconds once its airflow was cut.</b>
-              </p>
-              <p className="hero__ask">
-                Does the same hold for other fuels, atmospheres and gravity levels?
-                {myth?.myth_verified ? <> NASA's own guide files <q>{myth.myth.replace(/\.$/, "")}</q> under misconceptions.</> : " NASA's own guide files that belief under misconceptions."}
-              </p>
-              <div className="hero__cta">
-                <a className="btn btn--primary" href={href("/myths/fans")}>Explore the evidence</a>
-                <a className="btn btn--quiet" href={href("/paradox")}>Compare conditions</a>
-                <a className="btn btn--quiet" href="#?tour=1"><IconTour size={16} />90-second tour</a>
-              </div>
-              {words && wOut && wOut.rows > 0 && (
-                <details className="hero__more">
-                  <summary>What the BASS-II table itself records</summary>
-                  <p>
-                    {wOut.rows} of {words.n_rows} rows say in words that the flame went out{wZero && wZero.rows > 0 ? <>; in {wZero.rows} a display reads 0 and the row has no word on the flame</> : null}.
-                    {noEnding ? " The table has no column for the ending." : ""} <a href={`${href("/evidence/measured")}?at=words`}>Read the rows</a>.
-                  </p>
-                </details>
-              )}
-              <p className="hero__src">
-                <span>Sources:</span>
-                {brief && brief.kind === "quote" && <SourceBtn title={brief.source} sref={{ ...brief.ref, page: brief.ref.loc }} klass="literature" label="the station's response" extra={[["quotation", brief.quote]]} />}
-                {bass && bass.kind === "quote" && <SourceBtn title={bass.source} sref={{ ...bass.ref, page: bass.ref.loc }} klass="literature" label="BASS-II report" extra={[["quotation", bass.quote]]} />}
-                {myth && <SourceBtn title="A Researcher's Guide to: Combustion Science" sref={{ ...myth.myth_ref, page: myth.myth_ref.loc }} klass="literature" label={`NASA's guide${myth.myth_ref.loc ? ", " + myth.myth_ref.loc : ""}`} extra={[["quotation", myth.myth]]} />}
-                {!nasa && <span>appear after the NASA sync</span>}
-              </p>
-            </div>
-            <div>
-              <div className="windows">
-                <figure>
-                  <Porthole tag="schematic">
-                    <FlameCanvas g={0} flow={fans ? FAN_FLOW : 0} strength={fans ? 1 : 0} seed={3} label="Schematic flame on the space station" />
-                  </Porthole>
-                  <figcaption className="window-cap">
-                    <div className="window-cap__name">Space station</div>
-                    <div className="window-cap__g">free fall, air at 21% oxygen</div>
-                    <p className="window-cap__state">{fans ? `Air passes the fuel at about ${FAN_FLOW * 100} cm/s. The flame burns blue and steady.` : "The flame shrinks and goes out, as it did in one BASS-II test."}</p>
-                  </figcaption>
-                </figure>
-                <figure>
-                  <Porthole tag="schematic">
-                    <FlameCanvas g={BODIES.moon.g} flow={fans ? FAN_FLOW : 0} strength={fans ? 1 : 0.8} uncertain={!fans} seed={11} label="Schematic flame in lunar gravity" />
-                  </Porthole>
-                  <figcaption className="window-cap">
-                    <div className="window-cap__name">Lunar habitat</div>
-                    <div className="window-cap__g">{BODIES.moon.g} g, richer in oxygen</div>
-                    <p className="window-cap__state">
-                      {fans ? "Fan flow and buoyant flow add up." : `Buoyancy still draws air through the flame, about ${(mLo * 100).toFixed(0)} to ${(mHi * 100).toFixed(0)} cm/s by scaling. Unmeasured: it may keep burning.`}
-                    </p>
-                  </figcaption>
-                </figure>
-              </div>
-              <div className="hero__switch">
-                <FanSwitch on={fans} onChange={setFans} />
-                <KlassBadge k="illustrative" note="shape follows the cube root of gravity" />
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section className="dpanel span-4" aria-label="Ask ISKRA">
           <header className="dpanel__head"><span className="led" /><h2>Ask ISKRA</h2><a className="dpanel__more" href={href("/ask")}>Full search <IconArrow size={13} /></a></header>
           <button type="button" className="iskra-hero" onClick={() => emit({ type: "ASK" })} aria-label="Open the conversation with ISKRA">
@@ -219,9 +170,6 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
           <div className="msg__chips">{STARTERS.map((s) => <button key={s} type="button" className="chipbtn" onClick={() => ask(s)}>{s}</button>)}</div>
           <p className="dpanel__foot">{nasa?.passages ? `${fmtInt(nasa.passages)} passages on board. Works with no network and no key.` : "Works with no network and no key."}</p>
         </section>
-      </div>
-
-      <div className="deck__row">
         <section className="dpanel span-5" aria-label="Where NASA has tested">
           <header className="dpanel__head"><span className="led" /><h2>Where NASA has tested</h2><a className="dpanel__more" href={href("/gaps")}>Gaps and plans <IconArrow size={13} /></a></header>
           {cover ? <MiniCover c={cover} /> : <p className="note">Appears after the NASA sync.</p>}
@@ -265,16 +213,12 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
             </>
           )}
         </section>
-      </div>
-
-      <div className="deck__row">
         <section className="dpanel span-5" aria-label="Models checked against NASA">
           <header className="dpanel__head"><span className="led" /><h2>Models checked against NASA</h2><a className="dpanel__more" href={href("/physics")}>Flame physics <IconArrow size={13} /></a></header>
           <div className="checks2">
             <a className="check" href={href("/physics")}>
               <MiniParity pts={tad} lo={1300} hi={2900} label="Flame temperature: model against NASA's column" />
-              <div><div className="check__num">{nasa?.validation_mean_abs_K != null ? `${nasa.validation_mean_abs_K.toFixed(1)} K` : "–"}</div><div className="check__lab">flame temperature, mean gap to NASA's tabulated Tad over {nasa?.validation_rows ? fmtInt(nasa.validation_rows) : "–"} tests, each table at the pressure convention its column fits
-                {val.data?.overall.row_pressure.mean_abs != null ? `; ${val.data.overall.row_pressure.mean_abs.toFixed(1)} K with the row's pressure throughout` : ""}</div></div>
+              <div><div className="check__num">{nasa?.validation_mean_abs_K != null ? `${nasa.validation_mean_abs_K.toFixed(1)} K` : "–"}</div><div className="check__lab">flame temperature: mean gap to NASA's tabulated Tad over {nasa?.validation_rows ? fmtInt(nasa.validation_rows) : "–"} tests, pressure convention per table{val.data?.overall.row_pressure.mean_abs != null ? ` (${val.data.overall.row_pressure.mean_abs.toFixed(1)} K with the row's pressure throughout)` : ""}</div></div>
             </a>
             <a className="check" href={`${href("/physics")}`}>
               <MiniParity pts={d2} lo={0} hi={40} label="Droplet burn time: d-squared law against NASA's column" />
@@ -283,17 +227,12 @@ export function Home({ manifest }: { manifest: Manifest | null }) {
           </div>
         </section>
 
-        <section className="dpanel span-4" aria-label="Read first for a lunar habitat">
+        <section className="dpanel span-3" aria-label="Read first for a lunar habitat">
           <header className="dpanel__head"><span className="led led--partial" /><h2>Read first for a lunar habitat</h2><a className="dpanel__more" href={href("/rank/lunar")}>Rank <IconArrow size={13} /></a></header>
           {rank.data ? <TopFive doc={rank.data} lens="lunar" /> : <p className="note">Appears after the NASA sync.</p>}
           <p className="dpanel__foot">Score out of 100 from ten stated factors. Change the mission or the weights on the ranking page.</p>
         </section>
 
-        <section className="dpanel span-3" aria-label="Evidence ledger">
-          <header className="dpanel__head"><span className={`led ${nasa?.ledger_chain_ok ? "led--ok" : "led--warn"}`} /><h2>Evidence ledger</h2><a className="dpanel__more" href={href("/ledger")}>Verify <IconArrow size={13} /></a></header>
-          {nasa ? <Chain head={nasa.ledger_head} /> : <p className="note">Appears after the NASA sync.</p>}
-          {nasa && <p className="dpanel__foot">{fmtInt(nasa.files_in_ledger)} files, {fmtBytes(nasa.bytes_in_ledger)}, fetched from NASA {fmtUtc(nasa.synced_at_utc)}. {nasa.quotes_verified} of {nasa.quotes} quotations match the stored text.</p>}
-        </section>
       </div>
 
       <section aria-label="Guided tour">
