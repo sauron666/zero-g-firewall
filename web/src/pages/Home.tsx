@@ -52,10 +52,10 @@ function Hero({ manifest }: { manifest: Manifest | null }) {
           <p className="hero2__eyebrow">NASA Space Apps 2026 · Flame in Freefall</p>
           <h1 className="hero2__title">Fire behaves differently in freefall.</h1>
           <p className="hero2__lede">Explore NASA experiments, compare conditions and see what the evidence supports, and where it stops.</p>
-          <p className="hero2__q">The station's first response to a fire is to stop the fans. <b>Kill the fans?</b> The answer depends on conditions NASA has and has not tested.</p>
+          <p className="hero2__q">Stopping the ventilation is an established step against a fire in a spacecraft. <b>Kill the fans?</b> The answer depends on conditions NASA has and has not tested.</p>
           <div className="hero2__cta">
             <a className="btn btn--primary hero2__go" href={href("/lab")}>Enter the lab</a>
-            <a className="btn btn--quiet" href={href("/material")}>Explore NASA evidence</a>
+            <a className="btn btn--quiet" href={href("/evidence")}>Explore NASA evidence</a>
           </div>
           <a className="hero2__methods" href={href("/about")}>Methods, classes of evidence and limits</a>
         </div>

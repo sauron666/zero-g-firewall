@@ -12,6 +12,9 @@ export const STOPS: Stop[] = [
   { id: "question", to: "", verb: "Question", fans: false, text: () => "Kill the fans? One switch, two habitats. In one NASA test in free fall the flame went out within two seconds. In lunar gravity it may keep burning: gravity is a fan nobody can switch off." },
   { id: "interpret", to: "myths--fans", verb: "Interpret", text: () => "NASA tested it, and NASA's own guide calls the rule a misconception. Both sides, every quotation checked against the stored document." },
   { id: "model", to: "paradox", verb: "Model", text: () => "Two realities that differ only in ventilation. With the fans off, a detector in the duct may never see the smoke." },
+  { id: "simulate", to: "lab?scene=habitat", verb: "Simulate", text: () => "Fire Lab: a concept cabin in 3-D, driven by this site's transport model. Stop the fans and read the smoke at three sensors. A model, and labelled as one." },
+  { id: "compare", to: "material", verb: "Compare", text: () => "A habitat question about PMMA set against NASA's recorded tests, condition by condition: what matches, and what no test covers." },
+  { id: "predict", to: "model", verb: "Predict", text: () => "A model trained on NASA's FLEX droplets and scored on regimes it never saw. Ask it for PMMA on the Moon, and it abstains." },
   { id: "find", to: "envelope", verb: "Find", text: (m) => `Every real test by oxygen and pressure: ${n(m?.nasa?.envelope_points)} rows from NASA's tables. None was taken in lunar or Martian gravity.` },
   { id: "rank", to: "rank--lunar", verb: "Rank", text: () => "The investigations ranked for a lunar habitat by stated factors, with a check of how stable the order is." },
   { id: "summarize", to: "evidence--PSI-25", verb: "Summarize", text: () => "One record: what varied, what stayed constant, a receipt on every row, and the curator's notes on the data." },
@@ -20,7 +23,7 @@ export const STOPS: Stop[] = [
   { id: "ask", to: "ask?q=Has%20anything%20been%20burned%20in%20lunar%20gravity%3F", verb: "Ask", text: () => "Ask ISKRA in plain words. Numbers are computed, every sentence comes with its NASA source, and it works with no network." },
   { id: "trace", to: "ledger", verb: "Trace", text: (m) => `${n(m?.nasa?.files_in_ledger)} files fetched from NASA, hash-chained. Your browser recomputes the chain while you watch.` },
 ];
-export const DWELL = 8500;                                         // ms per stop: ten stops in under ninety seconds
+export const DWELL = 6900;                                         // ms per stop: thirteen stops in under ninety seconds
 
 export function Tour({ at, set, manifest, state }: { at: number; set: (i: number | null) => void; manifest: Manifest | null; state: IskraState }) {
   const [playing, setPlaying] = useState(true);
